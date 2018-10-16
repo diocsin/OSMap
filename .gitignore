@@ -1,6 +1,7 @@
 .idea/
 build/
 .svn/
+*.log
 bootstrap.js
 bootstrap.css
 classic.json
