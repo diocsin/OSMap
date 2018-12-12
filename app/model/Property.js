@@ -1,4 +1,4 @@
 Ext.define('Isidamaps.model.Property', {
     extend: 'Ext.data.Model',
-    fields: ['urlGeodata', 'urlWebSocket']
+    fields: ['urlGeodata', 'urlWebSocket', 'urlOpenStreetServerTiles','urlOpenStreetServerRoute']
 });

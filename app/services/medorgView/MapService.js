@@ -5,6 +5,7 @@ Ext.define('Isidamaps.services.medorgView.MapService', {
     medorgMarkers: [],
     medorgStore: null,
     urlGeodata: null,
+    urlOpenStreetServerTiles: null,
     vectorSource: null,
     // ====
     markerClick: Ext.emptyFn,
@@ -13,12 +14,18 @@ Ext.define('Isidamaps.services.medorgView.MapService', {
     // ====
     constructor: function (options) {
         var me = this;
+        me.markerClick = options.markerClick;
+        me.clustersClick = options.clustersClick;
+        me.viewModel = options.viewModel;
+        me.urlGeodata = options.urlGeodata;
+        me.getStoreMarkerInfo = options.getStoreMarkerInfo;
+        me.urlOpenStreetServerTiles = options.urlOpenStreetServerTiles;
         me.map = new ol.Map({
             target: 'mapId',
             layers: [
                 new ol.layer.Tile({
                     source: new ol.source.OSM({
-                        url: 'http://192.168.1.154/hot/{z}/{x}/{y}.png',
+                        url: me.urlOpenStreetServerTiles + '/{z}/{x}/{y}.png',
                         maxZoom: 19,
                         crossOrigin: null
                     })
@@ -29,12 +36,6 @@ Ext.define('Isidamaps.services.medorgView.MapService', {
                 zoom: 12
             })
         });
-        me.markerClick = options.markerClick;
-        me.clustersClick = options.clustersClick;
-        me.viewModel = options.viewModel;
-        me.urlGeodata = options.urlGeodata;
-        me.getStoreMarkerInfo = options.getStoreMarkerInfo;
-
     },
 
     addMarkers: function () {
@@ -71,7 +72,7 @@ Ext.define('Isidamaps.services.medorgView.MapService', {
                 records.forEach(function (medorg) {
                     if (medorg.get('latitude') !== undefined && medorg.get('longitude') !== undefined) {
                         var iconFeature = new ol.Feature({
-                            geometry: new ol.geom.Point(ol.proj.fromLonLat([medorg.get('longitude') - 2.8, medorg.get('latitude') - 6.05])),
+                            geometry: new ol.geom.Point(ol.proj.fromLonLat([medorg.get('longitude'), medorg.get('latitude')])),
                             id: medorg.get('organizationId'),
                             customOptions: {
                                 objectType: medorg.get('objectType'),

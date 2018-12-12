@@ -1,6 +1,7 @@
 Ext.define('Isidamaps.services.medorgView.MedorgController', {
     extend: 'Isidamaps.services.monitoringView.MonitoringController',
     alias: 'controller.medorg',
+    urlOpenStreetServerTiles: null,
 
     createMap: function () {
         var me = this,
@@ -9,7 +10,8 @@ Ext.define('Isidamaps.services.medorgView.MedorgController', {
             markerClick: me.markerClick,
             clustersClick: me.clustersClick,
             urlGeodata: me.urlGeodata,
-            getStoreMarkerInfo: me.getStoreMarkerInfo
+            getStoreMarkerInfo: me.getStoreMarkerInfo,
+            urlOpenStreetServerTiles: me.urlOpenStreetServerTiles
         });
         Medorg.optionsObjectManager();
         Medorg.readMarkers();

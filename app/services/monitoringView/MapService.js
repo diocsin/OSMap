@@ -8,6 +8,7 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
     filterCallArray: [],
     station: [],
     urlGeodata: null,
+    urlOpenStreetServerTiles: null,
     vectorLayer: null,
     vectorSource: null,
     commonArrayMarkers: [],
@@ -123,24 +124,66 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
         ]
     }],
 
-    iconStyle: function (icon) {
-        return new ol.style.Style({
-            image: new ol.style.Icon(/** @type {module:ol/style/Icon~Options} */ ({
-                src: icon,
-                scale: 0.5,
-            }))
+    iconStyle: function (feature) {
+        var icon = feature.getProperties().options.iconImageHref;
+        var textFill = new ol.style.Fill({
+            color: '#00000'
         });
+        var textFill3 = new ol.style.Stroke({
+            color: '#000000',
+            lineCap: 'round',
+            lineJoin: 'round'
+        });
+        var textFill2 = new ol.style.Fill({
+            color: '#ffffff'
+        });
+        if (feature.getProperties().customOptions.objectType === "BRIGADE") {
+            return new ol.style.Style({
+                image: new ol.style.Icon(/** @type {module:ol/style/Icon~Options} */ ({
+                    src: icon,
+                    scale: 0.5,
+                })),
+
+                text: new ol.style.Text({
+                    text: feature.getProperties().customOptions.brigadeNum + "(" + feature.getProperties().customOptions.profile + ")",
+                    offsetX: 35,
+                    offsetY: -20,
+                    font: '14px sans-serif',
+                    fill: textFill,
+                    padding: [1, 1, 1, 1],
+                    backgroundFill: textFill2,
+                    backgroundStroke: textFill3,
+
+                })
+            });
+        }
+        if (feature.getProperties().customOptions.objectType === "CALL") {
+            return new ol.style.Style({
+                image: new ol.style.Icon(/** @type {module:ol/style/Icon~Options} */ ({
+                    src: icon,
+                    scale: 0.5,
+                })),
+            });
+        }
 
     },
 
     constructor: function (options) {
         var me = this;
+        me.markerClick = options.markerClick;
+        me.clustersClick = options.clustersClick;
+        me.viewModel = options.viewModel;
+        me.filterBrigadeArray = options.filterBrigadeArray;
+        me.filterCallArray = options.filterCallArray;
+        me.urlGeodata = options.urlGeodata;
+        me.urlOpenStreetServerTiles = options.urlOpenStreetServerTiles;
+        me.getStoreMarkerInfo = options.getStoreMarkerInfo;
         me.map = new ol.Map({
             target: 'mapId',
             layers: [
                 new ol.layer.Tile({
                     source: new ol.source.OSM({
-                        url: 'http://192.168.1.154/hot/{z}/{x}/{y}.png',
+                        url: me.urlOpenStreetServerTiles + '/{z}/{x}/{y}.png',
                         maxZoom: 19,
                         crossOrigin: null
                     })
@@ -151,19 +194,12 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
                 zoom: 12
             })
         });
-        me.markerClick = options.markerClick;
-        me.clustersClick = options.clustersClick;
-        me.viewModel = options.viewModel;
-        me.filterBrigadeArray = options.filterBrigadeArray;
-        me.filterCallArray = options.filterCallArray;
-        me.urlGeodata = options.urlGeodata;
-        me.getStoreMarkerInfo = options.getStoreMarkerInfo;
-
     },
 
     clusterOptions: function () {
 
         var me = this;
+        console.dir("cluster");
         var currentResolution;
         var maxFeatureCount;
         var textFill = new ol.style.Fill({
@@ -181,10 +217,9 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
             style: styleFunction
         });
 
-
         function createEarthquakeStyle(feature) {
 
-            return me.iconStyle(feature.getProperties().options.iconImageHref);
+            return me.iconStyle(feature);
 
         }
 
@@ -242,20 +277,41 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
                 function (feature) {
                     return feature;
                 });
-            if (feature !== undefined && feature.getProperties().customOptions == undefined) {
+            if (feature !== undefined && feature.getProperties().customOptions === undefined) {
                 var geometry = feature.getGeometry(), coord = geometry.getCoordinates(),
                     pixel = me.map.getPixelFromCoordinate(coord);
                 if (feature.getProperties().features.length === 1) {
-                    var storeMarker = me.getStoreMarkerInfo(feature);
+                    var storeMarker = me.getStoreMarkerInfo(feature.getProperties().features[0]);
                     var win = Ext.WindowManager.getActive();
                     if (win) {
                         win.close();
                     }
-                    me.markerClick(feature, pixel, storeMarker);
+                    me.markerClick(feature.getProperties().features[0], pixel, storeMarker);
                 }
                 else {
+                    var win = Ext.WindowManager.getActive();
+                    if (win) {
+                        win.close();
+                    }
                     me.clustersClick(pixel, feature);
                 }
+
+
+            }
+            if (feature !== undefined && feature.getProperties().customOptions !== undefined) {
+                var style = feature.getStyle();
+                var timerId = setInterval(function () {
+                    feature.setStyle(new ol.style.Style({}));
+                }, 1000);
+                var timerId2 = setInterval(function () {
+                    feature.setStyle(style);
+                }, 2000);
+// через 5 сек остановить повторы
+                setTimeout(function () {
+                    clearInterval(timerId);
+                    clearInterval(timerId2);
+                    feature.setStyle(style);
+                }, 6000);
             }
         });
         me.map.on('pointermove', function (e) {
@@ -284,6 +340,7 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
                     }
                 }
                 else if (feature.getProperties().customOptions.objectType === 'route') {
+                    console.dir(feature.getProperties());
                     myForm.setData('Маршрут ' + feature.getProperties().customOptions.brigadeNum + ' бригады');
                     myForm.show();
                     myForm.setPosition(e.pointerEvent.clientX + 10, e.pointerEvent.clientY + 10);
@@ -301,20 +358,22 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
     addMarkers: function () {
         var me = this;
         me.brigadesMarkers.forEach(function (brigade) {
-            brigade.setStyle(me.iconStyle(brigade.getProperties().options.iconImageHref));
-            me.commonArrayMarkers.push(brigade);
-
+            if (brigade.getProperties().customOptions.status !== 'WITHOUT_SHIFT') {
+                brigade.setStyle(me.iconStyle(brigade));
+                me.commonArrayMarkers.push(brigade);
+            }
         });
-        console.dir(me.brigadesMarkers);
         me.callMarkers.forEach(function (call) {
             if (call.getProperties().customOptions.status !== "COMPLETED") {
-                call.setStyle(me.iconStyle(call.getProperties().options.iconImageHref));
+                call.setStyle(me.iconStyle(call));
+                console.dir(call);
                 me.commonArrayMarkers.push(call);
             }
         });
 
-        me.vectorSource = new ol.source.Vector({
-            features: me.commonArrayMarkers,
+        me.vectorSource = new ol.source.Vector();
+        me.commonArrayMarkers.forEach(function (feature) {
+            me.vectorSource.addFeature(feature);
         });
         me.clusterOptions();
         me.map.addLayer(me.vectorLayer);
@@ -330,39 +389,62 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
 
     addMarkersSocket: function (iconFeature) {
         var me = this,
-            sourceVectorLayer = me.vectorLayer.getSource();
+            sourceVectorLayer = me.vectorLayer.getSource().getSource();
+        console.dir(iconFeature);
+        var id = iconFeature.getProperties().id;
         if (iconFeature.getProperties().customOptions.objectType === 'BRIGADE') {
+            sourceVectorLayer.getFeatures().forEach(function (brigade) {
+                if (brigade.getProperties().id === id) {
+                    sourceVectorLayer.removeFeature(brigade);
+                    if (iconFeature.getProperties().customOptions.status === 'WITHOUT_SHIFT') {
+                        me.addButtonsBrigadeOnPanel();
+                    }
+                    console.dir("удалил бригаду");
+                }
 
-            if (me.vectorLayer.getSource().hasFeature(iconFeature)) {
-                sourceVectorLayer.removeFeature(iconFeature);
-            }
+            });
+
             if (me.filterBrigadeArray.indexOf(iconFeature.getProperties().customOptions.station) === -1 &&
                 me.filterBrigadeArray.indexOf(iconFeature.getProperties().customOptions.status) === -1 &&
-                me.filterBrigadeArray.indexOf(iconFeature.getProperties().customOptions.profile) === -1) {
+                me.filterBrigadeArray.indexOf(iconFeature.getProperties().customOptions.profile) === -1 &&
+                iconFeature.getProperties().customOptions.status !== "WITHOUT_SHIFT") {
                 function func() {
-                    iconFeature.setStyle(me.iconStyle(iconFeature.getProperties().options.iconImageHref));
+
+                    iconFeature.setStyle(me.iconStyle(iconFeature));
                     sourceVectorLayer.addFeature(iconFeature);
+                    Ext.fireEvent('getButtonBrigadeForChangeButton', iconFeature);
+                    console.dir("добавил бригаду");
                 }
 
                 setTimeout(func, 20);
             }
+            return;
         }
         if (iconFeature.getProperties().customOptions.objectType === 'CALL') {
             if (iconFeature.getProperties().customOptions.status === "COMPLETED" || me.vectorLayer.getSource().hasFeature(iconFeature)) {
-                sourceVectorLayer.removeFeature(iconFeature);
+                sourceVectorLayer.getFeatures().forEach(function (call) {
+                    if (call.getProperties().id === id) {
+                        sourceVectorLayer.removeFeature(call);
+                        console.dir("удалил вызов");
+                    }
+                });
             }
 
             if (me.filterCallArray.indexOf(iconFeature.getProperties().customOptions.status) === -1 &&
                 me.filterCallArray.indexOf(iconFeature.getProperties().customOptions.station) === -1 &&
                 iconFeature.getProperties().customOptions.status !== "COMPLETED") {
-                iconFeature.setStyle(me.iconStyle(iconFeature.getProperties().options.iconImageHref));
+                iconFeature.setStyle(me.iconStyle(iconFeature));
                 sourceVectorLayer.addFeature(iconFeature);
+                console.dir("добавил вызов");
             }
         }
     },
 
     addButtonsBrigadeOnPanel: function () {
         Ext.fireEvent('addButtonsBrigadeOnPanel');
+    },
+
+    addStationFilter: function () {
         Ext.fireEvent('addStationFilter');
     },
 
@@ -386,7 +468,7 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
             records.forEach(function (call) {
                 if (call.get('latitude') !== undefined && call.get('longitude') !== undefined) {
                     var iconFeature = new ol.Feature({
-                        geometry: new ol.geom.Point(ol.proj.fromLonLat([call.get('longitude') - 2.8, call.get('latitude') - 6.05])),
+                        geometry: new ol.geom.Point(ol.proj.fromLonLat([call.get('longitude'), call.get('latitude')])),
                         id: call.get('callCardId'),
                         customOptions: {
                             objectType: call.get('objectType'),
@@ -422,7 +504,7 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
             records.forEach(function (brigade) {
                 if (brigade.get('latitude') !== undefined && brigade.get('longitude') !== undefined) {
                     var iconFeature = new ol.Feature({
-                        geometry: new ol.geom.Point(ol.proj.fromLonLat([brigade.get('longitude') - 2.8, brigade.get('latitude') - 6.05])),
+                        geometry: new ol.geom.Point(ol.proj.fromLonLat([brigade.get('longitude'), brigade.get('latitude')])),
                         id: brigade.get('deviceId'),
                         customOptions: {
                             objectType: brigade.get('objectType'),
@@ -439,13 +521,14 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
                     me.brigadesMarkers.push(iconFeature);
                 }
             });
-
+            me.addStationFilter();
             me.storeCall(urlCall);
         })
     },
 
     readStation: function (station) {
         var me = this;
+        console.dir(station);
         station.forEach(function (st) {
             me.station.push(Ext.String.trim(st));
         });
@@ -454,6 +537,8 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
             }),
             urlBrigade = Ext.String.format(me.urlGeodata + '/data?{0}&statuses=', t),
             urlCall = Ext.String.format(me.urlGeodata + '/call?{0}', t);
+        console.dir(urlBrigade);
+        console.dir(urlCall);
         me.brigadesMarkers = [];
         me.callMarkers = [];
         me.storeBrigade(urlBrigade, urlCall);
@@ -471,7 +556,7 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
             });
             if (call.get('latitude') !== undefined && call.get('longitude') !== undefined) {
                 var iconFeature = new ol.Feature({
-                    geometry: new ol.geom.Point(ol.proj.fromLonLat([call.get('longitude') - 2.8, call.get('latitude') - 6.05])),
+                    geometry: new ol.geom.Point(ol.proj.fromLonLat([call.get('longitude'), call.get('latitude')])),
                     id: call.get('callCardId'),
                     customOptions: {
                         objectType: call.get('objectType'),
@@ -499,7 +584,7 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
             });
             if (brigade.get('latitude') !== undefined && brigade.get('longitude') !== undefined) {
                 var iconFeature = new ol.Feature({
-                    geometry: new ol.geom.Point(ol.proj.fromLonLat([brigade.get('longitude') - 2.8, brigade.get('latitude') - 6.05])),
+                    geometry: new ol.geom.Point(ol.proj.fromLonLat([brigade.get('longitude'), brigade.get('latitude')])),
                     id: brigade.get('deviceId'),
                     customOptions: {
                         objectType: brigade.get('objectType'),

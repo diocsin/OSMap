@@ -15,6 +15,9 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
     arrRouteForTable: [],
     errorBrigades: [],
     arrayRoute: [],
+    urlOpenStreetServerRoute : null,
+    urlOpenStreetServerTiles: null,
+
 
     // ====.
     markerClick: Ext.emptyFn,
@@ -22,12 +25,13 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
     // ====
 
     getNearest: function (coord) {
+        var me = this;
         var coord4326 = this.to4326(coord);
         var t = [(parseInt(coord4326[0] * 10000)) / 10000, (parseInt(coord4326[1] * 10000)) / 10000];
         return new Promise(function (resolve, reject) {
             //make sure the coord is on street
 
-            fetch('http://192.168.1.154:5000/nearest/v1/driving/' + t.join()).then(function (response) {
+            fetch(me.urlOpenStreetServerRoute +'/nearest/v1/driving/' + t.join()).then(function (response) {
                 // Convert to JSON
                 return response.json();
             }).then(function (json) {
@@ -36,6 +40,10 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
             });
         });
     },
+
+    getRoutes: function(point1, point2){
+
+},
 
     createRoute: function () {
         var me = this;
@@ -60,7 +68,8 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
                     var point1 = last_point.join();
                     var point2 = coord_street.join();
 
-                    fetch('http://192.168.1.154:5000/route/v1/driving/' + point2 + ';' + point1).then(function (r) {
+
+                    fetch(me.urlOpenStreetServerRoute+'/route/v1/driving/' + point2 + ';' + point1).then(function (r) {
                         return r.json();
                     }).then(function (json) {
                         if (json.code !== 'Ok') {
@@ -139,12 +148,20 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
 
     constructor: function (options) {
         var me = this;
+        me.vectorSource =new ol.source.Vector({});
+        me.markerClick = options.markerClick;
+        me.clustersClick = options.clustersClick;
+        me.viewModel = options.viewModel;
+        me.getStoreMarkerInfo = options.getStoreMarkerInfo;
+        me.urlGeodata = options.urlGeodata;
+        me.urlOpenStreetServerRoute = options.urlOpenStreetServerRoute;
+        me.urlOpenStreetServerTiles=options.urlOpenStreetServerTiles;
         me.map = new ol.Map({
             target: 'mapId',
             layers: [
                 new ol.layer.Tile({
                     source: new ol.source.OSM({
-                        url: 'http://192.168.1.154/hot/{z}/{x}/{y}.png',
+                        url: me.urlOpenStreetServerTiles+'/{z}/{x}/{y}.png',
                         maxZoom: 19,
                         crossOrigin: null
                     })
@@ -155,12 +172,7 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
                 zoom: 12
             })
         });
-        me.vectorSource =new ol.source.Vector({});
-        me.markerClick = options.markerClick;
-        me.clustersClick = options.clustersClick;
-        me.viewModel = options.viewModel;
-        me.getStoreMarkerInfo = options.getStoreMarkerInfo;
-        me.urlGeodata = options.urlGeodata;
+
     },
 
     callback: function () {
@@ -181,13 +193,13 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
         me.optionsObjectManager();
 
         me.brigadesMarkers.forEach(function (brigade) {
-            brigade.setStyle(me.iconStyle(brigade.getProperties().options.iconImageHref));
+            brigade.setStyle(me.iconStyle(brigade));
             me.commonArrayMarkers.push(brigade);
 
         });
         me.callMarkers.forEach(function (call) {
             if (call.getProperties().customOptions.status !== "COMPLETED") {
-                call.setStyle(me.iconStyle(call.getProperties().options.iconImageHref));
+                call.setStyle(me.iconStyle(call));
                 me.commonArrayMarkers.push(call);
             }
         });
@@ -336,7 +348,7 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
             records.forEach(function (call) {
                 if (call.get('latitude') !== undefined && call.get('longitude') !== undefined) {
                     var iconFeature = new ol.Feature({
-                        geometry: new ol.geom.Point(ol.proj.fromLonLat([call.get('longitude') - 2.8, call.get('latitude') - 6.05])),
+                        geometry: new ol.geom.Point(ol.proj.fromLonLat([call.get('longitude'), call.get('latitude')])),
                         id: call.get('callCardId'),
                         customOptions: {
                             objectType: call.get('objectType'),
@@ -356,7 +368,7 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
                 records.forEach(function (brigade) {
                     if (brigade.get('latitude') !== undefined && brigade.get('longitude') !== undefined) {
                         var iconFeature = new ol.Feature({
-                            geometry: new ol.geom.Point(ol.proj.fromLonLat([brigade.get('longitude') - 2.8, brigade.get('latitude') - 6.05])),
+                            geometry: new ol.geom.Point(ol.proj.fromLonLat([brigade.get('longitude'), brigade.get('latitude')])),
                             id: brigade.get('deviceId'),
                             customOptions: {
                                 objectType: brigade.get('objectType'),
@@ -385,6 +397,7 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
         if (me.arrRouteForTable.length === me.brigadesMarkers.length) {
             var store = me.viewModel.getStore('Routes');
             me.arrRouteForTable.forEach(function (object) {
+                console.dir(object);
                 var x = Ext.create('Isidamaps.model.Route');
                 x.set('checkBox', false);
                 x.set('brigadeId', object.brigade.getProperties().id);

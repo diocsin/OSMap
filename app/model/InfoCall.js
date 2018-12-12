@@ -53,7 +53,7 @@ Ext.define('Isidamaps.model.InfoCall', {
                     }
                     return v1
                 }
-                return record.get('lastName') + ' ' + record.get('firstName') + ' ' + record.get('secondName') +
+                return und(record.get('lastName')) + ' ' + und(record.get('firstName')) + ' ' + und(record.get('secondName')) +
                     ',  Возраст: ' + und(record.get('age')) + ',  Пол: ' + und(record.get('sex'))
             }
         },

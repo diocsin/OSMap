@@ -19,6 +19,7 @@ Ext.define('Isidamaps.services.brigadeForAssignView.BrigadeForAssign', {
         width: 400,
         floatable: true,
         collapsible: true,
+        scrollable: 'vertical',
         titleAlign: 'center',
         collapseToolText: 'Скрыть панель',
         expandToolText: 'Открыть панель',

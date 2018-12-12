@@ -3,6 +3,8 @@ Ext.define('Isidamaps.services.brigadeForAssignView.BrigadeForAssignController',
     alias: 'controller.brigadeforassign',
     BrigadeForAssign: null,
     urlGeodata: null,
+    urlOpenStreetServerRoute: null,
+    urlOpenStreetServerTiles: null,
     listen: {
         global: {
             jsonAnswerReady: 'buttonCheked',
@@ -25,9 +27,10 @@ Ext.define('Isidamaps.services.brigadeForAssignView.BrigadeForAssignController',
             markerClick: me.markerClick,
             clustersClick: me.clustersClick,
             urlGeodata: me.urlGeodata,
-            getStoreMarkerInfo: me.getStoreMarkerInfo
+            getStoreMarkerInfo: me.getStoreMarkerInfo,
+            urlOpenStreetServerRoute : me.urlOpenStreetServerRoute,
+            urlOpenStreetServerTiles: me.urlOpenStreetServerTiles,
         });
-        me.BrigadeForAssign.readMarkers(12,['277343750','277361257']);
         ASOV.setMapManager({
             setMarkers: me.BrigadeForAssign.setMarkers.bind(this)
         }, Ext.History.currentToken);

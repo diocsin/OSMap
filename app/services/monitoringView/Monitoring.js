@@ -21,6 +21,7 @@ Ext.define('Isidamaps.services.monitoringView.Monitoring', {
         width: 250,
         floatable: true,
         collapsible: true,
+        scrollable: 'vertical',
         titleAlign: 'center',
         collapseToolText: 'Скрыть панель',
         expandToolText: 'Открыть панель',

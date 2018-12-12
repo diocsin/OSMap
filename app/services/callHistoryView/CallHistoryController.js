@@ -3,6 +3,7 @@ Ext.define('Isidamaps.services.callHistoryView.CallHistoryController', {
     alias: 'controller.callhistory',
     CallHistory: null,
     urlGeodata: null,
+    urlOpenStreetServerTiles: null,
     listen: {
         global: {
             windowClose: 'windowClose'
@@ -21,10 +22,10 @@ Ext.define('Isidamaps.services.callHistoryView.CallHistoryController', {
             markerClick: me.markerClick,
             clustersClick: me.clustersClick,
             urlGeodata: me.urlGeodata,
-            getStoreMarkerInfo: me.getStoreMarkerInfo
+            getStoreMarkerInfo: me.getStoreMarkerInfo,
+            urlOpenStreetServerTiles: me.urlOpenStreetServerTiles
         });
         me.CallHistory.optionsObjectManager();
-        me.CallHistory.readMarkers('277364680');
         ASOV.setMapManager({
             setMarkers: me.CallHistory.setMarkers.bind(this)
         }, Ext.History.currentToken);

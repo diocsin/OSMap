@@ -28,6 +28,19 @@ Ext.define('Isidamaps.model.InfoBrigade', {
         {
             name: 'station',
             mapping: 'brigade.station'
+        },
+        {
+            name: 'profile',
+            type: 'string',
+            convert: function (v, record) {
+                function und(v1) {
+                    if (typeof(v1) === "undefined") {
+                        return " "
+                    }
+                    return v1
+                }
+                return und(record.get('profile'))
+            }
         }
     ]
 });
