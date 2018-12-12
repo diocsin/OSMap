@@ -15,8 +15,9 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
     arrRouteForTable: [],
     errorBrigades: [],
     arrayRoute: [],
-    urlOpenStreetServerRoute : null,
+    urlOpenStreetServerRoute: null,
     urlOpenStreetServerTiles: null,
+    callCoord: null,
 
 
     // ====.
@@ -31,7 +32,7 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
         return new Promise(function (resolve, reject) {
             //make sure the coord is on street
 
-            fetch(me.urlOpenStreetServerRoute +'/nearest/v1/driving/' + t.join()).then(function (response) {
+            fetch(me.urlOpenStreetServerRoute + '/nearest/v1/driving/' + t.join()).then(function (response) {
                 // Convert to JSON
                 return response.json();
             }).then(function (json) {
@@ -41,100 +42,100 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
         });
     },
 
-    getRoutes: function(point1, point2){
-
-},
-
     createRoute: function () {
         var me = this;
         if (me.callMarkers.length > 0 && me.brigadesMarkers.length > 0) {
             var geometryCall = me.callMarkers[0].getGeometry();
             var coordCall = geometryCall.getCoordinates();
             me.getNearest(coordCall).then(function (coord_street) {
-                me.points.push(coord_street);
-            });
+                me.callCoord = coord_street;
+                me.brigadesMarkers.forEach(function (brigadeMarker) {
+                    var geometryBrigade = brigadeMarker.getGeometry();
+                    var coordBrigade = geometryBrigade.getCoordinates();
+                    me.getNearest(coordBrigade).then(function (coord_street) {
 
-            me.brigadesMarkers.forEach(function (brigadeMarker) {
+                        var point1 = me.callCoord.join();
+                        var point2 = coord_street.join();
+                        var routeDraw = function () {
+                            fetch(me.urlOpenStreetServerRoute + '/route/v1/driving/' + point2 + ';' + point1).then(function (response) {
+                                return response.json();
+                            }).then(function (json) {
+                                if (json.code === 'Ok') {
+                                    var polyline = json.routes[0].geometry;
+                                    // route is ol.geom.LineString
+                                    var route = new ol.format.Polyline({
+                                        factor: 1e5
+                                    }).readGeometry(polyline, {
+                                        dataProjection: 'EPSG:4326',
+                                        featureProjection: 'EPSG:3857'
+                                    });
+                                    var route = new ol.Feature({
+                                        type: 'route',
+                                        geometry: route,
+                                        customOptions: {
+                                            objectType: 'route',
+                                            brigadeNum: brigadeMarker.getProperties().customOptions.brigadeNum
+                                        }
+                                    });
+                                    var styles = {
+                                        route: new ol.style.Style({
+                                            stroke: new ol.style.Stroke({
+                                                width: 4, color: [255, 0, 0, 0.8]
+                                            })
+                                        })
+                                    };
 
-                var geometryBrigade = brigadeMarker.getGeometry();
-                var coordBrigade = geometryBrigade.getCoordinates();
-                me.getNearest(coordBrigade).then(function (coord_street) {
-                    var last_point = me.points[me.points.length - 1];
-                    var points_length = me.points.push(coord_street);
-                    if (points_length < 2) {
-                        return;
-                    }
+                                    var routeList = {
+                                        brigade: brigadeMarker,
+                                        route: json
+                                    };
+                                    route.setStyle(styles.route);
+                                    me.arrayRoute.push(route);
+                                    var vectorSourceRoute = new ol.source.Vector({
+                                        features: me.arrayRoute
+                                    });
+                                    var vectorLayerRoute = new ol.layer.Vector({
+                                        source: vectorSourceRoute
+                                    });
+                                    me.map.addLayer(vectorLayerRoute);
+                                    me.arrRouteForTable.push(routeList);
+                                    me.arrpoints = route.getProperties().geometry.flatCoordinates;
+                                    me.arrRoute.push({
+                                        brigadeId: brigadeMarker.getProperties().id,
+                                        objectType: brigadeMarker.getProperties().customOptions.objectType,
+                                        profile: brigadeMarker.getProperties().customOptions.profile,
+                                        brigadeNum: brigadeMarker.getProperties().customOptions.brigadeNum,
+                                        station: brigadeMarker.getProperties().customOptions.station,
+                                        longitude: brigadeMarker.getProperties().geometry.flatCoordinates[1],
+                                        latitude: brigadeMarker.getProperties().geometry.flatCoordinates[0],
+                                        distance: (json.routes[0].distance / 1000).toFixed(1),
+                                        time: (json.routes[0].duration / 60).toFixed(0),
+                                        route: me.arrpoints
+                                    });
+                                    me.createTableRoute();
+                                    me.callback();
+                                    me.arrpoints = [];
 
-                    var point1 = last_point.join();
-                    var point2 = coord_street.join();
+
+                                }
+
+                                else {
+                                    //setTimeout(routeDraw(), 1000);
+                                }
 
 
-                    fetch(me.urlOpenStreetServerRoute+'/route/v1/driving/' + point2 + ';' + point1).then(function (r) {
-                        return r.json();
-                    }).then(function (json) {
-                        if (json.code !== 'Ok') {
-                            return;
-                        }
-
-                        var polyline = json.routes[0].geometry;
-                        // route is ol.geom.LineString
-                        var route = new ol.format.Polyline({
-                            factor: 1e5
-                        }).readGeometry(polyline, {
-                            dataProjection: 'EPSG:4326',
-                            featureProjection: 'EPSG:3857'
-                        });
-                        var route = new ol.Feature({
-                            type: 'route',
-                            geometry: route,
-                            customOptions: {
-                                objectType: 'route',
-                                brigadeNum: brigadeMarker.getProperties().customOptions.brigadeNum
-                            }
-                        });
-                        var styles = {
-                            route: new ol.style.Style({
-                                stroke: new ol.style.Stroke({
-                                    width: 4, color: [255, 0, 0, 0.8]
-                                })
-                            })
+                            });
                         };
 
-                            var routeList = {
-                                brigade: brigadeMarker,
-                                route: json
-                            };
-                        route.setStyle(styles.route);
-                        me.arrayRoute.push(route);
-                        var vectorSourceRoute = new ol.source.Vector({
-                            features: me.arrayRoute
-                        });
-                        var vectorLayerRoute = new ol.layer.Vector({
-                            source: vectorSourceRoute
-                        });
-                        me.map.addLayer(vectorLayerRoute);
-                        me.arrRouteForTable.push(routeList);
-                        me.arrpoints = route.getProperties().geometry.flatCoordinates;
-                        me.arrRoute.push({
-                            brigadeId: brigadeMarker.getProperties().id,
-                            objectType: brigadeMarker.getProperties().customOptions.objectType,
-                            profile: brigadeMarker.getProperties().customOptions.profile,
-                            brigadeNum: brigadeMarker.getProperties().customOptions.brigadeNum,
-                            longitude: brigadeMarker.getProperties().geometry.flatCoordinates[1],
-                            latitude: brigadeMarker.getProperties().geometry.flatCoordinates[0],
-                            distance: (json.routes[0].distance / 1000).toFixed(1),
-                            time: (json.routes[0].duration / 60).toFixed(0),
-                            route: me.arrpoints
-                        });
-                        me.createTableRoute();
-                        me.callback();
-                        me.arrpoints = [];
-
+                        routeDraw();
 
                     });
+
                 });
 
             });
+
+
         }
 
 
@@ -148,20 +149,20 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
 
     constructor: function (options) {
         var me = this;
-        me.vectorSource =new ol.source.Vector({});
+        me.vectorSource = new ol.source.Vector({});
         me.markerClick = options.markerClick;
         me.clustersClick = options.clustersClick;
         me.viewModel = options.viewModel;
         me.getStoreMarkerInfo = options.getStoreMarkerInfo;
         me.urlGeodata = options.urlGeodata;
         me.urlOpenStreetServerRoute = options.urlOpenStreetServerRoute;
-        me.urlOpenStreetServerTiles=options.urlOpenStreetServerTiles;
+        me.urlOpenStreetServerTiles = options.urlOpenStreetServerTiles;
         me.map = new ol.Map({
             target: 'mapId',
             layers: [
                 new ol.layer.Tile({
                     source: new ol.source.OSM({
-                        url: me.urlOpenStreetServerTiles+'/{z}/{x}/{y}.png',
+                        url: me.urlOpenStreetServerTiles + '/{z}/{x}/{y}.png',
                         maxZoom: 19,
                         crossOrigin: null
                     })
@@ -187,7 +188,7 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
         if (me.callMarkers.length === 0) {
             me.createCallAlert();
         } else if (me.errorBrigades.length > 0) {
-            me.createBrigadeAlert();
+            // me.createBrigadeAlert();
         }
         me.createBouns();  //в callHistory
         me.optionsObjectManager();
@@ -219,12 +220,41 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
                     return feature;
                 });
             if (feature && eType === 'click') {
-                var geometry = feature.getGeometry();
-                var coord = geometry.getCoordinates();
-                var pixel = me.map.getPixelFromCoordinate(coord);
-                if (feature.getProperties().customOptions===undefined) {
-                    var storeMarker = me.getStoreMarkerInfo(feature);
-                  me.markerClick(feature, pixel, storeMarker);
+                if (feature !== undefined && feature.getProperties().customOptions === undefined) {
+                    var geometry = feature.getGeometry(), coord = geometry.getCoordinates(),
+                        pixel = me.map.getPixelFromCoordinate(coord);
+                    if (feature.getProperties().features.length === 1) {
+                        var storeMarker = me.getStoreMarkerInfo(feature.getProperties().features[0]);
+                        var win = Ext.WindowManager.getActive();
+                        if (win) {
+                            win.close();
+                        }
+                        me.markerClick(feature.getProperties().features[0], pixel, storeMarker);
+                    }
+                    else {
+                        var win = Ext.WindowManager.getActive();
+                        if (win) {
+                            win.close();
+                        }
+                        me.clustersClick(pixel, feature);
+                    }
+
+
+                }
+                if (feature !== undefined && feature.getProperties().customOptions !== undefined) {
+                    var style = feature.getStyle();
+                    var timerId = setInterval(function () {
+                        feature.setStyle(new ol.style.Style({}));
+                    }, 1000);
+                    var timerId2 = setInterval(function () {
+                        feature.setStyle(style);
+                    }, 2000);
+// через 5 сек остановить повторы
+                    setTimeout(function () {
+                        clearInterval(timerId);
+                        clearInterval(timerId2);
+                        feature.setStyle(style);
+                    }, 6000);
                 }
             }
             else {
@@ -248,15 +278,15 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
                     function (feature) {
                         return feature;
                     });
-                if(feature.getProperties().features!==undefined) {
-                    if (feature.getProperties().features.length===1 && feature.getProperties().features[0].getProperties().customOptions.objectType === 'BRIGADE') {
+                if (feature.getProperties().features !== undefined) {
+                    if (feature.getProperties().features.length === 1 && feature.getProperties().features[0].getProperties().customOptions.objectType === 'BRIGADE') {
                         myForm.setData('Бригада ' + feature.getProperties().features[0].getProperties().customOptions.brigadeNum);
                         myForm.show();
                         myForm.setPosition(e.pointerEvent.clientX + 10, e.pointerEvent.clientY + 10);
                     }
 
                 }
-                else  if (feature.getProperties().customOptions.objectType === 'route') {
+                else if (feature.getProperties().customOptions.objectType === 'route') {
                     myForm.setData('Маршрут ' + feature.getProperties().customOptions.brigadeNum + ' бригады');
                     myForm.show();
                     myForm.setPosition(e.pointerEvent.clientX + 10, e.pointerEvent.clientY + 10);
@@ -374,7 +404,7 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
                                 objectType: brigade.get('objectType'),
                                 profile: brigade.get('profile'),
                                 status: brigade.get('status'),
-                                station: '' + brigade.get('station'),
+                                station: brigade.get('station'),
                                 brigadeNum: brigade.get('brigadeNum')
                             },
                             options: {
@@ -397,7 +427,6 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
         if (me.arrRouteForTable.length === me.brigadesMarkers.length) {
             var store = me.viewModel.getStore('Routes');
             me.arrRouteForTable.forEach(function (object) {
-                console.dir(object);
                 var x = Ext.create('Isidamaps.model.Route');
                 x.set('checkBox', false);
                 x.set('brigadeId', object.brigade.getProperties().id);

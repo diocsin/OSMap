@@ -61,7 +61,6 @@ Ext.define('Isidamaps.services.callHistoryView.MapService', {
 
         me.brigadesMarkers.forEach(function (brigade) {
             var coord = brigade.getGeometry().getCoordinates();
-            console.dir(brigade);
             var lon = coord[0];
             var lat = coord[1];
             arrayLatitude.push(lon);
@@ -73,9 +72,7 @@ Ext.define('Isidamaps.services.callHistoryView.MapService', {
         arrayLongitude.sort(function (a, b) {
             return a - b
         });
-        console.dir(arrayLatitude);
-        console.dir(arrayLongitude);
-        me.map.getView().fit([arrayLatitude[0], arrayLongitude[0], arrayLatitude[arrayLatitude.length - 1], arrayLongitude[arrayLongitude.length - 1]], me.map.getSize(), false);
+        me.map.getView().fit([arrayLatitude[0]-50, arrayLongitude[0], arrayLatitude[arrayLatitude.length - 1], arrayLongitude[arrayLongitude.length - 1]], me.map.getSize(), false);
     },
 
     createMarkers: function () {
@@ -197,17 +194,14 @@ Ext.define('Isidamaps.services.callHistoryView.MapService', {
                 arrayR.push([l.data.longitude, l.data.latitude]);
 
             });
-            console.dir(arrayR);
             i = 0;
-            console.dir(records);
             var polyline = new ol.geom.LineString(arrayR);
-            console.dir(polyline);
             polyline.transform('EPSG:4326', 'EPSG:3857');
             var feature = new ol.Feature({
                 geometry: polyline,
                 customOptions: {
                     objectType: 'route',
-                    brigadeNum: records.brigadeNum,
+                    brigadeNum: '',
                 }
             });
             var styles = {
@@ -243,7 +237,8 @@ Ext.define('Isidamaps.services.callHistoryView.MapService', {
                         customOptions: {
                             objectType: brigade.get('objectType'),
                             profile: brigade.get('profile'),
-                            brigadeNum: brigade.get('brigadeNum')
+                            brigadeNum: brigade.get('brigadeNum'),
+                            station: brigade.get('station')
                         },
                         options: {
                             iconImageHref: 'resources/icon/' + brigade.get('iconName')
@@ -264,7 +259,8 @@ Ext.define('Isidamaps.services.callHistoryView.MapService', {
                             customOptions: {
                                 objectType: brigade.get('objectType'),
                                 profile: brigade.get('profile'),
-                                brigadeNum: brigade.get('brigadeNum')
+                                brigadeNum: brigade.get('brigadeNum'),
+                                station: brigade.get('station')
                             },
                             options: {
                                 iconImageHref: 'resources/icon/' + brigade.get('iconName')
@@ -286,13 +282,13 @@ Ext.define('Isidamaps.services.callHistoryView.MapService', {
                                     customOptions: {
                                         objectType: brigade.objectType,
                                         brigadeNum: brigade.brigadeNum,
-                                        profile: brigade.profile
+                                        profile: brigade.profile,
+                                        station: brigade.station
                                     },
                                     options: {
                                         iconImageHref: 'resources/icon/free.png'
                                     }
                                 });
-                                console.dir(iconFeature);
                                 iconFeature.setStyle(me.iconStyle(iconFeature));
                                 me.brigadesMarkers.push(iconFeature);
                             }
@@ -313,8 +309,6 @@ Ext.define('Isidamaps.services.callHistoryView.MapService', {
         var me = this,
             urlRouteList = Ext.String.format(me.urlGeodata + '/route?callcardid={0}', call),
             urlFactRouteList = Ext.String.format(me.urlGeodata + '/route/fact?callcardid={0}', call);
-        console.dir(urlRouteList);
-        console.dir(urlFactRouteList);
         me.brigadeRoute = Ext.create('Ext.data.Store', {
             model: 'Isidamaps.model.RouteHistory',
             proxy: {

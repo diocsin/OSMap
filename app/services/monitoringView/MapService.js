@@ -199,7 +199,6 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
     clusterOptions: function () {
 
         var me = this;
-        console.dir("cluster");
         var currentResolution;
         var maxFeatureCount;
         var textFill = new ol.style.Fill({
@@ -340,7 +339,6 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
                     }
                 }
                 else if (feature.getProperties().customOptions.objectType === 'route') {
-                    console.dir(feature.getProperties());
                     myForm.setData('Маршрут ' + feature.getProperties().customOptions.brigadeNum + ' бригады');
                     myForm.show();
                     myForm.setPosition(e.pointerEvent.clientX + 10, e.pointerEvent.clientY + 10);
@@ -366,7 +364,6 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
         me.callMarkers.forEach(function (call) {
             if (call.getProperties().customOptions.status !== "COMPLETED") {
                 call.setStyle(me.iconStyle(call));
-                console.dir(call);
                 me.commonArrayMarkers.push(call);
             }
         });
@@ -390,7 +387,6 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
     addMarkersSocket: function (iconFeature) {
         var me = this,
             sourceVectorLayer = me.vectorLayer.getSource().getSource();
-        console.dir(iconFeature);
         var id = iconFeature.getProperties().id;
         if (iconFeature.getProperties().customOptions.objectType === 'BRIGADE') {
             sourceVectorLayer.getFeatures().forEach(function (brigade) {
@@ -399,7 +395,6 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
                     if (iconFeature.getProperties().customOptions.status === 'WITHOUT_SHIFT') {
                         me.addButtonsBrigadeOnPanel();
                     }
-                    console.dir("удалил бригаду");
                 }
 
             });
@@ -413,7 +408,6 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
                     iconFeature.setStyle(me.iconStyle(iconFeature));
                     sourceVectorLayer.addFeature(iconFeature);
                     Ext.fireEvent('getButtonBrigadeForChangeButton', iconFeature);
-                    console.dir("добавил бригаду");
                 }
 
                 setTimeout(func, 20);
@@ -425,7 +419,6 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
                 sourceVectorLayer.getFeatures().forEach(function (call) {
                     if (call.getProperties().id === id) {
                         sourceVectorLayer.removeFeature(call);
-                        console.dir("удалил вызов");
                     }
                 });
             }
@@ -435,7 +428,6 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
                 iconFeature.getProperties().customOptions.status !== "COMPLETED") {
                 iconFeature.setStyle(me.iconStyle(iconFeature));
                 sourceVectorLayer.addFeature(iconFeature);
-                console.dir("добавил вызов");
             }
         }
     },
@@ -528,7 +520,6 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
 
     readStation: function (station) {
         var me = this;
-        console.dir(station);
         station.forEach(function (st) {
             me.station.push(Ext.String.trim(st));
         });
@@ -537,8 +528,6 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
             }),
             urlBrigade = Ext.String.format(me.urlGeodata + '/data?{0}&statuses=', t),
             urlCall = Ext.String.format(me.urlGeodata + '/call?{0}', t);
-        console.dir(urlBrigade);
-        console.dir(urlCall);
         me.brigadesMarkers = [];
         me.callMarkers = [];
         me.storeBrigade(urlBrigade, urlCall);

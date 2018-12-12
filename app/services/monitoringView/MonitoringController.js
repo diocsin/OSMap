@@ -381,7 +381,6 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
         brigadeSort.sort(function (a, b) {
             return a.getProperties().customOptions.brigadeNum - b.getProperties().customOptions.brigadeNum
         });
-        console.dir(brigadeSort);
         brigadeSort.forEach(function (e) {
             if (e.getProperties().customOptions.brigadeNum !== undefined) {
                 buttonBrigade.add(Ext.create('Ext.Button', {
@@ -393,7 +392,6 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                     listeners: {
                         click: function (r) {
                             me.Monitoring.vectorLayer.getSource().getSource().getFeatures().forEach(function (features) {
-                                console.dir(me.Monitoring.vectorLayer.getSource().getSource().getFeatures());
                                 var idE = e.getProperties().id;
                                 var idF = features.getProperties().id;
                                 if (idF === idE) {   //для того что me.markerClick() нужен features
@@ -412,10 +410,8 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
     },
 
     getStoreMarkerInfo: function (object) {
-        console.dir(object);
         var me = this,
             urlInfoMarker = Ext.String.format(me.urlGeodata + '/info?objectid={0}&objecttype={1}', object.getProperties().id, object.getProperties().customOptions.objectType);
-        console.dir(urlInfoMarker);
         if (object.getProperties().customOptions.objectType === 'BRIGADE') {
             return Ext.create('Ext.data.Store', {
                 model: 'Isidamaps.model.InfoBrigade',
@@ -499,15 +495,15 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
             win.close();
         }
 
-        if ((sizeCmp.width / 2) < coords[0]) {
-            coords[0] -= 450;
+        if ((sizeCmp.width / 2.1) < coords[0]) {
+            coords[0] -= 400;
             coords[1] += 50;
         }
         else {
             coords[0] += 300;
             coords[1] += 50;
         }
-        if ((sizeCmp.height / 2) < coords[1]) {
+        if ((sizeCmp.height / 1.4) < coords[1]) {
             coords[1] -= 550;
         }
         Ext.create('Ext.window.Window', {
@@ -630,7 +626,6 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                                         if (records.length > 0) {
                                             var status = null;
                                             records.forEach(function (brigade) {
-                                                console.dir(brigade);
                                                 switch (brigade.get('status')) {
                                                     case 'FREE':
                                                         status = 'Свободна';
@@ -779,7 +774,6 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
             sizeCmp = ymapWrapper.getSize();
 
         sizeCmp.width = sizeCmp.width * 1.55;
-        console.dir(object);
         if (object.getProperties().customOptions.objectType === 'BRIGADE') {
             if ((sizeCmp.width / 2) < coord[0]) {
                 coord[0] -= 500;
@@ -925,12 +919,12 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
         }
         if (object.getProperties().customOptions.objectType === 'CALL') {
             if ((sizeCmp.width / 2) < coord[0]) {
-                coord[0] -= 600;
+                coord[0] -= 400;
                 coord[1] += 20;
             }
             if ((sizeCmp.height / 2) < coord[1]) {
-                coord[0] += 20;
-                coord[1] -= 470;
+                coord[0] += 50;
+                coord[1] -= 490;
             }
             infoMarker.load({
                 callback: function (records, operation, success) {
