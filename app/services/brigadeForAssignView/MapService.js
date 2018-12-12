@@ -219,8 +219,9 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
                 function (feature) {
                     return feature;
                 });
-            if (feature && eType === 'click') {
-                if (feature !== undefined && feature.getProperties().customOptions === undefined) {
+            if(feature!==undefined){
+            if (eType === 'click') {
+                if (feature.getProperties().customOptions === undefined) {
                     var geometry = feature.getGeometry(), coord = geometry.getCoordinates(),
                         pixel = me.map.getPixelFromCoordinate(coord);
                     if (feature.getProperties().features.length === 1) {
@@ -238,10 +239,8 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
                         }
                         me.clustersClick(pixel, feature);
                     }
-
-
                 }
-                if (feature !== undefined && feature.getProperties().customOptions !== undefined) {
+                if (feature.getProperties().customOptions !== undefined) {
                     var style = feature.getStyle();
                     var timerId = setInterval(function () {
                         feature.setStyle(new ol.style.Style({}));
@@ -266,6 +265,7 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
                     });
                     record.set('checkBox', !record.get('checkBox'));
                 }
+            }
             }
         });
         me.map.on('pointermove', function (e) {

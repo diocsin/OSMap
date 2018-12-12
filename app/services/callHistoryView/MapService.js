@@ -72,7 +72,7 @@ Ext.define('Isidamaps.services.callHistoryView.MapService', {
         arrayLongitude.sort(function (a, b) {
             return a - b
         });
-        me.map.getView().fit([arrayLatitude[0]-50, arrayLongitude[0], arrayLatitude[arrayLatitude.length - 1], arrayLongitude[arrayLongitude.length - 1]], me.map.getSize(), false);
+        me.map.getView().fit([arrayLatitude[0] - 50, arrayLongitude[0], arrayLatitude[arrayLatitude.length - 1], arrayLongitude[arrayLongitude.length - 1]], me.map.getSize(), false);
     },
 
     createMarkers: function () {
@@ -151,6 +151,7 @@ Ext.define('Isidamaps.services.callHistoryView.MapService', {
                         }
                         i++;
                     });
+                    arrayR.push(array);
                     array = [];
                     i = 0;
                     var polyline = new ol.geom.LineString(arrayR);
@@ -309,6 +310,7 @@ Ext.define('Isidamaps.services.callHistoryView.MapService', {
         var me = this,
             urlRouteList = Ext.String.format(me.urlGeodata + '/route?callcardid={0}', call),
             urlFactRouteList = Ext.String.format(me.urlGeodata + '/route/fact?callcardid={0}', call);
+        console.dir(urlRouteList);
         me.brigadeRoute = Ext.create('Ext.data.Store', {
             model: 'Isidamaps.model.RouteHistory',
             proxy: {
