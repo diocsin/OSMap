@@ -30,8 +30,16 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
             features.getProperties().features.forEach(function (feature) {
                 if (feature.getProperties().customOptions.brigadeNum === searchText) {
                     me.Monitoring.map.getView().setCenter(features.getProperties().geometry.flatCoordinates);
-                    me.Monitoring.map.getView().setZoom(16);
+                    me.Monitoring.map.getView().setZoom(18);
                     searchTrue = feature;
+                    me.flash(features);
+                    var t = setInterval(function run() {
+                        me.flash(features);
+                    }, 2000);
+
+                    setTimeout(function () {
+                        clearInterval(t);
+                    }, 9000);
                     return;
                 }
             })
@@ -384,22 +392,29 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
         brigadeSort.forEach(function (e) {
             if (e.getProperties().customOptions.brigadeNum !== undefined) {
                 buttonBrigade.add(Ext.create('Ext.Button', {
-                    itemId: 'id' + e.getProperties().id,
+                    //itemId: 'id' + e.getProperties().id,
                     text: e.getProperties().customOptions.brigadeNum + " " + "(" + e.getProperties().customOptions.profile + ")" + " " + e.getProperties().customOptions.station,
                     maxWidth: 110,
                     minWidth: 110,
                     margin: 5,
                     listeners: {
                         click: function (r) {
-                            me.Monitoring.vectorLayer.getSource().getSource().getFeatures().forEach(function (features) {
+                            me.Monitoring.vectorSource.forEachFeature(function (features) {
                                 var idE = e.getProperties().id;
                                 var idF = features.getProperties().id;
                                 if (idF === idE) {   //для того что me.markerClick() нужен features
                                     var infoMarker = me.getStoreMarkerInfo(features);
-                                    me.markerClick(features, [r.getXY()[0] + 80, r.getXY()[1] + 30], infoMarker);
+                                    me.markerClick(features, [r.getXY()[0] + 110, r.getXY()[1] + 30], infoMarker);
                                     me.Monitoring.map.getView().setCenter(features.getProperties().geometry.flatCoordinates);
-                                    me.Monitoring.map.getView().setZoom(16);
+                                    me.Monitoring.map.getView().setZoom(18);
+                                    me.flash(features);
+                                    var t = setInterval(function run() {
+                                        me.flash(features);
+                                    }, 2000);
 
+                                    setTimeout(function () {
+                                        clearInterval(t);
+                                    }, 9000);
                                 }
                             });
                         }
@@ -407,6 +422,47 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                 }))
             }
         })
+    },
+
+    flash: function (features) {
+        console.dir('sas');
+        var me = this;
+        var listenerKey = me.Monitoring.map.on('postcompose', animate);
+        var start = new Date().getTime();
+        var duration = 3000;
+
+        function animate(evt) {
+            console.dir(evt);
+            var vectorContext = evt.vectorContext;
+            var frameState = evt.frameState;
+            var flashGeom = features.getGeometry().clone();
+            var elapsed = frameState.time - start;
+            var elapsedRatio = elapsed / duration;
+// radius will be 5 at start and 30 at end.
+            var radius = ol.easing.easeOut(elapsedRatio) * 25 + 5;
+            var opacity = ol.easing.easeOut(1 - elapsedRatio);
+
+            var style = new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: radius,
+                    stroke: new ol.style.Stroke({
+                        color: 'rgba(255, 0, 0, ' + opacity + ')',
+                        width: 0.25 + opacity
+                    })
+                })
+            });
+            console.dir('11122');
+            vectorContext.setStyle(style);
+            vectorContext.drawGeometry(flashGeom);
+            if (elapsed > duration) {
+                new ol.Observable.unByKey(listenerKey);
+                elapsed = 0;
+                return;
+            }
+// tell OpenLayers to continue postcompose animation
+            me.Monitoring.map.render();
+
+        }
     },
 
     getStoreMarkerInfo: function (object) {

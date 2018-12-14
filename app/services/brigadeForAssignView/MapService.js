@@ -144,8 +144,7 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
         return ol.proj.transform([
             parseFloat(coord[0]), parseFloat(coord[1])
         ], 'EPSG:3857', 'EPSG:4326');
-    }
-    ,
+    },
 
     constructor: function (options) {
         var me = this;

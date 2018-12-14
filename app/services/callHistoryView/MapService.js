@@ -310,6 +310,7 @@ Ext.define('Isidamaps.services.callHistoryView.MapService', {
         var me = this,
             urlRouteList = Ext.String.format(me.urlGeodata + '/route?callcardid={0}', call),
             urlFactRouteList = Ext.String.format(me.urlGeodata + '/route/fact?callcardid={0}', call);
+        console.dir(urlFactRouteList);
         console.dir(urlRouteList);
         me.brigadeRoute = Ext.create('Ext.data.Store', {
             model: 'Isidamaps.model.RouteHistory',

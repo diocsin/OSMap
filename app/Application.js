@@ -6,6 +6,7 @@
 Ext.define('Isidamaps.Application', {
   extend: 'Ext.app.Application',
   requires: ['Isidamaps.services.monitoringView.Monitoring',
+    'Isidamaps.services.monitoringBrigadeOnCallView.MonitoringBrigade',
     'Isidamaps.services.brigadeForAssignView.BrigadeForAssign',
     'Isidamaps.services.callHistoryView.CallHistory',
     'Isidamaps.services.medorgView.Medorg'
@@ -48,5 +49,5 @@ Ext.define('Isidamaps.Application', {
     // Do something...
   },
 
-  defaultToken: 'brigadesforassign'
+  defaultToken: 'monitoring'
 });
