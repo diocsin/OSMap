@@ -415,6 +415,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                                     setTimeout(function () {
                                         clearInterval(t);
                                     }, 6000);
+
                                 }
                             });
                         }
@@ -429,7 +430,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
         var listenerKey = me.Monitoring.map.on('postcompose', animate);
         var start = new Date().getTime();
         var duration = 3000;
-
+        me.Monitoring.map.render();
         function animate(evt) {
             var vectorContext = evt.vectorContext;
             var frameState = evt.frameState;
