@@ -414,7 +414,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
 
                                     setTimeout(function () {
                                         clearInterval(t);
-                                    }, 9000);
+                                    }, 6000);
                                 }
                             });
                         }
@@ -425,14 +425,12 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
     },
 
     flash: function (features) {
-        console.dir('sas');
         var me = this;
         var listenerKey = me.Monitoring.map.on('postcompose', animate);
         var start = new Date().getTime();
         var duration = 3000;
 
         function animate(evt) {
-            console.dir(evt);
             var vectorContext = evt.vectorContext;
             var frameState = evt.frameState;
             var flashGeom = features.getGeometry().clone();
@@ -451,12 +449,10 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                     })
                 })
             });
-            console.dir('11122');
             vectorContext.setStyle(style);
             vectorContext.drawGeometry(flashGeom);
             if (elapsed > duration) {
                 new ol.Observable.unByKey(listenerKey);
-                elapsed = 0;
                 return;
             }
 // tell OpenLayers to continue postcompose animation

@@ -11,8 +11,7 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MonitoringBrigadeCont
     urlOpenStreetServerTiles: null,
     listen: {
         global: {
-
-
+            windowClose: 'windowClose'
         }
     },
 
@@ -28,6 +27,10 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MonitoringBrigadeCont
             });
             me.createMap();
         });
+    },
+
+    windowClose: function () {
+        window.close();
     },
 
     connect: function () {
@@ -46,15 +49,18 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MonitoringBrigadeCont
     showGreeting: function (message) {
         var me = this;
         console.dir(message);
-        message.station = '' + message.station;
-        if (me.MonitoringBrigade.brigadeNum===message.brigadeNum) {
-            if (message.objectType === 'BRIGADE') {
+        message.deviceId = '' + message.deviceId;
+
+        if (message.objectType === 'BRIGADE') {
+            if (me.MonitoringBrigade.brigadeId === message.deviceId) {
                 var storeBrigades = me.getViewModel().getStore('Brigades');
                 storeBrigades.loadRawData(message);
                 me.MonitoringBrigade.createMarkers();
             }
+        }
 
-            if (message.objectType === 'CALL') {
+        if (message.objectType === 'CALL') {
+            if (me.MonitoringBrigade.callId === message.deviceId) {
                 var storeCalls = me.getViewModel().getStore('Calls');
                 storeCalls.loadRawData(message);
                 me.MonitoringBrigade.createMarkers();
@@ -80,16 +86,14 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MonitoringBrigadeCont
             filterCallArray: me.filterCallArray,
             urlGeodata: me.urlGeodata,
             urlOpenStreetServerTiles: me.urlOpenStreetServerTiles,
-            urlOpenStreetServerRoute : me.urlOpenStreetServerRoute,
+            urlOpenStreetServerRoute: me.urlOpenStreetServerRoute,
             getStoreMarkerInfo: me.getStoreMarkerInfo
         });
         me.MonitoringBrigade.optionsObjectManager();
-        me.MonitoringBrigade.readMarkers('88151399',['88150724']);
-        /*
         ASOV.setMapManager({
-            setStation: me.MonitoringBrigade.setMarkers.bind(this)
+            setMarkers: me.MonitoringBrigade.setMarkers.bind(this)
         }, Ext.History.currentToken);
-        */
+
         var ymapWrapper = me.lookupReference('ymapWrapper');
         ymapWrapper.on('resize', function () {
             me.MonitoringBrigade.resizeMap(me.MonitoringBrigade);
@@ -101,7 +105,6 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MonitoringBrigadeCont
     getStoreMarkerInfo: function (object) {
         var me = this,
             urlInfoMarker = Ext.String.format(me.urlGeodata + '/info?objectid={0}&objecttype={1}', object.getProperties().id, object.getProperties().customOptions.objectType);
-       console.dir(urlInfoMarker);
         if (object.getProperties().customOptions.objectType === 'BRIGADE') {
             return Ext.create('Ext.data.Store', {
                 model: 'Isidamaps.model.InfoBrigade',

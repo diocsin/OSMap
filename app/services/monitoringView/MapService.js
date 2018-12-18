@@ -539,7 +539,7 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
             callRecords = me.viewModel.getStore('Calls').getData().items;
         callRecords.forEach(function (call) {
             me.callMarkers.forEach(function (callInArray) {
-                if (callInArray.id === call.get('callCardId')) {
+                if (callInArray.getProperties().id === call.get('callCardId')) {
                     var index = me.callMarkers.indexOf(callInArray);
                     me.callMarkers.splice(index, 1);
                 }
@@ -567,7 +567,7 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
         var brigadeRecords = me.viewModel.getStore('Brigades').getData().items;
         brigadeRecords.forEach(function (brigade) {
             me.brigadesMarkers.forEach(function (brigadeInArray) {
-                if (brigadeInArray.id === brigade.get('deviceId')) {
+                if (brigadeInArray.getProperties().id === brigade.get('deviceId')) {
                     var index = me.brigadesMarkers.indexOf(brigadeInArray);
                     me.brigadesMarkers.splice(index, 1);
                 }
