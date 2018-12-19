@@ -360,7 +360,8 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
 
     getButtonBrigadeForChangeButton: function (brigade) {
         var me = this;
-        var buttonBrigade = me.lookupReference('BrigadePanel');
+        me.addButtonsBrigadeOnPanel();
+       /* var buttonBrigade = me.lookupReference('BrigadePanel');
         var brigadeHave = buttonBrigade.items.getByKey('id' + brigade.getProperties().id);
         if (brigadeHave === undefined) {
             me.addButtonsBrigadeOnPanel();
@@ -368,7 +369,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
         else {
 
         }
-
+*/
 
     },
 
@@ -392,7 +393,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
         brigadeSort.forEach(function (e) {
             if (e.getProperties().customOptions.brigadeNum !== undefined) {
                 buttonBrigade.add(Ext.create('Ext.Button', {
-                    //itemId: 'id' + e.getProperties().id,
+                    itemId: 'id' + e.getProperties().id,
                     text: e.getProperties().customOptions.brigadeNum + " " + "(" + e.getProperties().customOptions.profile + ")" + " " + e.getProperties().customOptions.station,
                     maxWidth: 110,
                     minWidth: 110,
