@@ -408,7 +408,7 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
 
                     iconFeature.setStyle(me.iconStyle(iconFeature));
                     sourceVectorLayer.addFeature(iconFeature);
-                    Ext.fireEvent('getButtonBrigadeForChangeButton', iconFeature);
+                    //Ext.fireEvent('getButtonBrigadeForChangeButton', iconFeature);
                 }
 
                 setTimeout(func, 20);

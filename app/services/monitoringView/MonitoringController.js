@@ -272,7 +272,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
         });
     },
 
-    connect: function () {
+    /*connect: function () {
         var me = this,
             socket = new SockJS(me.urlWebSocket + '/geo');
         me.stompClient = Stomp.over(socket);
@@ -283,6 +283,25 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                 me.showGreeting(JSON.parse(greeting.body));
             });
         });
+    },*/
+    connect: function() {
+        var me = this,
+            socket = new SockJS(me.urlWebSocket + '/geo');
+        me.stompClient = Stomp.over(socket);
+        me.stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+                me.stompClient.subscribe('/geo-queue/geodata-updates', function (greeting) {
+                    console.dir(greeting);
+                    me.showGreeting(JSON.parse(greeting.body));
+                });
+            }.bind(this),
+            function(e) {
+                console.error(e, "Reconnecting WS");
+                window.setTimeout(function() {
+                    this.connect();
+                }.bind(this), 2500);
+            }.bind(this)
+        );
     },
 
     showGreeting: function (message) {
@@ -360,8 +379,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
 
     getButtonBrigadeForChangeButton: function (brigade) {
         var me = this;
-        me.addButtonsBrigadeOnPanel();
-       /* var buttonBrigade = me.lookupReference('BrigadePanel');
+        var buttonBrigade = me.lookupReference('BrigadePanel');
         var brigadeHave = buttonBrigade.items.getByKey('id' + brigade.getProperties().id);
         if (brigadeHave === undefined) {
             me.addButtonsBrigadeOnPanel();
@@ -369,7 +387,6 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
         else {
 
         }
-*/
 
     },
 
@@ -393,7 +410,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
         brigadeSort.forEach(function (e) {
             if (e.getProperties().customOptions.brigadeNum !== undefined) {
                 buttonBrigade.add(Ext.create('Ext.Button', {
-                    itemId: 'id' + e.getProperties().id,
+                    //itemId: 'id' + e.getProperties().id,
                     text: e.getProperties().customOptions.brigadeNum + " " + "(" + e.getProperties().customOptions.profile + ")" + " " + e.getProperties().customOptions.station,
                     maxWidth: 110,
                     minWidth: 110,

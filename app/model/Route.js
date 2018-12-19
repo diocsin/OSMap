@@ -4,5 +4,20 @@ Ext.define('Isidamaps.model.Route', {
     fields: [{
         name: 'checkBox',
         type: 'boolean'
-    }, 'brigadeId', 'brigadeNum', 'profile', 'distance', 'time']
+    },
+        {
+            name: 'time',
+            type: 'number'
+        },
+        {
+            name: 'brigadeNum',
+            type: 'number'
+        }, {
+            name: 'brigadeId'
+        },
+        {
+            name: 'distance',
+            type: 'number'
+        },
+        'profile',]
 });
