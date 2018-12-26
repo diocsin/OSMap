@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app
+  xmlns="http://java.sun.com/xml/ns/javaee"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+  metadata-complete="true"
+  version="2.5"
+>
+
+  <!-- ==================================================================== -->
+  <!-- Reverse HTTP Proxy for the Sencha Cmd web server, e.g.               -->
+  <!-- http://localhost:1841/backend/test.php will reflect                  -->
+  <!-- http://example.com/backend/test.php                                  -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
+  <servlet>
+    <servlet-name>transparentReverseProxy</servlet-name>
+    <servlet-class>org.eclipse.jetty.servlets.ProxyServlet$Transparent</servlet-class>
+    <init-param>
+        <param-name>ProxyTo</param-name>
+        <param-value>http://localhost:1841</param-value>
+    </init-param>
+    <init-param>
+        <param-name>HostHeader</param-name>
+        <param-value>localhost</param-value>
+    </init-param>
+    <init-param>
+        <param-name>Prefix</param-name>
+        <param-value>/map</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>transparentReverseProxy</servlet-name>
+    <url-pattern>/map/*</url-pattern>
+  </servlet-mapping>
+
+</web-app>
