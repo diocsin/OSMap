@@ -233,7 +233,7 @@
         "js": [
             // Remove this entry to individually load sources from the framework.
             {
-                "path": "${framework.dir}/build/ext-all-rtl-debug.js"
+                "path": "${framework.dir}/build/ext-all-debug.js"
             }
         ],
       "requires": [
@@ -241,49 +241,8 @@
       ]
     },
 
-
-  /**
-   * Settings specific to modern toolkit builds.
-   */
-    /*"modern": {
-        "js": [
-            // Remove this entry to individually load sources from the framework.
-            {
-                "path": "${framework.dir}/build/ext-modern-all-debug.js"
-            }
-        ]
-    },*/
-
-    /**
-     * List of all CSS assets in the right inclusion order.
-     *
-     * Each item is an object with the following format:
-     *
-     *      {
-     *          // Path to file. If the file is local this must be a relative path from
-     *          // this app.json file.
-     *          //
-     *          "path": "path/to/stylesheet.css",   // REQUIRED
-     *
-     *          // Specify as true if this file is remote and should not be copied into the
-     *          // build folder. Defaults to false for a local file which will be copied.
-     *          //
-     *          "remote": false,    // OPTIONAL
-     *
-     *          // If not specified, this file will only be loaded once, and cached inside
-     *          // localStorage until this value is changed. You can specify:
-     *          //
-     *          //   - "delta" to enable over-the-air delta update for this file
-     *          //   - "full" means full update will be made when this file changes
-     *          //
-     *          "update": ""      // OPTIONAL
-     *      }
-     */
     "css": [
         {
-            // this entry uses an ant variable that is the calculated
-            // value of the generated output css file for the app,
-            // defined in .sencha/app/defaults.properties
             "path": "${build.out.css.path}",
             "bundle": true,
             "exclude": ["fashion"]
@@ -510,56 +469,11 @@
 
     "archivePath": "archive/${build.id}",
 
-
-
-
-    /**
-     * Build Profiles. This object's properties are each a "build profile". You can
-     * add as many as you need to produce optimized builds for devices, themes, locales
-     * or other criteria. Your "Ext.beforeLoad" hook (see index.html) is responsible for
-     * selecting the desired build profile by setting "Ext.manifest" to one of these
-     * names.
-     *
-     *     "builds": {
-     *         "classic": {
-     *             "toolkit": "classic",
-     *             "theme": "theme-neptune"
-     *         },
-     *
-     *         "modern": {
-     *             "toolkit": "modern",
-     *             "theme": "theme-neptune"
-     *         }
-     *     }
-     *
-     */
-
     "builds": {
         "classic": {
             "toolkit": "classic",
-
-            "theme": "theme-classic"/*,
-
-            "sass": {
-                "generated": {
-                    "var": "classic/sass/save.scss",
-                    "src": "classic/sass/save"
-                }
-            }*/
-        }/*,
-
-        "modern": {
-            "toolkit": "modern",
-
-            "theme": "theme-triton",
-
-            "sass": {
-                "generated": {
-                    "var": "modern/sass/save.scss",
-                    "src": "modern/sass/save"
-                }
-            }
-        }*/
+            "theme": "theme-classic"
+        }
     },
 
 

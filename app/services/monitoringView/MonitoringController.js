@@ -794,7 +794,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                                                             xtype: 'displayfield',
                                                             name: 'passToBrigadeTime',
                                                             fieldLabel: 'Время получения бригадой',
-                                                            renderer: Ext.util.Format.dateRenderer('Y-m-d, h:i:s'),
+                                                            renderer: Ext.util.Format.dateRenderer('Y-m-d, H:i:s'),
                                                             labelWidth: '100%',
                                                             margin: 0
                                                         }
@@ -970,7 +970,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                                             xtype: 'displayfield',
                                             name: 'passToBrigadeTime',
                                             fieldLabel: 'Время получения бригадой',
-                                            renderer: Ext.util.Format.dateRenderer('Y-m-d, h:i:s'),
+                                            renderer: Ext.util.Format.dateRenderer('Y-m-d, H:i:s'),
                                             labelWidth: '100%',
                                             margin: 0
                                         }

@@ -38,7 +38,7 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MapService', {
                 name: 'createTime',
                 fieldLabel: 'Время создания вызова',
                 labelWidth: '100%',
-                renderer: Ext.util.Format.dateRenderer('Y-m-d, h:i:s'),
+                renderer: Ext.util.Format.dateRenderer('Y-m-d, H:i:s'),
                 margin: 0
             },
             {
@@ -46,7 +46,7 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MapService', {
                 name: 'regBeginTime',
                 fieldLabel: 'Время приема вызова',
                 labelWidth: '100%',
-                renderer: Ext.util.Format.dateRenderer('Y-m-d, h:i:s'),
+                renderer: Ext.util.Format.dateRenderer('Y-m-d, H:i:s'),
                 margin: 0
             },
             {
@@ -107,7 +107,7 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MapService', {
                 name: 'brigadeAssignTime',
                 labelWidth: '100%',
                 fieldLabel: 'Время назначения бригады на вызов',
-                renderer: Ext.util.Format.dateRenderer('Y-m-d, h:i:s'),
+                renderer: Ext.util.Format.dateRenderer('Y-m-d, H:i:s'),
                 margin: 0
             },
             {
@@ -115,7 +115,7 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MapService', {
                 name: 'brigadeArrivalTime',
                 labelWidth: '100%',
                 fieldLabel: 'Время прибытия бригады к месту вызова',
-                renderer: Ext.util.Format.dateRenderer('Y-m-d, h:i:s'),
+                renderer: Ext.util.Format.dateRenderer('Y-m-d, H:i:s'),
                 margin: 0
             },
             {
