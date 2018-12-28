@@ -911,6 +911,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                                 autoScroll: true,
                                 resizable: false,
                                 width: 500,
+                                constrain: true,
                                 //height: 250,
                                 items: [{
                                     xtype: 'form',
@@ -1018,6 +1019,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                                 layout: 'form',
                                 id: 'winId',
                                 border: 'fit',
+                                constrain: true,
                                 autoScroll: true,
                                 resizable: false,
                                 width: 550,
