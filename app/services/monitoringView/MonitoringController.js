@@ -9,6 +9,11 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
     urlWebSocket: null,
     urlOpenStreetServerRoute: null,
     urlOpenStreetServerTiles: null,
+    brigadeStatusesMap: (function () {
+        const map = Ext.create('Ext.util.HashMap');
+        map.add('FREE', '123');
+        return map;
+    })(),
     listen: {
         global: {
             checkedProfileBrigade: 'checkedProfileBrigade',
@@ -318,8 +323,8 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
         me.connect();
         me.Monitoring = Ext.create('Isidamaps.services.monitoringView.MapService', {
             viewModel: me.getViewModel(),
-            markerClick: me.markerClick,
-            clustersClick: me.clustersClick,
+            markerClick: me.markerClick.bind(me),
+            clustersClick: me.clustersClick.bind(me),
             filterBrigadeArray: me.filterBrigadeArray,
             filterCallArray: me.filterCallArray,
             urlGeodata: me.urlGeodata,
@@ -386,36 +391,37 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
         });
 
         brigadeSort.forEach(function (e) {
-            if (e.getProperties().customOptions.brigadeNum !== undefined) {
-                buttonBrigade.add(Ext.create('Ext.Button', {
-                    text: e.getProperties().customOptions.brigadeNum + " " + "(" + e.getProperties().customOptions.profile + ")" + " " + e.getProperties().customOptions.station,
-                    maxWidth: 110,
-                    minWidth: 110,
-                    margin: 5,
-                    listeners: {
-                        click: function (r) {
-                            me.Monitoring.vectorSource.forEachFeature(function (features) {
-                                const idE = e.getProperties().id,
-                                    idF = features.getProperties().id;
-                                if (idF === idE) {   //для того что me.markerClick() нужен features
-                                    const infoMarker = me.getStoreMarkerInfo(features);
-                                    me.markerClick(features, [r.getXY()[0] + 110, r.getXY()[1] + 30], infoMarker);
-                                    me.Monitoring.map.getView().setCenter(features.getProperties().geometry.flatCoordinates);
-                                    me.Monitoring.map.getView().setZoom(18);
-                                    me.flash(features);
-                                    const t = setInterval(function run() {
-                                        me.flash(features);
-                                    }, 2000);
-
-                                    setTimeout(function () {
-                                        clearInterval(t);
-                                    }, 6000);
-                                }
-                            });
-                        }
-                    }
-                }))
+            if (e.getProperties().customOptions.brigadeNum === undefined) {
+                return;
             }
+            buttonBrigade.add(Ext.create('Ext.Button', {
+                text: e.getProperties().customOptions.brigadeNum + " " + "(" + e.getProperties().customOptions.profile + ")" + " " + e.getProperties().customOptions.station,
+                maxWidth: 110,
+                minWidth: 110,
+                margin: 5,
+                listeners: {
+                    click: function (r) {
+                        me.Monitoring.vectorSource.forEachFeature(function (features) {
+                            const idE = e.getProperties().id,
+                                idF = features.getProperties().id;
+                            if (idF === idE) {   //для того что me.markerClick() нужен features
+                                const infoMarker = me.getStoreMarkerInfo(features);
+                                me.markerClick(features, [r.getXY()[0] + 110, r.getXY()[1] + 30], infoMarker);
+                                me.Monitoring.map.getView().setCenter(features.getProperties().geometry.flatCoordinates);
+                                me.Monitoring.map.getView().setZoom(18);
+                                me.flash(features);
+                                const t = setInterval(function run() {
+                                    me.flash(features);
+                                }, 2000);
+
+                                setTimeout(function () {
+                                    clearInterval(t);
+                                }, 6000);
+                            }
+                        });
+                    }
+                }
+            }))
         })
     },
 
@@ -506,8 +512,9 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
     },
 
     layoutReady: function () {
-        this.fireTabEvent(this.lookupReference('navigationPanel'));
-        this.fireTabEvent(this.lookupReference('BrigadePanel'));
+        const me = this;
+        me.fireTabEvent(me.lookupReference('navigationPanel'));
+        me.fireTabEvent(me.lookupReference('BrigadePanel'));
     },
 
     tabChange: function (panel, newTab, oldTab) {
@@ -519,23 +526,16 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
         tab.fireEvent('tabEnter');
     },
 
-    clustersClick: function (coords, cluster) {
-        function errorMessage(marker) {
-            let markerMessage = null;
-            if (marker === 'CALL') {
-                markerMessage = 'Данные о вызове временно не доступны';
-            }
-            if (marker === 'BRIGADE') {
-                markerMessage = 'Данные о бригаде временно не доступны';
-            }
-            Ext.create('Ext.window.MessageBox').show({
-                title: 'Ошибка',
-                message: markerMessage,
-                icon: Ext.Msg.ERROR,
-                buttons: Ext.Msg.OK
-            })
-        }
+    errorMessage: function (msg) {
+        Ext.Msg.show({
+            title: 'Ошибка',
+            message: msg,
+            icon: Ext.Msg.ERROR,
+            buttons: Ext.Msg.OK
+        });
+    },
 
+    clustersClick: function (coords, cluster) {
         const me = this,
             ymapWrapper = Ext.getCmp('mapId'),
             sizeCmp = ymapWrapper.getSize(),
@@ -607,43 +607,30 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                             infoMarker.removeAll();
                             storeMarker.load({
                                 callback: function (records, operation, success) {
-                                    if (success === true) {
-                                        if (records.length === 0) {
-                                            errorMessage('CALL');
-                                        }
+                                    if ((success === true && records.length === 0) || success === false) {
+                                        me.errorMessage('Данные о вызове временно не доступны');
+                                        return;
                                     }
-                                    if (success === false) {
-                                        try {
-                                            errorMessage('CALL');
-                                        } catch (e) {
-                                            errorMessage('CALL');
+                                    infoMarker.add(Ext.create('Ext.Panel', {
+                                        layout: 'form',
+                                        border: 'fit',
+                                        autoScroll: true,
+                                        resizable: false,
+                                        width: '100%',
+                                        items: me.callInfoForm,
+                                        listeners: {
+                                            afterrender: function (component) {
+                                                const form = component.down('form');
+                                                form.loadRecord(storeMarker.first());
+                                            }
                                         }
-                                    }
-                                    if (success === true) {
-                                        if (records.length > 0) {
-                                            infoMarker.add(Ext.create('Ext.Panel', {
-                                                layout: 'form',
-                                                border: 'fit',
-                                                autoScroll: true,
-                                                resizable: false,
-                                                width: '100%',
-                                                items: me.callInfoForm,
-                                                listeners: {
-                                                    afterrender: function (component) {
-                                                        const form = component.down('form');
-                                                        form.loadRecord(storeMarker.first());
-                                                    }
-                                                }
-                                            }))
-                                        }
-                                    }
+                                    }))
                                 }
                             })
                         }
                     }
                 }))
             }
-
             if (marker.getProperties().customOptions.objectType === 'BRIGADE') {
                 markerInClusters.add(Ext.create('Ext.Button', {
                     text: 'Бр.№ ' + marker.getProperties().customOptions.brigadeNum + " " + "(" + marker.getProperties().customOptions.profile + ")" + " " + marker.getProperties().customOptions.station,
@@ -656,126 +643,80 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                             infoMarker.removeAll();
                             storeMarker.load({
                                 callback: function (records, operation, success) {
-                                    if (success === true) {
-                                        if (records.length === 0) {
-                                            errorMessage('BRIGADE');
-                                        }
+                                    if ((success === true && records.length === 0) || success === false) {
+                                        me.errorMessage('Данные о бригаде временно недоступны');
+                                        return;
                                     }
-                                    if (success === false) {
-                                        try {
-                                            errorMessage('BRIGADE');
-                                        } catch (e) {
-                                            errorMessage('BRIGADE');
+                                    const status = me.brigadeStatusesMap.get(records[0].get('status') || 'Неизвестно');
+                                    infoMarker.add(Ext.create('Ext.Panel', {
+                                        layout: 'form',
+                                        border: 'fit',
+                                        autoScroll: true,
+                                        resizable: false,
+                                        width: '100%',
+                                        items: [{
+                                            xtype: 'form',
+                                            autoScroll: true,
+                                            height: '100%',
+                                            width: '100%',
+                                            items: [{
+                                                xtype: 'displayfield',
+                                                name: 'brigadeNum',
+                                                fieldLabel: 'Номер бригады',
+                                                labelWidth: '100%',
+                                                margin: 0
+                                            }, {
+                                                xtype: 'displayfield',
+                                                name: 'station',
+                                                fieldLabel: 'Номер подстанции',
+                                                labelWidth: '100%',
+                                                margin: 0
+                                            }, {
+                                                xtype: 'displayfield',
+                                                value: marker.getProperties().customOptions.profile,
+                                                fieldLabel: 'Профиль бригады',
+                                                labelWidth: '100%',
+                                                margin: 0
+                                            }, {
+                                                xtype: 'displayfield',
+                                                value: status,
+                                                fieldLabel: 'Статус бригады',
+                                                labelWidth: '100%',
+                                                margin: 0
+                                            }, {
+                                                xtype: 'displayfield',
+                                                fieldLabel: 'Старший бригады',
+                                                name: 'chefName',
+                                                labelWidth: '100%',
+                                                margin: 0
+                                            }, {
+                                                xtype: 'displayfield',
+                                                name: 'callCardNum',
+                                                fieldLabel: 'Вызов',
+                                                labelWidth: '100%',
+                                                margin: 0
+                                            }, {
+                                                xtype: 'displayfield',
+                                                name: 'address',
+                                                fieldLabel: 'Адрес места вызова',
+                                                labelWidth: 150,
+                                                margin: 0
+                                            }, {
+                                                xtype: 'displayfield',
+                                                name: 'passToBrigadeTime',
+                                                fieldLabel: 'Время получения бригадой',
+                                                renderer: Ext.util.Format.dateRenderer('Y-m-d, H:i:s'),
+                                                labelWidth: '100%',
+                                                margin: 0
+                                            }]
+                                        }],
+                                        listeners: {
+                                            afterrender: function (component) {
+                                                const form = component.down('form');
+                                                form.loadRecord(storeMarker.first());
+                                            }
                                         }
-                                    }
-                                    if (success === true) {
-                                        if (records.length > 0) {
-                                            let status = null;
-                                            records.forEach(function (brigade) {
-                                                switch (brigade.get('status')) {
-                                                    case 'FREE':
-                                                        status = 'Свободна';
-                                                        break;
-                                                    case 'ON_EVENT':
-                                                        status = 'Дежурство на мероприятии';
-                                                        break;
-                                                    case 'WITHOUT_SHIFT':
-                                                        status = 'Вне графика';
-                                                        break;
-                                                    case 'CRASH_CAR':
-                                                        status = 'Ремонт';
-                                                        break;
-                                                    case 'PASSED_BRIGADE':
-                                                        status = 'Принял вызов';
-                                                        break;
-                                                    case 'AT_CALL':
-                                                        status = 'На вызове';
-                                                        break;
-                                                    case 'RELAXON':
-                                                        status = 'Обед';
-                                                        break;
-                                                    case 'GO_HOSPITAL':
-                                                        status = 'Транспортировка в стационар';
-                                                        break;
-                                                    case 'HIJACKING':
-                                                        status = 'Нападение на бригаду';
-                                                        break;
-                                                    default:
-                                                        status = 'Неизвестно';
-                                                        break;
-                                                }
-                                            });
-                                            infoMarker.add(Ext.create('Ext.Panel', {
-                                                layout: 'form',
-                                                border: 'fit',
-                                                autoScroll: true,
-                                                resizable: false,
-                                                width: '100%',
-                                                items: [{
-                                                    xtype: 'form',
-                                                    autoScroll: true,
-                                                    height: '100%',
-                                                    width: '100%',
-                                                    items: [{
-                                                        xtype: 'displayfield',
-                                                        name: 'brigadeNum',
-                                                        fieldLabel: 'Номер бригады',
-                                                        labelWidth: '100%',
-                                                        margin: 0
-                                                    }, {
-                                                        xtype: 'displayfield',
-                                                        name: 'station',
-                                                        fieldLabel: 'Номер подстанции',
-                                                        labelWidth: '100%',
-                                                        margin: 0
-                                                    }, {
-                                                        xtype: 'displayfield',
-                                                        value: marker.getProperties().customOptions.profile,
-                                                        fieldLabel: 'Профиль бригады',
-                                                        labelWidth: '100%',
-                                                        margin: 0
-                                                    }, {
-                                                        xtype: 'displayfield',
-                                                        value: status,
-                                                        fieldLabel: 'Статус бригады',
-                                                        labelWidth: '100%',
-                                                        margin: 0
-                                                    }, {
-                                                        xtype: 'displayfield',
-                                                        fieldLabel: 'Старший бригады',
-                                                        name: 'chefName',
-                                                        labelWidth: '100%',
-                                                        margin: 0
-                                                    }, {
-                                                        xtype: 'displayfield',
-                                                        name: 'callCardNum',
-                                                        fieldLabel: 'Вызов',
-                                                        labelWidth: '100%',
-                                                        margin: 0
-                                                    }, {
-                                                        xtype: 'displayfield',
-                                                        name: 'address',
-                                                        fieldLabel: 'Адрес места вызова',
-                                                        labelWidth: 150,
-                                                        margin: 0
-                                                    }, {
-                                                        xtype: 'displayfield',
-                                                        name: 'passToBrigadeTime',
-                                                        fieldLabel: 'Время получения бригадой',
-                                                        renderer: Ext.util.Format.dateRenderer('Y-m-d, H:i:s'),
-                                                        labelWidth: '100%',
-                                                        margin: 0
-                                                    }]
-                                                }],
-                                                listeners: {
-                                                    afterrender: function (component) {
-                                                        const form = component.down('form');
-                                                        form.loadRecord(storeMarker.first());
-                                                    }
-                                                }
-                                            }))
-                                        }
-                                    }
+                                    }))
                                 }
                             })
                         }
@@ -792,22 +733,6 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
             win.close();
         }
 
-        function errorMessage(marker) {
-            let markerMessage = null;
-            if (marker === 'CALL') {
-                markerMessage = 'Данные о вызове временно не доступны';
-            }
-            if (marker === 'BRIGADE') {
-                markerMessage = 'Данные о бригаде временно не доступны';
-            }
-            Ext.create('Ext.window.MessageBox').show({
-                title: 'Ошибка',
-                message: markerMessage,
-                icon: Ext.Msg.ERROR,
-                buttons: Ext.Msg.OK
-            })
-        }
-
         const ymapWrapper = Ext.getCmp('mapId'),
             sizeCmp = ymapWrapper.getSize();
 
@@ -822,128 +747,82 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
             }
             infoMarker.load({
                 callback: function (records, operation, success) {
-                    if (success === true) {
-                        if (records.length === 0) {
-                            errorMessage('BRIGADE');
-                        }
+                    if ((success === true && records.length === 0) || success === false) {
+                        me.errorMessage('Данные о бригаде временно не доступны');
+                        return;
                     }
-                    if (success === false) {
-                        try {
-                            errorMessage('BRIGADE');
-                        } catch (e) {
-                            errorMessage('BRIGADE');
+                    let status = me.brigadeStatusesMap.get(records[0].get('status')) || 'Неизвестно';
+                    Ext.create('Ext.window.Window', {
+                        title: 'Бригада',
+                        layout: 'form',
+                        border: 'fit',
+                        autoScroll: true,
+                        resizable: false,
+                        width: 500,
+                        constrain: true,
+                        items: [{
+                            xtype: 'form',
+                            autoScroll: true,
+                            height: '100%',
+                            width: '100%',
+                            items: [{
+                                xtype: 'displayfield',
+                                name: 'brigadeNum',
+                                fieldLabel: 'Номер бригады',
+                                labelWidth: '100%',
+                                margin: 0
+                            }, {
+                                xtype: 'displayfield',
+                                name: 'station',
+                                fieldLabel: 'Номер подстанции',
+                                labelWidth: '100%',
+                                margin: 0
+                            }, {
+                                xtype: 'displayfield',
+                                value: object.getProperties().customOptions.profile,
+                                fieldLabel: 'Профиль бригады',
+                                labelWidth: '100%',
+                                margin: 0
+                            }, {
+                                xtype: 'displayfield',
+                                value: status,
+                                fieldLabel: 'Статус бригады',
+                                labelWidth: '100%',
+                                margin: 0
+                            }, {
+                                xtype: 'displayfield',
+                                fieldLabel: 'Старший бригады',
+                                name: 'chefName',
+                                labelWidth: '100%',
+                                margin: 0
+                            }, {
+                                xtype: 'displayfield',
+                                name: 'callCardNum',
+                                fieldLabel: 'Вызов',
+                                labelWidth: '100%',
+                                margin: 0
+                            }, {
+                                xtype: 'displayfield',
+                                name: 'address',
+                                fieldLabel: 'Адрес места вызова',
+                                labelWidth: 150,
+                                margin: 0
+                            }, {
+                                xtype: 'displayfield',
+                                name: 'passToBrigadeTime',
+                                fieldLabel: 'Время получения бригадой',
+                                renderer: Ext.util.Format.dateRenderer('Y-m-d, H:i:s'),
+                                labelWidth: '100%',
+                                margin: 0
+                            }]
+                        }],
+                        listeners: {
+                            afterrender: function (component) {
+                                const form = component.down('form');
+                                form.loadRecord(infoMarker.first());
+                            }
                         }
-                    }
-                    if (success === true) {
-                        if (records.length > 0) {
-                            let status = null;
-                            records.forEach(function (brigade) {
-                                switch (brigade.get('status')) {
-                                    case 'FREE':
-                                        status = 'Свободна';
-                                        break;
-                                    case 'ON_EVENT':
-                                        status = 'Дежурство на мероприятии';
-                                        break;
-                                    case 'WITHOUT_SHIFT':
-                                        status = 'Вне графика';
-                                        break;
-                                    case 'CRASH_CAR':
-                                        status = 'Ремонт';
-                                        break;
-                                    case 'PASSED_BRIGADE':
-                                        status = 'Принял вызов';
-                                        break;
-                                    case 'AT_CALL':
-                                        status = 'На вызове';
-                                        break;
-                                    case 'RELAXON':
-                                        status = 'Обед';
-                                        break;
-                                    case 'GO_HOSPITAL':
-                                        status = 'Транспортировка в стационар';
-                                        break;
-                                    case 'HIJACKING':
-                                        status = 'Нападение на бригаду';
-                                        break;
-                                    default:
-                                        status = 'Неизвестно';
-                                        break;
-                                }
-                            });
-                            Ext.create('Ext.window.Window', {
-                                title: 'Бригада',
-                                layout: 'form',
-                                border: 'fit',
-                                autoScroll: true,
-                                resizable: false,
-                                width: 500,
-                                constrain: true,
-                                items: [{
-                                    xtype: 'form',
-                                    autoScroll: true,
-                                    height: '100%',
-                                    width: '100%',
-                                    items: [{
-                                        xtype: 'displayfield',
-                                        name: 'brigadeNum',
-                                        fieldLabel: 'Номер бригады',
-                                        labelWidth: '100%',
-                                        margin: 0
-                                    }, {
-                                        xtype: 'displayfield',
-                                        name: 'station',
-                                        fieldLabel: 'Номер подстанции',
-                                        labelWidth: '100%',
-                                        margin: 0
-                                    }, {
-                                        xtype: 'displayfield',
-                                        value: object.getProperties().customOptions.profile,
-                                        fieldLabel: 'Профиль бригады',
-                                        labelWidth: '100%',
-                                        margin: 0
-                                    }, {
-                                        xtype: 'displayfield',
-                                        value: status,
-                                        fieldLabel: 'Статус бригады',
-                                        labelWidth: '100%',
-                                        margin: 0
-                                    }, {
-                                        xtype: 'displayfield',
-                                        fieldLabel: 'Старший бригады',
-                                        name: 'chefName',
-                                        labelWidth: '100%',
-                                        margin: 0
-                                    }, {
-                                        xtype: 'displayfield',
-                                        name: 'callCardNum',
-                                        fieldLabel: 'Вызов',
-                                        labelWidth: '100%',
-                                        margin: 0
-                                    }, {
-                                        xtype: 'displayfield',
-                                        name: 'address',
-                                        fieldLabel: 'Адрес места вызова',
-                                        labelWidth: 150,
-                                        margin: 0
-                                    }, {
-                                        xtype: 'displayfield',
-                                        name: 'passToBrigadeTime',
-                                        fieldLabel: 'Время получения бригадой',
-                                        renderer: Ext.util.Format.dateRenderer('Y-m-d, H:i:s'),
-                                        labelWidth: '100%',
-                                        margin: 0
-                                    }]
-                                }],
-                                listeners: {
-                                    afterrender: function (component) {
-                                        const form = component.down('form');
-                                        form.loadRecord(infoMarker.first());
-                                    }
-                                }
-                            }).showAt(coord);
-                        }
-                    }
+                    }).showAt(coord);
                 }
             })
         }
@@ -958,39 +837,27 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
             }
             infoMarker.load({
                 callback: function (records, operation, success) {
-                    if (success === true) {
-                        if (records.length === 0) {
-                            errorMessage('CALL');
-                        }
+                    if ((success === true && records.length === 0) || success === false) {
+                        me.errorMessage('Данные о вызове временно недоступны');
+                        return;
                     }
-                    if (success === false) {
-                        try {
-                            errorMessage('CALL');
-                        } catch (e) {
-                            errorMessage('CALL');
+                    Ext.create('Ext.window.Window', {
+                        title: 'Вызов',
+                        layout: 'form',
+                        id: 'winId',
+                        border: 'fit',
+                        constrain: true,
+                        autoScroll: true,
+                        resizable: false,
+                        width: 550,
+                        items: me.callInfoForm,
+                        listeners: {
+                            afterrender: function (component) {
+                                const form = component.down('form');
+                                form.loadRecord(infoMarker.first());
+                            }
                         }
-                    }
-                    if (success === true) {
-                        if (records.length > 0) {
-                            Ext.create('Ext.window.Window', {
-                                title: 'Вызов',
-                                layout: 'form',
-                                id: 'winId',
-                                border: 'fit',
-                                constrain: true,
-                                autoScroll: true,
-                                resizable: false,
-                                width: 550,
-                                items: me.callInfoForm,
-                                listeners: {
-                                    afterrender: function (component) {
-                                        const form = component.down('form');
-                                        form.loadRecord(infoMarker.first());
-                                    }
-                                }
-                            }).showAt(coord);
-                        }
-                    }
+                    }).showAt(coord);
                 }
             })
         }
