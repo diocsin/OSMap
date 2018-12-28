@@ -579,6 +579,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
         }
         Ext.create('Ext.window.Window', {
             title: 'Кластер',
+            constrain: true,
             layout: 'hbox',
             resizable: false,
             border: 'fit',
