@@ -23,9 +23,9 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
     },
 
     buttonSearch: function () {
-        var me = this;
-        var searchTrue = null;
-        var searchText = Ext.getCmp('searchTextField').getValue();
+        const me = this;
+        let searchTrue = null;
+        const searchText = Ext.getCmp('searchTextField').getValue();
         me.Monitoring.vectorLayer.getSource().getFeatures().forEach(function (features) {
             features.getProperties().features.forEach(function (feature) {
                 if (feature.getProperties().customOptions.brigadeNum === searchText) {
@@ -33,14 +33,13 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                     me.Monitoring.map.getView().setZoom(18);
                     searchTrue = feature;
                     me.flash(features);
-                    var t = setInterval(function run() {
+                    const t = setInterval(function run() {
                         me.flash(features);
                     }, 2000);
 
                     setTimeout(function () {
                         clearInterval(t);
                     }, 9000);
-                    return;
                 }
             })
         });
@@ -50,13 +49,13 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
     },
 
     checkedCallStatus: function (checkbox) {
-        var me = this,
+        const me = this,
             checkboxValue = checkbox.inputValue,
             checkboxChecked = checkbox.checked,
             stBf = this.lookupReference('callStatusFilter');
         if (checkboxChecked === false) {
             me.filterCallArray.push(checkboxValue);
-            var i = 0;
+            let i = 0;
             stBf.items.each(function (checkbox) {
                 if (checkbox.checked === true) {
                     i++
@@ -68,19 +67,17 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
             me.Monitoring.callMarkers.forEach(function (call) {
                 if (checkboxValue === call.getProperties().customOptions.status && me.Monitoring.vectorSource.hasFeature(call)) {
                     me.Monitoring.vectorSource.removeFeature(call);
-
                 }
             });
         }
         if (checkboxChecked === true) {
-            var index = me.filterCallArray.indexOf(checkboxValue),
-                j = 0;
+            const index = me.filterCallArray.indexOf(checkboxValue);
+            let j = 0;
             me.filterCallArray.splice(index, 1);
             me.Monitoring.callMarkers.forEach(function (call) {
                 if (checkboxValue === call.getProperties().customOptions.status) {
                     if (me.filterCallArray.indexOf(call.getProperties().customOptions.station) === -1) {
                         me.Monitoring.vectorSource.addFeature(call);
-
                     }
                 }
             });
@@ -98,13 +95,13 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
     checkedStationBrigade: function (checkbox) {
 
         function func(checkbox, me) {
-            var checkboxValue = checkbox.inputValue,
+            const checkboxValue = checkbox.inputValue,
                 checkboxChecked = checkbox.checked,
                 stationFilter = me.lookupReference('stationFilter');
             if (checkboxChecked === false) {
                 me.filterCallArray.push(checkboxValue);
                 me.filterBrigadeArray.push(checkboxValue);
-                var i = 0;
+                let i = 0;
                 stationFilter.items.each(function (checkbox) {
                     if (checkbox.checked === true) {
                         i++
@@ -120,15 +117,14 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                 });
                 me.Monitoring.callMarkers.forEach(function (call) {
                     if (checkboxValue === call.getProperties().customOptions.station && me.Monitoring.vectorSource.hasFeature(call)) {
-
                         me.Monitoring.vectorSource.removeFeature(call);
                     }
                 })
             }
             if (checkboxChecked === true) {
-                var indexBrigade = me.filterBrigadeArray.indexOf(checkboxValue),
-                    indexCall = me.filterCallArray.indexOf(checkboxValue),
-                    j = 0;
+                const indexBrigade = me.filterBrigadeArray.indexOf(checkboxValue),
+                    indexCall = me.filterCallArray.indexOf(checkboxValue);
+                let j = 0;
                 me.filterBrigadeArray.splice(indexBrigade, 1);
                 me.filterCallArray.splice(indexCall, 1);
                 me.Monitoring.brigadesMarkers.forEach(function (brigade) {
@@ -162,12 +158,12 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
 
     checkedProfileBrigade: function (checkbox) {
         function func(checkbox, me) {
-            var checkboxValue = checkbox.inputValue,
+            const checkboxValue = checkbox.inputValue,
                 checkboxChecked = checkbox.checked,
                 profileBrigadeFilter = me.lookupReference('profileBrigadeFilter');
             if (checkboxChecked === false) {
                 me.filterBrigadeArray.push(checkboxValue);
-                var i = 0;
+                let i = 0;
                 profileBrigadeFilter.items.each(function (checkbox) {
                     if (checkbox.checked === true) {
                         i++
@@ -183,8 +179,8 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                 })
             }
             if (checkboxChecked === true) {
-                var index = me.filterBrigadeArray.indexOf(checkboxValue),
-                    j = 0;
+                const index = me.filterBrigadeArray.indexOf(checkboxValue);
+                let j = 0;
                 me.filterBrigadeArray.splice(index, 1);
                 me.Monitoring.brigadesMarkers.forEach(function (brigade) {
                     if (checkboxValue === brigade.getProperties().customOptions.profile) {
@@ -202,8 +198,6 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                     me.lookupReference('allProfile').setValue(true)
                 }
             }
-
-
             me.addButtonsBrigadeOnPanel();
         }
 
@@ -212,12 +206,12 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
 
     checkedStatusBrigade: function (checkbox) {
         function func(checkbox, me) {
-            var checkboxValue = checkbox.inputValue,
+            let checkboxValue = checkbox.inputValue,
                 checkboxChecked = checkbox.checked,
                 statusBrigadeFilter = me.lookupReference('statusBrigadeFilter');
             if (checkboxChecked === false) {
                 me.filterBrigadeArray.push(checkboxValue);
-                var i = 0;
+                let i = 0;
                 statusBrigadeFilter.items.each(function (checkbox) {
                     if (checkbox.checked === true) {
                         i++
@@ -233,8 +227,8 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                 })
             }
             if (checkboxChecked === true) {
-                var index = me.filterBrigadeArray.indexOf(checkboxValue),
-                    j = 0;
+                const index = me.filterBrigadeArray.indexOf(checkboxValue);
+                let j = 0;
                 me.filterBrigadeArray.splice(index, 1);
                 me.Monitoring.brigadesMarkers.forEach(function (brigade) {
                     if (checkboxValue === brigade.getProperties().customOptions.status) {
@@ -259,7 +253,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
     },
 
     mainBoxReady: function () {
-        var me = this,
+        const me = this,
             property = me.getViewModel().getStore('Property');
         property.load(function (records) {
             records.forEach(function (data) {
@@ -272,20 +266,8 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
         });
     },
 
-    /*connect: function () {
-        var me = this,
-            socket = new SockJS(me.urlWebSocket + '/geo');
-        me.stompClient = Stomp.over(socket);
-        me.stompClient.connect({}, function (frame) {
-            console.log('Connected: ' + frame);
-            me.stompClient.subscribe('/geo-queue/geodata-updates', function (greeting) {
-                console.dir(greeting);
-                me.showGreeting(JSON.parse(greeting.body));
-            });
-        });
-    },*/
-    connect: function() {
-        var me = this,
+    connect: function () {
+        let me = this,
             socket = new SockJS(me.urlWebSocket + '/geo');
         me.stompClient = Stomp.over(socket);
         me.stompClient.connect({}, function (frame) {
@@ -295,9 +277,9 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                     me.showGreeting(JSON.parse(greeting.body));
                 });
             }.bind(this),
-            function(e) {
+            function (e) {
                 console.error(e, "Reconnecting WS");
-                window.setTimeout(function() {
+                window.setTimeout(function () {
                     this.connect();
                 }.bind(this), 2500);
             }.bind(this)
@@ -305,17 +287,17 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
     },
 
     showGreeting: function (message) {
-        var me = this;
+        const me = this;
         console.dir(message);
         message.station = '' + message.station;
         if (me.Monitoring.station.indexOf(message.station) !== -1) {
             if (message.objectType === 'BRIGADE') {
-                var storeBrigades = me.getViewModel().getStore('Brigades');
+                const storeBrigades = me.getViewModel().getStore('Brigades');
                 storeBrigades.loadRawData(message);
                 me.Monitoring.createMarkers();
             }
             if (message.objectType === 'CALL') {
-                var storeCalls = me.getViewModel().getStore('Calls');
+                const storeCalls = me.getViewModel().getStore('Calls');
                 storeCalls.loadRawData(message);
                 me.Monitoring.createMarkers();
             }
@@ -323,15 +305,16 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
     },
 
     sendName: function () {
-        //stompClient.send("/app/hello", {}, JSON.stringify({ 'name': name }));
+
     },
+
     disconnect: function () {
         stompClient.disconnect();
         console.log("Disconnected");
     },
 
     createMap: function () {
-        var me = this;
+        const me = this;
         me.connect();
         me.Monitoring = Ext.create('Isidamaps.services.monitoringView.MapService', {
             viewModel: me.getViewModel(),
@@ -347,7 +330,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
         ASOV.setMapManager({
             setStation: me.Monitoring.setStation.bind(this)
         }, Ext.History.currentToken);
-        var ymapWrapper = me.lookupReference('ymapWrapper');
+        const ymapWrapper = me.lookupReference('ymapWrapper');
         ymapWrapper.on('resize', function () {
             me.Monitoring.resizeMap(me.Monitoring);
         });
@@ -357,7 +340,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
     },
 
     addStationFilter: function () {
-        var me = this,
+        const me = this,
             checkboxStation = me.lookupReference('stationFilter'),
             records = me.Monitoring.station;
         records.forEach(function (rec) {
@@ -376,22 +359,17 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
         })
     },
 
-
     getButtonBrigadeForChangeButton: function (brigade) {
-        var me = this;
-        var buttonBrigade = me.lookupReference('BrigadePanel');
-        var brigadeHave = buttonBrigade.items.getByKey('id' + brigade.getProperties().id);
+        const me = this,
+            buttonBrigade = me.lookupReference('BrigadePanel'),
+            brigadeHave = buttonBrigade.items.getByKey('id' + brigade.getProperties().id);
         if (brigadeHave === undefined) {
             me.addButtonsBrigadeOnPanel();
         }
-        else {
-
-        }
-
     },
 
     addButtonsBrigadeOnPanel: function () {
-        var me = this,
+        const me = this,
             buttonBrigade = me.lookupReference('BrigadePanel'),
             brigadeSort = [];
         buttonBrigade.removeAll();
@@ -403,14 +381,13 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
             })
         });
 
-
         brigadeSort.sort(function (a, b) {
             return a.getProperties().customOptions.brigadeNum - b.getProperties().customOptions.brigadeNum
         });
+
         brigadeSort.forEach(function (e) {
             if (e.getProperties().customOptions.brigadeNum !== undefined) {
                 buttonBrigade.add(Ext.create('Ext.Button', {
-                    //itemId: 'id' + e.getProperties().id,
                     text: e.getProperties().customOptions.brigadeNum + " " + "(" + e.getProperties().customOptions.profile + ")" + " " + e.getProperties().customOptions.station,
                     maxWidth: 110,
                     minWidth: 110,
@@ -418,22 +395,21 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                     listeners: {
                         click: function (r) {
                             me.Monitoring.vectorSource.forEachFeature(function (features) {
-                                var idE = e.getProperties().id;
-                                var idF = features.getProperties().id;
+                                const idE = e.getProperties().id,
+                                    idF = features.getProperties().id;
                                 if (idF === idE) {   //для того что me.markerClick() нужен features
-                                    var infoMarker = me.getStoreMarkerInfo(features);
+                                    const infoMarker = me.getStoreMarkerInfo(features);
                                     me.markerClick(features, [r.getXY()[0] + 110, r.getXY()[1] + 30], infoMarker);
                                     me.Monitoring.map.getView().setCenter(features.getProperties().geometry.flatCoordinates);
                                     me.Monitoring.map.getView().setZoom(18);
                                     me.flash(features);
-                                    var t = setInterval(function run() {
+                                    const t = setInterval(function run() {
                                         me.flash(features);
                                     }, 2000);
 
                                     setTimeout(function () {
                                         clearInterval(t);
                                     }, 6000);
-
                                 }
                             });
                         }
@@ -444,22 +420,24 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
     },
 
     flash: function (features) {
-        var me = this;
-        var listenerKey = me.Monitoring.map.on('postcompose', animate);
-        var start = new Date().getTime();
-        var duration = 3000;
-        me.Monitoring.map.render();
-        function animate(evt) {
-            var vectorContext = evt.vectorContext;
-            var frameState = evt.frameState;
-            var flashGeom = features.getGeometry().clone();
-            var elapsed = frameState.time - start;
-            var elapsedRatio = elapsed / duration;
-// radius will be 5 at start and 30 at end.
-            var radius = ol.easing.easeOut(elapsedRatio) * 25 + 5;
-            var opacity = ol.easing.easeOut(1 - elapsedRatio);
+        const me = this,
+            listenerKey = me.Monitoring.map.on('postcompose', animate),
+            start = new Date().getTime(),
+            duration = 3000;
 
-            var style = new ol.style.Style({
+        me.Monitoring.map.render();
+
+        function animate(evt) {
+            const vectorContext = evt.vectorContext,
+                frameState = evt.frameState,
+                flashGeom = features.getGeometry().clone(),
+                elapsed = frameState.time - start,
+                elapsedRatio = elapsed / duration;
+            // radius will be 5 at start and 30 at end.
+            const radius = ol.easing.easeOut(elapsedRatio) * 25 + 5;
+            const opacity = ol.easing.easeOut(1 - elapsedRatio);
+
+            const style = new ol.style.Style({
                 image: new ol.style.Circle({
                     radius: radius,
                     stroke: new ol.style.Stroke({
@@ -474,15 +452,15 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                 new ol.Observable.unByKey(listenerKey);
                 return;
             }
-// tell OpenLayers to continue postcompose animation
+            // tell OpenLayers to continue postcompose animation
             me.Monitoring.map.render();
-
         }
     },
 
     getStoreMarkerInfo: function (object) {
-        var me = this,
-            urlInfoMarker = Ext.String.format(me.urlGeodata + '/info?objectid={0}&objecttype={1}', object.getProperties().id, object.getProperties().customOptions.objectType);
+        const me = this,
+            urlInfoMarker = Ext.String.format(me.urlGeodata + '/info?objectid={0}&objecttype={1}',
+                object.getProperties().id, object.getProperties().customOptions.objectType);
         if (object.getProperties().customOptions.objectType === 'BRIGADE') {
             return Ext.create('Ext.data.Store', {
                 model: 'Isidamaps.model.InfoBrigade',
@@ -543,7 +521,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
 
     clustersClick: function (coords, cluster) {
         function errorMessage(marker) {
-            var markerMessage = null;
+            let markerMessage = null;
             if (marker === 'CALL') {
                 markerMessage = 'Данные о вызове временно не доступны';
             }
@@ -558,7 +536,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
             })
         }
 
-        var me = this,
+        const me = this,
             ymapWrapper = Ext.getCmp('mapId'),
             sizeCmp = ymapWrapper.getSize(),
             win = Ext.WindowManager.getActive();
@@ -569,8 +547,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
         if ((sizeCmp.width / 2.1) < coords[0]) {
             coords[0] -= 400;
             coords[1] += 50;
-        }
-        else {
+        } else {
             coords[0] += 300;
             coords[1] += 50;
         }
@@ -586,7 +563,6 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
             width: 750,
             height: 480,
             scrollable: 'vertical',
-
             items: [{
                 xtype: 'panel',
                 id: 'markerInClustersId',
@@ -594,32 +570,30 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                 layout: 'vbox',
                 height: '100%f',
                 width: '25%'
-            },
-                {
-                    xtype: 'panel',
-                    id: 'infoMarkerId',
-                    autoScroll: true,
-                    height: '100%',
-                    width: '75%'
-                }
-            ]
+            }, {
+                xtype: 'panel',
+                id: 'infoMarkerId',
+                autoScroll: true,
+                height: '100%',
+                width: '75%'
+            }]
         }).showAt(coords);
-        var markerInClusters = Ext.getCmp('markerInClustersId');
+        const markerInClusters = Ext.getCmp('markerInClustersId');
         markerInClusters.removeAll();
-        var infoMarker = Ext.getCmp('infoMarkerId');
+        const infoMarker = Ext.getCmp('infoMarkerId');
         cluster.getProperties().features.forEach(function (marker) {
             if (marker.getProperties().customOptions.objectType === 'CALL') {
                 function f() {
                     if (marker.getProperties().customOptions.status === 'NEW') {
-                        return 'Новый'
+                        return 'Новый';
                     }
                     if (marker.getProperties().customOptions.status === 'COMPLETED') {
-                        return 'Завершен'
+                        return 'Завершен';
                     }
                     if (marker.getProperties().customOptions.status === 'ASSIGNED') {
-                        return 'Исполнение'
+                        return 'Исполнение';
                     }
-                    return ""
+                    return "";
                 }
 
                 markerInClusters.add(Ext.create('Ext.Button', {
@@ -629,7 +603,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                     margin: 5,
                     listeners: {
                         click: function () {
-                            var storeMarker = me.getStoreMarkerInfo(marker);
+                            const storeMarker = me.getStoreMarkerInfo(marker);
                             infoMarker.removeAll();
                             storeMarker.load({
                                 callback: function (records, operation, success) {
@@ -656,7 +630,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                                                 items: me.callInfoForm,
                                                 listeners: {
                                                     afterrender: function (component) {
-                                                        var form = component.down('form');
+                                                        const form = component.down('form');
                                                         form.loadRecord(storeMarker.first());
                                                     }
                                                 }
@@ -678,7 +652,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                     margin: 5,
                     listeners: {
                         click: function () {
-                            var storeMarker = me.getStoreMarkerInfo(marker);
+                            const storeMarker = me.getStoreMarkerInfo(marker);
                             infoMarker.removeAll();
                             storeMarker.load({
                                 callback: function (records, operation, success) {
@@ -696,7 +670,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                                     }
                                     if (success === true) {
                                         if (records.length > 0) {
-                                            var status = null;
+                                            let status = null;
                                             records.forEach(function (brigade) {
                                                 switch (brigade.get('status')) {
                                                     case 'FREE':
@@ -748,62 +722,54 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                                                         fieldLabel: 'Номер бригады',
                                                         labelWidth: '100%',
                                                         margin: 0
-                                                    },
-                                                        {
-                                                            xtype: 'displayfield',
-                                                            name: 'station',
-                                                            fieldLabel: 'Номер подстанции',
-                                                            labelWidth: '100%',
-                                                            margin: 0
-                                                        },
-                                                        {
-                                                            xtype: 'displayfield',
-                                                            value: marker.getProperties().customOptions.profile,
-                                                            fieldLabel: 'Профиль бригады',
-                                                            labelWidth: '100%',
-                                                            margin: 0
-                                                        },
-                                                        {
-                                                            xtype: 'displayfield',
-                                                            value: status,
-                                                            fieldLabel: 'Статус бригады',
-                                                            labelWidth: '100%',
-                                                            margin: 0
-                                                        },
-                                                        {
-                                                            xtype: 'displayfield',
-                                                            fieldLabel: 'Старший бригады',
-                                                            name: 'chefName',
-                                                            labelWidth: '100%',
-                                                            margin: 0
-                                                        },
-                                                        {
-                                                            xtype: 'displayfield',
-                                                            name: 'callCardNum',
-                                                            fieldLabel: 'Вызов',
-                                                            labelWidth: '100%',
-                                                            margin: 0
-                                                        },
-                                                        {
-                                                            xtype: 'displayfield',
-                                                            name: 'address',
-                                                            fieldLabel: 'Адрес места вызова',
-                                                            labelWidth: 150,
-                                                            margin: 0
-                                                        },
-                                                        {
-                                                            xtype: 'displayfield',
-                                                            name: 'passToBrigadeTime',
-                                                            fieldLabel: 'Время получения бригадой',
-                                                            renderer: Ext.util.Format.dateRenderer('Y-m-d, H:i:s'),
-                                                            labelWidth: '100%',
-                                                            margin: 0
-                                                        }
-                                                    ]
+                                                    }, {
+                                                        xtype: 'displayfield',
+                                                        name: 'station',
+                                                        fieldLabel: 'Номер подстанции',
+                                                        labelWidth: '100%',
+                                                        margin: 0
+                                                    }, {
+                                                        xtype: 'displayfield',
+                                                        value: marker.getProperties().customOptions.profile,
+                                                        fieldLabel: 'Профиль бригады',
+                                                        labelWidth: '100%',
+                                                        margin: 0
+                                                    }, {
+                                                        xtype: 'displayfield',
+                                                        value: status,
+                                                        fieldLabel: 'Статус бригады',
+                                                        labelWidth: '100%',
+                                                        margin: 0
+                                                    }, {
+                                                        xtype: 'displayfield',
+                                                        fieldLabel: 'Старший бригады',
+                                                        name: 'chefName',
+                                                        labelWidth: '100%',
+                                                        margin: 0
+                                                    }, {
+                                                        xtype: 'displayfield',
+                                                        name: 'callCardNum',
+                                                        fieldLabel: 'Вызов',
+                                                        labelWidth: '100%',
+                                                        margin: 0
+                                                    }, {
+                                                        xtype: 'displayfield',
+                                                        name: 'address',
+                                                        fieldLabel: 'Адрес места вызова',
+                                                        labelWidth: 150,
+                                                        margin: 0
+                                                    }, {
+                                                        xtype: 'displayfield',
+                                                        name: 'passToBrigadeTime',
+                                                        fieldLabel: 'Время получения бригадой',
+                                                        renderer: Ext.util.Format.dateRenderer('Y-m-d, H:i:s'),
+                                                        labelWidth: '100%',
+                                                        margin: 0
+                                                    }]
                                                 }],
                                                 listeners: {
                                                     afterrender: function (component) {
-                                                        var form = component.down('form');
+                                                        const form = component.down('form');
                                                         form.loadRecord(storeMarker.first());
                                                     }
                                                 }
@@ -820,14 +786,14 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
     },
 
     markerClick: function (object, coord, infoMarker) {
-        var me = this;
-        var win = Ext.WindowManager.getActive();
+        const me = this,
+            win = Ext.WindowManager.getActive();
         if (win) {
             win.close();
         }
 
         function errorMessage(marker) {
-            var markerMessage = null;
+            let markerMessage = null;
             if (marker === 'CALL') {
                 markerMessage = 'Данные о вызове временно не доступны';
             }
@@ -842,7 +808,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
             })
         }
 
-        var ymapWrapper = Ext.getCmp('mapId'),
+        const ymapWrapper = Ext.getCmp('mapId'),
             sizeCmp = ymapWrapper.getSize();
 
         sizeCmp.width = sizeCmp.width * 1.55;
@@ -870,7 +836,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                     }
                     if (success === true) {
                         if (records.length > 0) {
-                            var status = null;
+                            let status = null;
                             records.forEach(function (brigade) {
                                 switch (brigade.get('status')) {
                                     case 'FREE':
@@ -913,7 +879,6 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                                 resizable: false,
                                 width: 500,
                                 constrain: true,
-                                //height: 250,
                                 items: [{
                                     xtype: 'form',
                                     autoScroll: true,
@@ -925,62 +890,54 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                                         fieldLabel: 'Номер бригады',
                                         labelWidth: '100%',
                                         margin: 0
-                                    },
-                                        {
-                                            xtype: 'displayfield',
-                                            name: 'station',
-                                            fieldLabel: 'Номер подстанции',
-                                            labelWidth: '100%',
-                                            margin: 0
-                                        },
-                                        {
-                                            xtype: 'displayfield',
-                                            value: object.getProperties().customOptions.profile,
-                                            fieldLabel: 'Профиль бригады',
-                                            labelWidth: '100%',
-                                            margin: 0
-                                        },
-                                        {
-                                            xtype: 'displayfield',
-                                            value: status,
-                                            fieldLabel: 'Статус бригады',
-                                            labelWidth: '100%',
-                                            margin: 0
-                                        },
-                                        {
-                                            xtype: 'displayfield',
-                                            fieldLabel: 'Старший бригады',
-                                            name: 'chefName',
-                                            labelWidth: '100%',
-                                            margin: 0
-                                        },
-                                        {
-                                            xtype: 'displayfield',
-                                            name: 'callCardNum',
-                                            fieldLabel: 'Вызов',
-                                            labelWidth: '100%',
-                                            margin: 0
-                                        },
-                                        {
-                                            xtype: 'displayfield',
-                                            name: 'address',
-                                            fieldLabel: 'Адрес места вызова',
-                                            labelWidth: 150,
-                                            margin: 0
-                                        },
-                                        {
-                                            xtype: 'displayfield',
-                                            name: 'passToBrigadeTime',
-                                            fieldLabel: 'Время получения бригадой',
-                                            renderer: Ext.util.Format.dateRenderer('Y-m-d, H:i:s'),
-                                            labelWidth: '100%',
-                                            margin: 0
-                                        }
-                                    ]
+                                    }, {
+                                        xtype: 'displayfield',
+                                        name: 'station',
+                                        fieldLabel: 'Номер подстанции',
+                                        labelWidth: '100%',
+                                        margin: 0
+                                    }, {
+                                        xtype: 'displayfield',
+                                        value: object.getProperties().customOptions.profile,
+                                        fieldLabel: 'Профиль бригады',
+                                        labelWidth: '100%',
+                                        margin: 0
+                                    }, {
+                                        xtype: 'displayfield',
+                                        value: status,
+                                        fieldLabel: 'Статус бригады',
+                                        labelWidth: '100%',
+                                        margin: 0
+                                    }, {
+                                        xtype: 'displayfield',
+                                        fieldLabel: 'Старший бригады',
+                                        name: 'chefName',
+                                        labelWidth: '100%',
+                                        margin: 0
+                                    }, {
+                                        xtype: 'displayfield',
+                                        name: 'callCardNum',
+                                        fieldLabel: 'Вызов',
+                                        labelWidth: '100%',
+                                        margin: 0
+                                    }, {
+                                        xtype: 'displayfield',
+                                        name: 'address',
+                                        fieldLabel: 'Адрес места вызова',
+                                        labelWidth: 150,
+                                        margin: 0
+                                    }, {
+                                        xtype: 'displayfield',
+                                        name: 'passToBrigadeTime',
+                                        fieldLabel: 'Время получения бригадой',
+                                        renderer: Ext.util.Format.dateRenderer('Y-m-d, H:i:s'),
+                                        labelWidth: '100%',
+                                        margin: 0
+                                    }]
                                 }],
                                 listeners: {
                                     afterrender: function (component) {
-                                        var form = component.down('form');
+                                        const form = component.down('form');
                                         form.loadRecord(infoMarker.first());
                                     }
                                 }
@@ -1027,7 +984,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                                 items: me.callInfoForm,
                                 listeners: {
                                     afterrender: function (component) {
-                                        var form = component.down('form');
+                                        const form = component.down('form');
                                         form.loadRecord(infoMarker.first());
                                     }
                                 }
