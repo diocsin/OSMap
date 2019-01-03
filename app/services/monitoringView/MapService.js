@@ -120,8 +120,7 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
                 labelWidth: '100%',
                 fieldLabel: 'Стационар',
                 margin: 0
-            }
-        ]
+            }]
     }],
 
     iconStyle: function (feature) {
