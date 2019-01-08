@@ -561,6 +561,7 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
                 });
                 me.callMarkers.push(iconFeature);
                 me.addMarkersSocket(iconFeature);
+                me.viewModel.getStore('Calls').clearData();
             }
 
         });
@@ -590,6 +591,7 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
 
                 me.brigadesMarkers.push(iconFeature);
                 me.addMarkersSocket(iconFeature);
+                me.viewModel.getStore('Brigades').clearData();
             }
 
         });
