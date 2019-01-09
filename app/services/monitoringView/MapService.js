@@ -524,11 +524,15 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
         station.forEach(function (st) {
             me.station.push(Ext.String.trim(st));
         });
+        var statuses = ['NEW', 'ASSIGNED'];
         var t = Ext.Object.toQueryString({
                 stations: me.station
             }),
+            s = Ext.Object.toQueryString({
+                statuses: statuses
+            }),
             urlBrigade = Ext.String.format(me.urlGeodata + '/data?{0}&statuses=', t),
-            urlCall = Ext.String.format(me.urlGeodata + '/call?{0}', t);
+            urlCall = Ext.String.format(me.urlGeodata + '/call?{0}&{1}', t, s);
         me.brigadesMarkers = [];
         me.callMarkers = [];
         me.storeBrigade(urlBrigade, urlCall);
