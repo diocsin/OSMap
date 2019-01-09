@@ -113,15 +113,9 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                 if (stationFilter.items.length === i + 1) {
                     me.lookupReference('allStation').setValue(false)
                 }
-                me.Monitoring.brigadesMarkers.forEach(function (brigade) {
-                    if (checkboxValue === brigade.getProperties().customOptions.station && me.Monitoring.vectorSource.hasFeature(brigade)) {
-                        me.Monitoring.vectorSource.removeFeature(brigade);
-                    }
-                });
-                me.Monitoring.callMarkers.forEach(function (call) {
-                    if (checkboxValue === call.getProperties().customOptions.station && me.Monitoring.vectorSource.hasFeature(call)) {
-
-                        me.Monitoring.vectorSource.removeFeature(call);
+                me.Monitoring.vectorSource.getFeatures().forEach(function (marker) {
+                    if (checkboxValue === marker.getProperties().customOptions.station) {
+                        me.Monitoring.vectorSource.removeFeature(marker);
                     }
                 })
             }
@@ -284,7 +278,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
             });
         });
     },*/
-    connect: function() {
+    connect: function () {
         var me = this,
             socket = new SockJS(me.urlWebSocket + '/geo');
         me.stompClient = Stomp.over(socket);
@@ -295,9 +289,9 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                     me.showGreeting(JSON.parse(greeting.body));
                 });
             }.bind(this),
-            function(e) {
+            function (e) {
                 console.error(e, "Reconnecting WS");
-                window.setTimeout(function() {
+                window.setTimeout(function () {
                     this.connect();
                 }.bind(this), 2500);
             }.bind(this)
@@ -449,6 +443,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
         var start = new Date().getTime();
         var duration = 3000;
         me.Monitoring.map.render();
+
         function animate(evt) {
             var vectorContext = evt.vectorContext;
             var frameState = evt.frameState;

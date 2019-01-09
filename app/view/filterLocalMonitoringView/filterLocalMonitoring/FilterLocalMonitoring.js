@@ -236,11 +236,10 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                 columns: 3,
                 vertical: true,
                 margin: '0px 5px 5px 5px',
-                items: [{
+                items: [ {
                     boxLabel: 'БИТ',
                     checked: true,
                     inputValue: 'БИТ',
-                    width: 100,
                     listeners: {
                         change: {
                             fn: function (checkbox, checked) {
@@ -250,33 +249,9 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                     }
                 },
                     {
-                        boxLabel: 'ЛБ',
+                        boxLabel: 'Неот',
                         checked: true,
-                        inputValue: 'ЛБ',
-                        listeners: {
-                            change: {
-                                fn: function (checkbox, checked) {
-                                    Ext.fireEvent('checkedProfileBrigade', checkbox, checked);
-                                }
-                            }
-                        }
-                    },
-                    {
-                        boxLabel: 'НБ',
-                        checked: true,
-                        inputValue: 'НБ',
-                        listeners: {
-                            change: {
-                                fn: function (checkbox, checked) {
-                                    Ext.fireEvent('checkedProfileBrigade', checkbox, checked);
-                                }
-                            }
-                        }
-                    },
-                    {
-                        boxLabel: 'ПБ',
-                        checked: true,
-                        inputValue: 'ПБ',
+                        inputValue: 'Неот',
                         width: 100,
                         listeners: {
                             change: {
@@ -287,33 +262,10 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                         }
                     },
                     {
-                        boxLabel: 'РБ',
+                        boxLabel: 'Пед',
                         checked: true,
-                        inputValue: 'РБ',
-                        listeners: {
-                            change: {
-                                fn: function (checkbox, checked) {
-                                    Ext.fireEvent('checkedProfileBrigade', checkbox, checked);
-                                }
-                            }
-                        }
-                    },
-                    {
-                        boxLabel: 'УБ',
-                        checked: true,
-                        inputValue: 'УБ',
-                        listeners: {
-                            change: {
-                                fn: function (checkbox, checked) {
-                                    Ext.fireEvent('checkedProfileBrigade', checkbox, checked);
-                                }
-                            }
-                        }
-                    },
-                    {
-                        boxLabel: 'ФБ',
-                        checked: true,
-                        inputValue: 'ФБ',
+                        inputValue: 'Пед',
+                        width: 100,
                         listeners: {
                             change: {
                                 fn: function (checkbox, checked) {
@@ -335,9 +287,21 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                         }
                     },
                     {
-                        boxLabel: 'НП',
+                        boxLabel: 'Реан',
                         checked: true,
-                        inputValue: 'НП',
+                        inputValue: 'Реан',
+                        listeners: {
+                            change: {
+                                fn: function (checkbox, checked) {
+                                    Ext.fireEvent('checkedProfileBrigade', checkbox, checked);
+                                }
+                            }
+                        }
+                    },
+                    {
+                        boxLabel: 'Фелд',
+                        checked: true,
+                        inputValue: 'Фелд',
                         listeners: {
                             change: {
                                 fn: function (checkbox, checked) {
