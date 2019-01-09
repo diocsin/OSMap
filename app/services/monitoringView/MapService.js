@@ -519,15 +519,19 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
     },
 
     readStation: function (station) {
-        var me = this;
+        var me = this,
+            statuses = ['NEW', 'ASSIGNED'];
         station.forEach(function (st) {
             me.station.push(Ext.String.trim(st));
         });
         var t = Ext.Object.toQueryString({
                 stations: me.station
             }),
+            s = Ext.Object.toQueryString({
+                statuses: statuses
+            }),
             urlBrigade = Ext.String.format(me.urlGeodata + '/data?{0}&statuses=', t),
-            urlCall = Ext.String.format(me.urlGeodata + '/call?{0}', t);
+            urlCall = Ext.String.format(me.urlGeodata + '/call?{0}&{1}', t, s);
         me.brigadesMarkers = [];
         me.callMarkers = [];
         me.storeBrigade(urlBrigade, urlCall);
@@ -560,6 +564,7 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
                 });
                 me.callMarkers.push(iconFeature);
                 me.addMarkersSocket(iconFeature);
+                me.viewModel.getStore('Calls').clearData();
             }
 
         });
@@ -589,6 +594,7 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
 
                 me.brigadesMarkers.push(iconFeature);
                 me.addMarkersSocket(iconFeature);
+                me.viewModel.getStore('Brigades').clearData();
             }
 
         });

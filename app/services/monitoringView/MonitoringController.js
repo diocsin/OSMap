@@ -123,16 +123,11 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                 if (stationFilter.items.length === i + 1) {
                     me.lookupReference('allStation').setValue(false)
                 }
-                me.Monitoring.brigadesMarkers.forEach(function (brigade) {
-                    if (checkboxValue === brigade.getProperties().customOptions.station && me.Monitoring.vectorSource.hasFeature(brigade)) {
-                        me.Monitoring.vectorSource.removeFeature(brigade);
+                me.Monitoring.vectorSource.getFeatures().forEach(function (marker) {
+                    if (checkboxValue === marker.getProperties().customOptions.station) {
+                        me.Monitoring.vectorSource.removeFeature(marker);
                     }
                 });
-                me.Monitoring.callMarkers.forEach(function (call) {
-                    if (checkboxValue === call.getProperties().customOptions.station && me.Monitoring.vectorSource.hasFeature(call)) {
-                        me.Monitoring.vectorSource.removeFeature(call);
-                    }
-                })
             }
             if (checkboxChecked === true) {
                 const indexBrigade = me.filterBrigadeArray.indexOf(checkboxValue),
@@ -331,6 +326,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                 ASOV.setMapManager({
                     setStation: me.Monitoring.setStation.bind(me)
                 }, Ext.History.currentToken);
+                me.Monitoring.readStation(['9']);
                 const ymapWrapper = me.lookupReference('ymapWrapper');
                 ymapWrapper.on('resize', function () {
                     me.Monitoring.resizeMap(me.Monitoring);

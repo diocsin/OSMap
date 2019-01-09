@@ -250,9 +250,9 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                     }
                 },
                     {
-                        boxLabel: 'ЛБ',
+                        boxLabel: 'Неот',
                         checked: true,
-                        inputValue: 'ЛБ',
+                        inputValue: 'Неот',
                         listeners: {
                             change: {
                                 fn: function (checkbox, checked) {
@@ -262,21 +262,9 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                         }
                     },
                     {
-                        boxLabel: 'НБ',
+                        boxLabel: 'Пед',
                         checked: true,
-                        inputValue: 'НБ',
-                        listeners: {
-                            change: {
-                                fn: function (checkbox, checked) {
-                                    Ext.fireEvent('checkedProfileBrigade', checkbox, checked);
-                                }
-                            }
-                        }
-                    },
-                    {
-                        boxLabel: 'ПБ',
-                        checked: true,
-                        inputValue: 'ПБ',
+                        inputValue: 'Пед',
                         width: 100,
                         listeners: {
                             change: {
@@ -287,9 +275,9 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                         }
                     },
                     {
-                        boxLabel: 'РБ',
+                        boxLabel: 'Реан',
                         checked: true,
-                        inputValue: 'РБ',
+                        inputValue: 'Реан',
                         listeners: {
                             change: {
                                 fn: function (checkbox, checked) {
@@ -299,21 +287,9 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                         }
                     },
                     {
-                        boxLabel: 'УБ',
+                        boxLabel: 'Фелд',
                         checked: true,
-                        inputValue: 'УБ',
-                        listeners: {
-                            change: {
-                                fn: function (checkbox, checked) {
-                                    Ext.fireEvent('checkedProfileBrigade', checkbox, checked);
-                                }
-                            }
-                        }
-                    },
-                    {
-                        boxLabel: 'ФБ',
-                        checked: true,
-                        inputValue: 'ФБ',
+                        inputValue: 'Фелд',
                         listeners: {
                             change: {
                                 fn: function (checkbox, checked) {
@@ -326,18 +302,6 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                         boxLabel: 'Псих',
                         checked: true,
                         inputValue: 'Псих',
-                        listeners: {
-                            change: {
-                                fn: function (checkbox, checked) {
-                                    Ext.fireEvent('checkedProfileBrigade', checkbox, checked);
-                                }
-                            }
-                        }
-                    },
-                    {
-                        boxLabel: 'НП',
-                        checked: true,
-                        inputValue: 'НП',
                         listeners: {
                             change: {
                                 fn: function (checkbox, checked) {
