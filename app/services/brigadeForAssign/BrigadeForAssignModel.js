@@ -1,4 +1,4 @@
-Ext.define('Isidamaps.services.brigadeForAssignView.BrigadeForAssignModel', {
+Ext.define('Isidamaps.services.brigadeForAssign.BrigadeForAssignModel', {
     extend: 'Isidamaps.services.monitoringView.MonitoringModel',
     alias: 'viewmodel.brigadeforassign',
     stores: {

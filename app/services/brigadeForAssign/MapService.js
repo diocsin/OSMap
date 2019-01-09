@@ -1,5 +1,5 @@
-Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
-    extend: 'Isidamaps.services.callHistoryView.MapService',
+Ext.define('Isidamaps.services.brigadeForAssign.MapService', {
+    extend: 'Isidamaps.services.callHistory.MapService',
     map: null,
     points: [],
     objectManager: null,

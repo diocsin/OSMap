@@ -7,9 +7,8 @@ Ext.define('Isidamaps.Application', {
   extend: 'Ext.app.Application',
   requires: ['Isidamaps.services.monitoringView.Monitoring',
     'Isidamaps.services.monitoringBrigadeOnCallView.MonitoringBrigade',
-    'Isidamaps.services.brigadeForAssignView.BrigadeForAssign',
-    'Isidamaps.services.callHistoryView.CallHistory',
-    'Isidamaps.services.medorgView.Medorg'
+    'Isidamaps.services.brigadeForAssign.BrigadeForAssign',
+    'Isidamaps.services.callHistory.CallHistory'
   ],
 
   name: 'Isidamaps',

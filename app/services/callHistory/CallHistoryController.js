@@ -1,4 +1,4 @@
-Ext.define('Isidamaps.services.callHistoryView.CallHistoryController', {
+Ext.define('Isidamaps.services.callHistory.CallHistoryController', {
     extend: 'Isidamaps.services.monitoringView.MonitoringController',
     alias: 'controller.callhistory',
     CallHistory: null,
@@ -17,7 +17,7 @@ Ext.define('Isidamaps.services.callHistoryView.CallHistoryController', {
     createMap: function () {
         var me = this;
 
-        me.CallHistory = Ext.create('Isidamaps.services.callHistoryView.MapService', {
+        me.CallHistory = Ext.create('Isidamaps.services.callHistory.MapService', {
             viewModel: me.getViewModel(),
             markerClick: me.markerClick,
             clustersClick: me.clustersClick,

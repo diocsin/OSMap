@@ -1,15 +1,15 @@
-Ext.define('Isidamaps.services.callHistoryView.CallHistory', {
+Ext.define('Isidamaps.services.brigadeForAssign.BrigadeForAssign', {
     extend: 'Ext.panel.Panel',
-    xtype: 'callhistory',
+    xtype: 'brigadesforassign',
 
-    requires: ['Isidamaps.view.routeHistoryView.RouteHistoryView',
-        'Isidamaps.services.callHistoryView.CallHistoryController',
-        'Isidamaps.services.callHistoryView.MapService',
-        'Isidamaps.services.callHistoryView.CallHistoryModel'
+    requires: ['Isidamaps.view.routeView.RouteView',
+        'Isidamaps.services.brigadeForAssign.BrigadeForAssignController',
+        'Isidamaps.services.brigadeForAssign.MapService',
+        'Isidamaps.services.brigadeForAssign.BrigadeForAssignModel'
     ],
 
-    controller: 'callhistory',
-    viewModel: 'callhistory',
+    controller: 'brigadeforassign',
+    viewModel: 'brigadeforassign',
     layout: 'border',
     items: [{
         xtype: 'panel',
@@ -19,13 +19,14 @@ Ext.define('Isidamaps.services.callHistoryView.CallHistory', {
         width: 400,
         floatable: true,
         collapsible: true,
+        scrollable: 'vertical',
         titleAlign: 'center',
         collapseToolText: 'Скрыть панель',
         expandToolText: 'Открыть панель',
 
         items: [{
             title: 'Параметры доезда',
-            xtype: 'routeHistoryView-routeHistory'
+            xtype: 'routeView-route'
         }]
     }, {
         xtype: 'container',

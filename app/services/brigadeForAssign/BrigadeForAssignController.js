@@ -1,4 +1,4 @@
-Ext.define('Isidamaps.services.brigadeForAssignView.BrigadeForAssignController', {
+Ext.define('Isidamaps.services.brigadeForAssign.BrigadeForAssignController', {
     extend: 'Isidamaps.services.monitoringView.MonitoringController',
     alias: 'controller.brigadeforassign',
     BrigadeForAssign: null,
@@ -22,7 +22,7 @@ Ext.define('Isidamaps.services.brigadeForAssignView.BrigadeForAssignController',
 
     createMap: function () {
         var me = this;
-        me.BrigadeForAssign = Ext.create('Isidamaps.services.brigadeForAssignView.MapService', {
+        me.BrigadeForAssign = Ext.create('Isidamaps.services.brigadeForAssign.MapService', {
             viewModel: me.getViewModel(),
             markerClick: me.markerClick,
             clustersClick: me.clustersClick,
