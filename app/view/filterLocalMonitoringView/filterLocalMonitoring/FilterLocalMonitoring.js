@@ -17,13 +17,14 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
             inputValue: 'ALL',
             margin: '5px 10px 0px 10px',
             listeners: {
-                change: function (checkbox, checked) {
-                    if (checked === true) {
+                change: function (checkbox, newValue, oldValue, eOpts ) {
+
+                    if (newValue === true) {
                         Ext.getCmp('stationGroupId').items.each(function (item) {
                             item.setValue(true);
                         })
                     }
-                    if (checked === false) {
+                    if (newValue === false) {
                         var i = true;
                         Ext.getCmp('stationGroupId').items.each(function (item) {
                             if (item.checked === false) {
@@ -31,6 +32,7 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                             }
                         });
                         if (i === true) {
+                            Ext.fireEvent('deletingAllMarkers');
                             Ext.getCmp('stationGroupId').items.each(function (item) {
                                 item.setValue(false);
                             })

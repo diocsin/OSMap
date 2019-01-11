@@ -18,8 +18,13 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
             addButtonsBrigadeOnPanel: 'addButtonsBrigadeOnPanel',
             addStationFilter: 'addStationFilter',
             getButtonBrigadeForChangeButton: 'getButtonBrigadeForChangeButton',
-            buttonSearch: 'buttonSearch'
+            buttonSearch: 'buttonSearch',
+            deletingAllMarkers: 'deletingAllMarkers'
         }
+    },
+    deletingAllMarkers: function () {
+        var me = this;
+        me.Monitoring.vectorSource.clear();
     },
 
     buttonSearch: function () {
@@ -65,12 +70,13 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
             if (stBf.items.length === i + 1) {
                 me.lookupReference('allCalls').setValue(false)
             }
-            me.Monitoring.callMarkers.forEach(function (call) {
-                if (checkboxValue === call.getProperties().customOptions.status && me.Monitoring.vectorSource.hasFeature(call)) {
-                    me.Monitoring.vectorSource.removeFeature(call);
-
+            me.Monitoring.vectorSource.getFeatures().forEach(function (marker) {
+                if(marker.getProperties().customOptions.objectType==='CALL'&& checkboxValue === marker.getProperties().customOptions.status){
+                    me.Monitoring.vectorSource.removeFeature(marker);
                 }
             });
+
+
         }
         if (checkboxChecked === true) {
             var index = me.filterCallArray.indexOf(checkboxValue),
@@ -170,11 +176,12 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                 if (profileBrigadeFilter.items.length === i + 1) {
                     me.lookupReference('allProfile').setValue(false)
                 }
+
                 me.Monitoring.brigadesMarkers.forEach(function (brigade) {
                     if (checkboxValue === brigade.getProperties().customOptions.profile && me.Monitoring.vectorSource.hasFeature(brigade)) {
                         me.Monitoring.vectorSource.removeFeature(brigade);
                     }
-                })
+                });
             }
             if (checkboxChecked === true) {
                 var index = me.filterBrigadeArray.indexOf(checkboxValue),
@@ -305,13 +312,13 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
         if (me.Monitoring.station.indexOf(message.station) !== -1) {
             if (message.objectType === 'BRIGADE') {
                 var storeBrigades = me.getViewModel().getStore('Brigades');
-                storeBrigades.loadRawData(message);
-                me.Monitoring.createMarkers();
+                storeBrigades.add(message);
+
             }
             if (message.objectType === 'CALL') {
                 var storeCalls = me.getViewModel().getStore('Calls');
-                storeCalls.loadRawData(message);
-                me.Monitoring.createMarkers();
+                storeCalls.add(message);
+
             }
         }
     },
@@ -576,25 +583,25 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
             title: 'Кластер',
             layout: 'hbox',
             resizable: false,
+            constrain: true,
             border: 'fit',
             width: 750,
             height: 480,
-            scrollable: 'vertical',
 
             items: [{
                 xtype: 'panel',
                 id: 'markerInClustersId',
-                autoScroll: true,
+                scrollable: 'vertical',
+                autoScroll: 'true',
                 layout: 'vbox',
-                height: '100%f',
-                width: '25%'
+                height: '100%',
+                width: '27%'
             },
                 {
                     xtype: 'panel',
                     id: 'infoMarkerId',
-                    autoScroll: true,
                     height: '100%',
-                    width: '75%'
+                    width: '73%'
                 }
             ]
         }).showAt(coords);
@@ -644,8 +651,6 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                                             infoMarker.add(Ext.create('Ext.Panel', {
                                                 layout: 'form',
                                                 border: 'fit',
-                                                autoScroll: true,
-                                                resizable: false,
                                                 width: '100%',
                                                 items: me.callInfoForm,
                                                 listeners: {
@@ -728,12 +733,9 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                                             infoMarker.add(Ext.create('Ext.Panel', {
                                                 layout: 'form',
                                                 border: 'fit',
-                                                autoScroll: true,
-                                                resizable: false,
                                                 width: '100%',
                                                 items: [{
                                                     xtype: 'form',
-                                                    autoScroll: true,
                                                     height: '100%',
                                                     width: '100%',
                                                     items: [{
@@ -906,6 +908,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                                 autoScroll: true,
                                 resizable: false,
                                 width: 500,
+                                constrain: true,
                                 //height: 250,
                                 items: [{
                                     xtype: 'form',
@@ -1011,6 +1014,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                             Ext.create('Ext.window.Window', {
                                 title: 'Вызов',
                                 layout: 'form',
+                                constrain: true,
                                 id: 'winId',
                                 border: 'fit',
                                 autoScroll: true,

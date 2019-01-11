@@ -48,22 +48,18 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MonitoringBrigadeCont
 
     showGreeting: function (message) {
         var me = this;
-        console.dir(message);
         message.deviceId = '' + message.deviceId;
-
         if (message.objectType === 'BRIGADE') {
             if (me.MonitoringBrigade.brigadeId === message.deviceId) {
                 var storeBrigades = me.getViewModel().getStore('Brigades');
-                storeBrigades.loadRawData(message);
-                me.MonitoringBrigade.createMarkers();
+                storeBrigades.add(message);
             }
         }
 
         if (message.objectType === 'CALL') {
             if (me.MonitoringBrigade.callId === message.deviceId) {
                 var storeCalls = me.getViewModel().getStore('Calls');
-                storeCalls.loadRawData(message);
-                me.MonitoringBrigade.createMarkers();
+                storeCalls.add(message);
             }
         }
     },
@@ -93,7 +89,6 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MonitoringBrigadeCont
         ASOV.setMapManager({
             setMarkers: me.MonitoringBrigade.setMarkers.bind(this)
         }, Ext.History.currentToken);
-
         var ymapWrapper = me.lookupReference('ymapWrapper');
         ymapWrapper.on('resize', function () {
             me.MonitoringBrigade.resizeMap(me.MonitoringBrigade);

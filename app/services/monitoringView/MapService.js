@@ -533,79 +533,88 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
             }),
             urlBrigade = Ext.String.format(me.urlGeodata + '/data?{0}&statuses=', t),
             urlCall = Ext.String.format(me.urlGeodata + '/call?{0}&{1}', t, s);
-        me.brigadesMarkers = [];
-        me.callMarkers = [];
+        Ext.Array.clean(me.brigadesMarkers);
+        Ext.Array.clean(me.callMarkers);
         me.storeBrigade(urlBrigade, urlCall);
+        me.listenerStore();
     },
 
-    createMarkers: function () {
+    listenerStore: function () {
+        var me = this;
+        me.viewModel.getStore('Brigades').on('add', function (store, records, index) {
+            this.createBrigadeOfSocked(records)
+        }, this);
+        me.viewModel.getStore('Calls').on('add', function (store, records, index) {
+            this.createCallOfSocked(records)
+        }, this);
+    },
+
+    createCallOfSocked: function (calls) {
         var me = this,
-            callRecords = me.viewModel.getStore('Calls').getData().items;
-        callRecords.forEach(function (call) {
-            me.callMarkers.forEach(function (callInArray) {
-                if (callInArray.getProperties().id === call.get('callCardId')) {
-                    var index = me.callMarkers.indexOf(callInArray);
-                    me.callMarkers.splice(index, 1);
+            call = calls[0];
+        if (call.get('latitude') !== undefined && call.get('longitude') !== undefined) {
+            var iconFeature = new ol.Feature({
+                geometry: new ol.geom.Point(ol.proj.fromLonLat([call.get('longitude'), call.get('latitude')])),
+                id: call.get('callCardId'),
+                customOptions: {
+                    objectType: call.get('objectType'),
+                    status: call.get('status'),
+                    callCardNum: call.get('callCardNum'),
+                    station: '' + call.get('station')
+                },
+                options: {
+                    iconImageHref: 'resources/icon/' + call.get('iconName')
+                }
+
+            });
+            var callHas = Ext.Array.findBy(me.callMarkers, function (callInArray, index) {
+                if (callInArray.getProperties().id === call.get('deviceId')) {
+                    return callInArray;
                 }
             });
-            if (call.get('latitude') !== undefined && call.get('longitude') !== undefined) {
-                var iconFeature = new ol.Feature({
-                    geometry: new ol.geom.Point(ol.proj.fromLonLat([call.get('longitude'), call.get('latitude')])),
-                    id: call.get('callCardId'),
-                    customOptions: {
-                        objectType: call.get('objectType'),
-                        status: call.get('status'),
-                        callCardNum: call.get('callCardNum'),
-                        station: '' + call.get('station')
-                    },
-                    options: {
-                        iconImageHref: 'resources/icon/' + call.get('iconName')
-                    }
-
-                });
-                me.callMarkers.push(iconFeature);
+            Ext.Array.remove(me.callMarkers, callHas);
+            if (iconFeature.getProperties().customOptions.status !== "COMPLETED") {
+                Ext.Array.push(me.callMarkers, iconFeature);
                 me.addMarkersSocket(iconFeature);
-                me.viewModel.getStore('Calls').clearData();
             }
-
-        });
-        var brigadeRecords = me.viewModel.getStore('Brigades').getData().items;
-        brigadeRecords.forEach(function (brigade) {
-            me.brigadesMarkers.forEach(function (brigadeInArray) {
+            me.viewModel.getStore('Calls').clearData();
+        }
+    },
+    createBrigadeOfSocked: function (brigades) {
+        var me = this;
+        var brigade = brigades[0];
+        if (brigade.get('latitude') !== undefined && brigade.get('longitude') !== undefined) {
+            var iconFeature = new ol.Feature({
+                geometry: new ol.geom.Point(ol.proj.fromLonLat([brigade.get('longitude'), brigade.get('latitude')])),
+                id: brigade.get('deviceId'),
+                customOptions: {
+                    objectType: brigade.get('objectType'),
+                    profile: brigade.get('profile'),
+                    status: brigade.get('status'),
+                    station: '' + brigade.get('station'),
+                    brigadeNum: brigade.get('brigadeNum')
+                },
+                options: {
+                    iconImageHref: 'resources/icon/' + brigade.get('iconName')
+                }
+            });
+            var brigadeHas = Ext.Array.findBy(me.brigadesMarkers, function (brigadeInArray, index) {
                 if (brigadeInArray.getProperties().id === brigade.get('deviceId')) {
-                    var index = me.brigadesMarkers.indexOf(brigadeInArray);
-                    me.brigadesMarkers.splice(index, 1);
+                    return brigadeInArray;
                 }
             });
-            if (brigade.get('latitude') !== undefined && brigade.get('longitude') !== undefined) {
-                var iconFeature = new ol.Feature({
-                    geometry: new ol.geom.Point(ol.proj.fromLonLat([brigade.get('longitude'), brigade.get('latitude')])),
-                    id: brigade.get('deviceId'),
-                    customOptions: {
-                        objectType: brigade.get('objectType'),
-                        profile: brigade.get('profile'),
-                        status: brigade.get('status'),
-                        station: '' + brigade.get('station'),
-                        brigadeNum: brigade.get('brigadeNum')
-                    },
-                    options: {
-                        iconImageHref: 'resources/icon/' + brigade.get('iconName')
-                    }
-                });
 
-                me.brigadesMarkers.push(iconFeature);
+            Ext.Array.remove(me.brigadesMarkers, brigadeHas);
+            if (iconFeature.getProperties().customOptions.status !== 'WITHOUT_SHIFT') {
+                Ext.Array.push(me.brigadesMarkers, iconFeature);
                 me.addMarkersSocket(iconFeature);
-                me.viewModel.getStore('Brigades').clearData();
             }
-
-        });
-
+            me.viewModel.getStore('Brigades').clearData();
+        }
     },
 
     resizeMap: function (Monitoring) {
-
         var div = Ext.get('mapId');
         Monitoring.map.setSize([div.getWidth(), div.getHeight()]);
-
     }
 });

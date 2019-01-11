@@ -5,6 +5,6 @@ Ext.define('Isidamaps.view.filterBrigadeView.filterBrigade.FilterBrigade', {
 
     layout: {
         type: 'table',
-        columns: 3
+        columns: 2
     }
 })
