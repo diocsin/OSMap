@@ -575,8 +575,8 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
             Ext.Array.remove(me.callMarkers, callHas);
             if (iconFeature.getProperties().customOptions.status !== "COMPLETED") {
                 Ext.Array.push(me.callMarkers, iconFeature);
-                me.addMarkersSocket(iconFeature);
             }
+            me.addMarkersSocket(iconFeature);
             me.viewModel.getStore('Calls').clearData();
         }
     },
@@ -607,8 +607,8 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
             Ext.Array.remove(me.brigadesMarkers, brigadeHas);
             if (iconFeature.getProperties().customOptions.status !== 'WITHOUT_SHIFT') {
                 Ext.Array.push(me.brigadesMarkers, iconFeature);
-                me.addMarkersSocket(iconFeature);
             }
+            me.addMarkersSocket(iconFeature);
             me.viewModel.getStore('Brigades').clearData();
         }
     },
