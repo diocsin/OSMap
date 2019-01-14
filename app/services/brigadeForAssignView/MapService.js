@@ -187,7 +187,7 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
         if (me.callMarkers.length === 0) {
             me.createCallAlert();
         } else if (me.errorBrigades.length > 0) {
-             me.createBrigadeAlert();
+           //  me.createBrigadeAlert();
         }
         me.createBouns();  //в callHistory
         me.optionsObjectManager();
@@ -338,8 +338,6 @@ Ext.define('Isidamaps.services.brigadeForAssignView.MapService', {
 
     setMarkers: function (call, brigades) {
         this.BrigadeForAssign.readMarkers(call, brigades);
-        console.dir(call);
-        console.dir(brigades);
     },
 
     readMarkers: function (call, brigades) {
