@@ -521,6 +521,7 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
 
     readStation: function (station) {
         var me = this;
+        console.dir(station);
         station.forEach(function (st) {
             me.station.push(Ext.String.trim(st));
         });

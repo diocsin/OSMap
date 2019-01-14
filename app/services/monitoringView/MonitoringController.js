@@ -723,7 +723,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                                                         status = 'Транспортировка в стационар';
                                                         break;
                                                     case 'HIJACKING':
-                                                        status = 'Нападение на бригаду';
+                                                        status = 'Проблемы';
                                                         break;
                                                     default:
                                                         status = 'Неизвестно';
@@ -894,7 +894,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                                         status = 'Транспортировка в стационар';
                                         break;
                                     case 'HIJACKING':
-                                        status = 'Нападение на бригаду';
+                                        status = 'Проблемы';
                                         break;
                                     default:
                                         status = 'Неизвестно';

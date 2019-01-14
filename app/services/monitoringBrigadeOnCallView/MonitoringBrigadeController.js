@@ -237,8 +237,7 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MonitoringBrigadeCont
                                         status = 'Транспортировка в стационар';
                                         break;
                                     case 'HIJACKING':
-                                        status = 'Нападение на бригаду';
-                                        break;
+                                        status = 'Проблемы';
                                     default:
                                         status = 'Неизвестно';
                                         break;

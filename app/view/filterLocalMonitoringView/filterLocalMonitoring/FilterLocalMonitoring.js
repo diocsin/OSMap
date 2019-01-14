@@ -185,7 +185,7 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                     }
                 },
                 {
-                    boxLabel: 'Нападение на бригаду',
+                    boxLabel: 'Проблемы',
                     checked: true,
                     inputValue: 'HIJACKING',
                     listeners: {
