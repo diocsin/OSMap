@@ -387,7 +387,6 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MapService', {
                 me.commonArrayMarkers.push(call);
             }
         });
-
         me.vectorSource = new ol.source.Vector();
         me.commonArrayMarkers.forEach(function (feature) {
             me.vectorSource.addFeature(feature);
@@ -397,27 +396,27 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MapService', {
         });
         me.createRoute();
         me.map.addLayer(me.vectorLayer);
-
     },
-
 
     addMarkersSocket: function (iconFeature) {
         var me = this,
             sourceVectorLayer = me.vectorLayer.getSource();
         var id = iconFeature.getProperties().id;
         if (iconFeature.getProperties().customOptions.objectType === 'BRIGADE') {
-            sourceVectorLayer.getFeatures().forEach(function (brigade) {
-                if (brigade.getProperties().id === id) {
-                    sourceVectorLayer.removeFeature(brigade);
-                    me.map.getLayers().getArray().forEach(function (layer) {
-                        if (layer.renderMode_ === 'route') {
-                            me.map.removeLayer(layer);
-                        }
-                    })
+
+            var brigadeHas = Ext.Array.findBy(sourceVectorLayer.getFeatures(), function (brigadeInArray, index) {
+                if (brigadeInArray.getProperties().id === id) {
+                    return brigadeInArray;
                 }
-
             });
-
+            if (brigadeHas !== null) {
+                sourceVectorLayer.removeFeature(brigadeHas);
+                me.map.getLayers().getArray().forEach(function (layer) {
+                    if (layer.renderMode_ === 'route') {
+                        me.map.removeLayer(layer);
+                    }
+                })
+            }
             iconFeature.setStyle(me.iconStyle(iconFeature));
             sourceVectorLayer.addFeature(iconFeature);
             me.createRoute();
@@ -425,12 +424,13 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MapService', {
 
         }
         if (iconFeature.getProperties().customOptions.objectType === 'CALL') {
-            if (me.vectorLayer.getSource().hasFeature(iconFeature)) {
-                sourceVectorLayer.getFeatures().forEach(function (call) {
-                    if (call.getProperties().id === id) {
-                        sourceVectorLayer.removeFeature(call);
-                    }
-                });
+            var callHas = Ext.Array.findBy(sourceVectorLayer.getFeatures(), function (callInArray, index) {
+                if (callInArray.getProperties().id === id) {
+                    return callInArray;
+                }
+            });
+            if (callHas !== null) {
+                sourceVectorLayer.removeFeature(callHas);
             }
             iconFeature.setStyle(me.iconStyle(iconFeature));
             sourceVectorLayer.addFeature(iconFeature);

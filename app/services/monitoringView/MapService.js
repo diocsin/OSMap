@@ -387,18 +387,20 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
 
     addMarkersSocket: function (iconFeature) {
         var me = this,
-            sourceVectorLayer = me.vectorLayer.getSource().getSource();
-        var id = iconFeature.getProperties().id;
+            sourceVectorLayer = me.vectorLayer.getSource().getSource(),
+            id = iconFeature.getProperties().id;
         if (iconFeature.getProperties().customOptions.objectType === 'BRIGADE') {
-            sourceVectorLayer.getFeatures().forEach(function (brigade) {
-                if (brigade.getProperties().id === id) {
-                    sourceVectorLayer.removeFeature(brigade);
-                    if (iconFeature.getProperties().customOptions.status === 'WITHOUT_SHIFT') {
-                        me.addButtonsBrigadeOnPanel();
-                    }
+            var brigadeHas = Ext.Array.findBy(sourceVectorLayer.getFeatures(), function (brigadeInArray, index) {
+                if (brigadeInArray.getProperties().id === id) {
+                    return brigadeInArray;
                 }
-
             });
+            if (brigadeHas !== null) {
+                sourceVectorLayer.removeFeature(brigadeHas);
+            }
+            if (brigadeHas == null || iconFeature.getProperties().customOptions.status === 'WITHOUT_SHIFT') {
+                me.addButtonsBrigadeOnPanel();
+            }
 
             if (me.filterBrigadeArray.indexOf(iconFeature.getProperties().customOptions.station) === -1 &&
                 me.filterBrigadeArray.indexOf(iconFeature.getProperties().customOptions.status) === -1 &&
@@ -416,13 +418,15 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
             return;
         }
         if (iconFeature.getProperties().customOptions.objectType === 'CALL') {
-            if (iconFeature.getProperties().customOptions.status === "COMPLETED" || me.vectorLayer.getSource().hasFeature(iconFeature)) {
-                sourceVectorLayer.getFeatures().forEach(function (call) {
-                    if (call.getProperties().id === id) {
-                        sourceVectorLayer.removeFeature(call);
-                    }
-                });
+            var callHas = Ext.Array.findBy(sourceVectorLayer.getFeatures(), function (callInArray, index) {
+                if (callInArray.getProperties().id === id) {
+                    return callInArray;
+                }
+            });
+            if (callHas !== null) {
+                sourceVectorLayer.removeFeature(callHas);
             }
+
 
             if (me.filterCallArray.indexOf(iconFeature.getProperties().customOptions.status) === -1 &&
                 me.filterCallArray.indexOf(iconFeature.getProperties().customOptions.station) === -1 &&
@@ -568,7 +572,7 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
 
             });
             var callHas = Ext.Array.findBy(me.callMarkers, function (callInArray, index) {
-                if (callInArray.getProperties().id === call.get('deviceId')) {
+                if (callInArray.getProperties().id === call.get('callCardId')) {
                     return callInArray;
                 }
             });
