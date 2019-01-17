@@ -21,34 +21,34 @@ Ext.define('Isidamaps.view.routeView.route.Route', {
                 }
             },
             name: 'checkbox_name',
-            width: '10%',
+            flex: 1,
             fixed: true
         },
         {
             text: 'Номер<br>бригады',
             dataIndex: 'brigadeNum',
             id: 'brigadeId',
-            width: '20%',
+            flex: 1,
             fixed: true
 
         },
         {
             text: 'Профиль',
             dataIndex: 'profile',
-            width: '20%',
+            flex: 1,
             fixed: true
         },
         {
             text: 'Расстояние<br>(км)',
             dataIndex: 'distance',
-            width: '25%',
+            flex: 1,
             fixed: true
 
         },
         {
             text: 'Время<br>доезда<br>(мин)',
             dataIndex: 'time',
-            width: '24%',
+            flex: 1,
             fixed: true
         }
     ],

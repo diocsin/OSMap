@@ -595,7 +595,6 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MapService', {
 
 
     resizeMap: function (Monitoring) {
-
         var div = Ext.get('mapId');
         Monitoring.map.setSize([div.getWidth(), div.getHeight()]);
 

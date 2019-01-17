@@ -15,27 +15,27 @@ Ext.define('Isidamaps.view.routeHistoryView.routeHistory.RouteHistory', {
             text: 'Номер<br>бригады',
             dataIndex: 'brigadeNum',
             id: 'brigadeId',
-            width: '25%',
+            flex: 1,
             fixed: true
 
         },
         {
             text: 'Профиль',
             dataIndex: 'profile',
-            width: '25%',
+            flex: 1,
             fixed: true
         },
         {
             text: 'Расстояние<br>(км)',
             dataIndex: 'distance',
-            width: '25%',
+            flex: 1,
             fixed: true
 
         },
         {
             text: 'Время<br>доезда<br>(мин)',
             dataIndex: 'time',
-            width: '24%',
+            flex: 1,
             sortable: true,
             fixed: true
         }

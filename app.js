@@ -28,12 +28,6 @@ function readPropertyFile() {
 readPropertyFile();
 
 function startApp() {
-    Ext.Loader.loadScript({
-        url: ['resources/lib/stomp.js', 'resources/lib/sockjs.js', 'resources/lib/ol.js'],
-        onError: function () {
-            console.log('Нет доступа к загружаемым скриптам');
-        }
-    });
     Ext.application({
         name: 'Isidamaps',
         extend: 'Isidamaps.Application',

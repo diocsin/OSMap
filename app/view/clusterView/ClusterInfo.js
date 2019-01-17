@@ -1,8 +1,8 @@
-Ext.define('Isidamaps.view.clusterView.ClusterInfoView', {
+Ext.define('Isidamaps.view.clusterView.ClusterInfo', {
     extend: 'Ext.window.Window',
     alias: 'widget.clusterInfo',
     controller: 'clusterInfoController',
-    requires: [Isidamaps.view.clusterView.clusterInfoController],
+    requires: ['Isidamaps.view.clusterView.ClusterInfoController'],
     title: 'Кластер',
     constrain: true,
     layout: 'hbox',

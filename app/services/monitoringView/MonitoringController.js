@@ -9,19 +9,6 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
     urlWebSocket: null,
     urlOpenStreetServerRoute: null,
     urlOpenStreetServerTiles: null,
-    brigadeStatusesMap: (function () {
-        const map = Ext.create('Ext.util.HashMap');
-        map.add('FREE', 'Свободна');
-        map.add('ON_EVENT', 'Дежурство на мероприятии');
-        map.add('WITHOUT_SHIFT', 'Вне графика');
-        map.add('CRASH_CAR', 'Ремонт');
-        map.add('PASSED_BRIGADE', 'Принял вызов');
-        map.add('AT_CALL', 'На вызове');
-        map.add('RELAXON', 'Обед');
-        map.add('GO_HOSPITAL', 'Транспортировка в стационар');
-        map.add('HIJACKING', 'Нападение на бригаду');
-        return map;
-    })(),
     listen: {
         global: {
             checkedProfileBrigade: 'checkedProfileBrigade',
@@ -35,6 +22,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
             deletingAllMarkers: 'deletingAllMarkers'
         }
     },
+
     deletingAllMarkers: function () {
         var me = this;
         me.Monitoring.vectorSource.clear();
@@ -297,8 +285,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
             return;
         }
         const store = me.getViewModel().getStore(message.objectType === 'BRIGADE' ? 'Brigades' : 'Calls');
-        store.loadRawData(message);
-        me.Monitoring.createMarkers();
+        store.add(message);
     },
 
     disconnect: function () {
@@ -307,62 +294,58 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
     },
 
     createMap: function () {
-        const me = this,
-            viewModel = me.getViewModel(),
-            settingsStore = viewModel.getStore('Settings');
-        settingsStore.load({
-            callback: function (records) {
-                const settings = records[0];
-                me.urlGeodata = settings.get('urlGeodata');
-                me.urlWebSocket = settings.get('urlWebSocket');
-                me.urlOpenStreetServerRoute = settings.get('urlOpenStreetServerRoute');
-                me.urlOpenStreetServerTiles = settings.get('urlOpenStreetServerTiles');
-                me.connect();
-                me.Monitoring = Ext.create('Isidamaps.services.monitoringView.MapService', {
-                    viewModel: me.getViewModel(),
-                    markerClick: me.markerClick.bind(me),
-                    clustersClick: me.clustersClick.bind(me),
-                    filterBrigadeArray: me.filterBrigadeArray,
-                    filterCallArray: me.filterCallArray,
-                    urlGeodata: me.urlGeodata,
-                    urlOpenStreetServerTiles: me.urlOpenStreetServerTiles,
-                    getStoreMarkerInfo: me.getStoreMarkerInfo
-                });
-                me.Monitoring.optionsObjectManager();
-                ASOV.setMapManager({
-                    setStation: me.Monitoring.setStation.bind(me)
-                }, Ext.History.currentToken);
-                me.Monitoring.readStation(['9']);
-                const ymapWrapper = me.lookupReference('ymapWrapper');
-                ymapWrapper.on('resize', function () {
-                    me.Monitoring.resizeMap(me.Monitoring);
-                });
-                setInterval(function () {
-                    window.location.reload();
-                }, 1800000);
-            }
+        const me = this;
+        me.urlWebSocket = Isidamaps.getApplication().getController('GlobalController').urlWebSocket,
+            me.urlGeodata = Isidamaps.getApplication().getController('GlobalController').urlGeodata,
+            me.urlOpenStreetServerTiles = Isidamaps.getApplication().getController('GlobalController').urlOpenStreetServerTiles,
+            me.connect();
+        me.Monitoring = Ext.create('Isidamaps.services.monitoringView.MapService', {
+            viewModel: me.getViewModel(),
+            markerClick: me.markerClick.bind(me),
+            filterBrigadeArray: me.filterBrigadeArray,
+            filterCallArray: me.filterCallArray,
+            urlGeodata: me.urlGeodata,
+            urlOpenStreetServerTiles: me.urlOpenStreetServerTiles
+        })
+        ;
+        me.Monitoring.optionsObjectManager();
+        ASOV.setMapManager({
+            setStation: me.Monitoring.setStation.bind(me)
+        }, Ext.History.currentToken);
+        me.Monitoring.readStation(['9']);
+        const ymapWrapper = me.lookupReference('ymapWrapper');
+        ymapWrapper.on('resize', function () {
+            me.Monitoring.resizeMap(me.Monitoring);
         });
+        setInterval(function () {
+            window.location.reload();
+        }, 1800000);
+
     },
 
-    addStationFilter: function () {
-        const me = this,
-            checkboxStation = me.lookupReference('stationFilter'),
-            records = me.Monitoring.station;
-        records.forEach(function (rec) {
-            checkboxStation.add(Ext.create('Ext.form.field.Checkbox', {
-                boxLabel: rec,
-                inputValue: rec,
-                checked: true,
-                listeners: {
-                    change: {
-                        fn: function (checkbox, checked) {
-                            Ext.fireEvent('checkedStationBrigade', checkbox, checked);
+    addStationFilter:
+
+        function () {
+            const me = this,
+                checkboxStation = me.lookupReference('stationFilter'),
+                records = me.Monitoring.station;
+            records.forEach(function (rec) {
+                checkboxStation.add(Ext.create('Ext.form.field.Checkbox', {
+                    boxLabel: rec,
+                    inputValue: rec,
+                    checked: true,
+                    listeners: {
+                        change: {
+                            fn: function (checkbox, checked) {
+                                Ext.fireEvent('checkedStationBrigade', checkbox, checked);
+                            }
                         }
                     }
-                }
-            }));
-        })
-    },
+                }));
+            })
+        }
+
+    ,
 
     getButtonBrigadeForChangeButton: function (brigade) {
         const me = this,
@@ -371,7 +354,8 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
         if (brigadeHave === undefined) {
             me.addButtonsBrigadeOnPanel();
         }
-    },
+    }
+    ,
 
     addButtonsBrigadeOnPanel: function () {
         const me = this,
@@ -423,7 +407,8 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                 }
             }))
         })
-    },
+    }
+    ,
 
     flash: function (features) {
         const me = this,
@@ -461,70 +446,26 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
             // tell OpenLayers to continue postcompose animation
             me.Monitoring.map.render();
         }
-    },
-
-    getStoreMarkerInfo: function (object) {
-        const me = this,
-            urlInfoMarker = me.urlGeodata + '/info';
-        if (object.getProperties().customOptions.objectType === 'BRIGADE') {
-            return Ext.create('Ext.data.Store', {
-                model: 'Isidamaps.model.InfoBrigade',
-                proxy: {
-                    type: 'ajax',
-                    url: urlInfoMarker,
-                    reader: {
-                        type: 'json',
-                        rootProperty: 'additionalInfo.brigade'
-                    }
-                },
-                autoLoad: false
-            });
-        }
-
-        if (object.getProperties().customOptions.objectType === 'CALL') {
-            return Ext.create('Ext.data.Store', {
-                model: 'Isidamaps.model.InfoCall',
-                proxy: {
-                    type: 'ajax',
-                    url: urlInfoMarker,
-                    reader: {
-                        type: 'json',
-                        rootProperty: 'additionalInfo.call'
-                    }
-                },
-                autoLoad: false
-            });
-        }
-        if (object.getProperties().customOptions.objectType === 'MEDORG') {
-            return Ext.create('Ext.data.Store', {
-                model: 'Isidamaps.model.InfoMedorgs',
-                proxy: {
-                    type: 'ajax',
-                    url: urlInfoMarker,
-                    reader: {
-                        type: 'json',
-                        rootProperty: 'additionalInfo.megOrg'
-                    }
-                },
-                autoLoad: false
-            });
-        }
-    },
+    }
+    ,
 
     layoutReady: function () {
         const me = this;
         me.fireTabEvent(me.lookup('navigationPanel'));
         me.fireTabEvent(me.lookup('BrigadePanel'));
-    },
+    }
+    ,
 
     tabChange: function (panel, newTab, oldTab) {
         oldTab.fireEvent('tabExit');
         this.fireTabEvent(newTab);
-    },
+    }
+    ,
 
     fireTabEvent: function (tab) {
         tab.fireEvent('tabEnter');
-    },
+    }
+    ,
 
     errorMessage: function (msg) {
         Ext.Msg.show({
@@ -533,108 +474,9 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
             icon: Ext.Msg.ERROR,
             buttons: Ext.Msg.OK
         });
-    },
+    }
+    ,
 
-    clustersClick: function (coords, cluster) {
-        const me = this,
-            ymapWrapper = Ext.getCmp('mapId'),
-            sizeCmp = ymapWrapper.getSize(),
-            win = Ext.WindowManager.getActive();
-        if (win) {
-            win.close();
-        }
-
-        if ((sizeCmp.width / 2.1) < coords[0]) {
-            coords[0] -= 400;
-            coords[1] += 50;
-        } else {
-            coords[0] += 300;
-            coords[1] += 50;
-        }
-        if ((sizeCmp.height / 1.4) < coords[1]) {
-            coords[1] -= 550;
-        }
-        const clusterInfo = Ext.widget('clusterInfo');
-        clusterInfo.showAt(coords);
-        const buttonsHolder = clusterInfo.lookup('buttonsHolder'),
-            infoHolder = clusterInfo.lookup('infoHolder');
-        cluster.getProperties().features.forEach(function (marker) {
-            const params = {
-                objecttype: marker.getProperties().customOptions.objectType,
-                objectid: marker.getProperties().id
-            };
-            if (marker.getProperties().customOptions.objectType === 'CALL') {
-                function f() {
-                    if (marker.getProperties().customOptions.status === 'NEW') {
-                        return 'Новый';
-                    }
-                    if (marker.getProperties().customOptions.status === 'COMPLETED') {
-                        return 'Завершен';
-                    }
-                    if (marker.getProperties().customOptions.status === 'ASSIGNED') {
-                        return 'Исполнение';
-                    }
-                    return "";
-                }
-
-                buttonsHolder.add(Ext.create('Ext.Button', {
-                    text: 'Выз.№ ' + marker.getProperties().customOptions.callCardNum + " " + f(),
-                    maxWidth: 170,
-                    minWidth: 170,
-                    margin: 5,
-                    listeners: {
-                        click: function () {
-                            const storeMarker = me.getStoreMarkerInfo(marker);
-                            infoHolder.removeAll();
-                            storeMarker.load({
-                                params: params,
-                                callback: function (records, operation, success) {
-                                    if ((success === true && records.length === 0) || success === false) {
-                                        me.errorMessage('Данные о вызове временно недоступны');
-                                        return;
-                                    }
-                                    const callInfoForm = Ext.widget('callInfoForm'),
-                                        callInfoViewModel = callInfoForm.getViewModel();
-                                    callInfoViewModel.set('record', records[0]);
-                                    infoHolder.add(callInfoForm);
-                                }
-                            })
-                        }
-                    }
-                }))
-            }
-            if (marker.getProperties().customOptions.objectType === 'BRIGADE') {
-                buttonsHolder.add(Ext.create('Ext.Button', {
-                    text: 'Бр.№ ' + marker.getProperties().customOptions.brigadeNum + " " + "(" + marker.getProperties().customOptions.profile + ")" + " " + marker.getProperties().customOptions.station,
-                    maxWidth: 170,
-                    minWidth: 170,
-                    margin: 5,
-                    listeners: {
-                        click: function () {
-                            const storeMarker = me.getStoreMarkerInfo(marker);
-                            infoHolder.removeAll();
-                            storeMarker.load({
-                                params: params,
-                                callback: function (records, operation, success) {
-                                    if ((success === true && records.length === 0) || success === false) {
-                                        me.errorMessage('Данные о бригаде временно недоступны');
-                                        return;
-                                    }
-                                    // FIXME formula?
-                                    const record = records[0];
-                                    record.set('status', me.brigadeStatusesMap.get(records[0].get('status') || 'Неизвестно'));
-                                    const brigadeInfoForm = Ext.widget('brigadeInfoForm'),
-                                        brigadeInfoViewModel = brigadeInfoForm.getViewModel();
-                                    brigadeInfoViewModel.set('record', record);
-                                    infoHolder.add(brigadeInfoForm);
-                                }
-                            })
-                        }
-                    }
-                }))
-            }
-        })
-    },
 
     markerClick: function (object, coord, infoMarker) {
         const me = this,
@@ -662,7 +504,8 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
         }
 
         me.callMarkerClick(options);
-    },
+    }
+    ,
 
     brigadeMarkerClick: function (options) {
         const me = this,
@@ -692,7 +535,8 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                 brigadeInfoWidget.show()/*At(coord)*/;
             }
         });
-    },
+    }
+    ,
 
     callMarkerClick: function (options) {
         const me = this,
@@ -720,4 +564,5 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
             }
         })
     }
-});
+})
+;

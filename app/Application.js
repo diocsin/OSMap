@@ -10,10 +10,12 @@ Ext.define('Isidamaps.Application', {
     'Isidamaps.services.brigadeForAssign.BrigadeForAssign',
     'Isidamaps.services.callHistory.CallHistory'
   ],
+  controllers: 'Isidamaps.global.GlobalController',
 
   name: 'Isidamaps',
 
   stores: [
+      'Isidamaps.global.GlobalStore'
     // TODO: add global / shared stores here
   ],
 

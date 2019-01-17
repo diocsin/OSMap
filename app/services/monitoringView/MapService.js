@@ -293,7 +293,8 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
                     if (win) {
                         win.close();
                     }
-                    me.clustersClick(pixel, feature);
+                    Ext.widget('clusterInfo').getController().clustersClick(feature);
+                  //  me.clustersClick(pixel, feature);
                 }
 
 

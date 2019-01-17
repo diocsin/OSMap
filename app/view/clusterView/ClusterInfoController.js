@@ -2,27 +2,17 @@ Ext.define('Isidamaps.view.clusterView.ClusterInfoController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.clusterInfoController',
 
-    clustersClick: function (coords, cluster) {
+    clustersClick: function (cluster) {
         const me = this,
-            ymapWrapper = Ext.getCmp('mapId'),
-            sizeCmp = ymapWrapper.getSize(),
             win = Ext.WindowManager.getActive();
+
+
         if (win) {
             win.close();
         }
 
-        if ((sizeCmp.width / 2.1) < coords[0]) {
-            coords[0] -= 400;
-            coords[1] += 50;
-        } else {
-            coords[0] += 300;
-            coords[1] += 50;
-        }
-        if ((sizeCmp.height / 1.4) < coords[1]) {
-            coords[1] -= 550;
-        }
         const clusterInfo = Ext.widget('clusterInfo');
-        clusterInfo.showAt(coords);
+        clusterInfo.show();
         const buttonsHolder = clusterInfo.lookup('buttonsHolder'),
             infoHolder = clusterInfo.lookup('infoHolder');
         cluster.getProperties().features.forEach(function (marker) {
@@ -51,7 +41,7 @@ Ext.define('Isidamaps.view.clusterView.ClusterInfoController', {
                     margin: 5,
                     listeners: {
                         click: function () {
-                            const storeMarker = me.getStoreMarkerInfo(marker);
+                            const storeMarker = Isidamaps.getApplication().getController('GlobalController').getStoreMarkerInfo(marker);
                             infoHolder.removeAll();
                             storeMarker.load({
                                 params: params,
@@ -78,7 +68,7 @@ Ext.define('Isidamaps.view.clusterView.ClusterInfoController', {
                     margin: 5,
                     listeners: {
                         click: function () {
-                            const storeMarker = me.getStoreMarkerInfo(marker);
+                            const storeMarker = Isidamaps.getApplication().getController('GlobalController').getStoreMarkerInfo(marker);
                             infoHolder.removeAll();
                             storeMarker.load({
                                 params: params,
@@ -89,7 +79,7 @@ Ext.define('Isidamaps.view.clusterView.ClusterInfoController', {
                                     }
                                     // FIXME formula?
                                     const record = records[0];
-                                    record.set('status', me.brigadeStatusesMap.get(records[0].get('status') || 'Неизвестно'));
+                                    record.set('status', Isidamaps.getApplication().getController('GlobalController').brigadeStatusesMap.get(records[0].get('status') || 'Неизвестно'));
                                     const brigadeInfoForm = Ext.widget('brigadeInfoForm'),
                                         brigadeInfoViewModel = brigadeInfoForm.getViewModel();
                                     brigadeInfoViewModel.set('record', record);
@@ -101,5 +91,13 @@ Ext.define('Isidamaps.view.clusterView.ClusterInfoController', {
                 }))
             }
         })
-    }
+    },
+    errorMessage: function (msg) {
+        Ext.Msg.show({
+            title: 'Ошибка',
+            message: msg,
+            icon: Ext.Msg.ERROR,
+            buttons: Ext.Msg.OK
+        });
+    },
 });
