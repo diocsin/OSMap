@@ -31,8 +31,13 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
             addButtonsBrigadeOnPanel: 'addButtonsBrigadeOnPanel',
             addStationFilter: 'addStationFilter',
             getButtonBrigadeForChangeButton: 'getButtonBrigadeForChangeButton',
-            buttonSearch: 'buttonSearch'
+            buttonSearch: 'buttonSearch',
+            deletingAllMarkers: 'deletingAllMarkers'
         }
+    },
+    deletingAllMarkers: function () {
+        var me = this;
+        me.Monitoring.vectorSource.clear();
     },
 
     buttonSearch: function () {
@@ -74,6 +79,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                 if (checkboxValue === call.getProperties().customOptions.status) {
                     if (me.filterCallArray.indexOf(call.getProperties().customOptions.station) === -1) {
                         me.Monitoring.vectorSource.addFeature(call);
+
                     }
                 }
             });
@@ -184,7 +190,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
                     if (checkboxValue === brigade.getProperties().customOptions.profile && me.Monitoring.vectorSource.hasFeature(brigade)) {
                         me.Monitoring.vectorSource.removeFeature(brigade);
                     }
-                })
+                });
             }
             if (checkboxChecked === true) {
                 const index = me.filterBrigadeArray.indexOf(checkboxValue);

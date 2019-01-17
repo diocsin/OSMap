@@ -18,7 +18,7 @@ Ext.define('Isidamaps.services.monitoringView.Monitoring', {
         reference: 'BrigadePanel',
         title: 'Бригады',
         publishes: 'size',
-        width: 250,
+        width: 260,
         floatable: true,
         collapsible: true,
         scrollable: 'vertical',

@@ -1,6 +1,6 @@
 {
-  "urlGeodata":"http://vm-win-gmc.isida.by:8400/geodata/v1.0",
-  "urlWebSocket":"http://vm-win-gmc.isida.by:8400",
+  "urlGeodata":"http://192.168.1.1:8400/geodata/v1.0",
+  "urlWebSocket":"http://192.168.1.1:8400",
   "urlOpenStreetServerTiles": "http://vm-tiles/osm",
   "urlOpenStreetServerRoute": "http://vm-tiles:5000"
 }
