@@ -337,7 +337,9 @@ Ext.define('Isidamaps.services.brigadeForAssign.MapService', {
     },
 
     setMarkers: function (call, brigades) {
+        console.dir(brigades);
         this.BrigadeForAssign.readMarkers(call, brigades);
+
     },
 
     readMarkers: function (call, brigades) {

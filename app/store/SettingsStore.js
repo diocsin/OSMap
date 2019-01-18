@@ -1,4 +1,4 @@
-Ext.define('Isidamaps.global.GlobalStore', {
+Ext.define('Isidamaps.store.SettingsStore', {
     extend: 'Ext.data.Store',
     model: 'Isidamaps.model.Property',
     proxy: {

@@ -24,17 +24,6 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringModel', {
                 }
             },
             autoLoad: false
-        },
-
-        Settings: {
-            model: 'Isidamaps.model.Property',
-            proxy: {
-                type: 'ajax',
-                url: 'resources/settings/property.json',
-                reader: {
-                    type: 'json'
-                }
-            }
         }
     }
 });

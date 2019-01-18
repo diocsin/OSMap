@@ -170,8 +170,6 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
 
     constructor: function (options) {
         var me = this;
-        me.markerClick = options.markerClick;
-        me.clustersClick = options.clustersClick;
         me.viewModel = options.viewModel;
         me.filterBrigadeArray = options.filterBrigadeArray;
         me.filterCallArray = options.filterCallArray;
@@ -278,23 +276,11 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
                     return feature;
                 });
             if (feature !== undefined && feature.getProperties().customOptions === undefined) {
-                var geometry = feature.getGeometry(), coord = geometry.getCoordinates(),
-                    pixel = me.map.getPixelFromCoordinate(coord);
                 if (feature.getProperties().features.length === 1) {
-                    var storeMarker = me.getStoreMarkerInfo(feature.getProperties().features[0]);
-                    var win = Ext.WindowManager.getActive();
-                    if (win) {
-                        win.close();
-                    }
-                    me.markerClick(feature.getProperties().features[0], pixel, storeMarker);
+                    Ext.widget('callInfo').getController().markerClick(feature.getProperties().features[0]);
                 }
                 else {
-                    var win = Ext.WindowManager.getActive();
-                    if (win) {
-                        win.close();
-                    }
                     Ext.widget('clusterInfo').getController().clustersClick(feature);
-                  //  me.clustersClick(pixel, feature);
                 }
 
 
@@ -325,26 +311,12 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
                     function (feature) {
                         return feature;
                     });
-                if (feature.getProperties().features !== undefined) {
-                    if (feature.getProperties().features.length === 1 && feature.getProperties().features[0].getProperties().customOptions.objectType === 'BRIGADE') {
-                        myForm.setData('Бригада ' + feature.getProperties().features[0].getProperties().customOptions.brigadeNum);
+                if (feature.getProperties().customOptions !== undefined) {
+                    if (feature.getProperties().customOptions.objectType === 'route') {
+                        myForm.setData('Маршрут ' + feature.getProperties().customOptions.brigadeNum + ' бригады');
                         myForm.show();
                         myForm.setPosition(e.pointerEvent.clientX + 10, e.pointerEvent.clientY + 10);
-
                     }
-
-                    if (feature.getProperties().features.length === 1 && feature.getProperties().features[0].getProperties().customOptions.objectType === 'MEDORG') {
-                        myForm.setData(feature.getProperties().features[0].getProperties().customOptions.organizationName);
-                        myForm.show();
-                        myForm.setPosition(e.pointerEvent.clientX + 10, e.pointerEvent.clientY + 10);
-
-                    }
-                }
-                else if (feature.getProperties().customOptions.objectType === 'route') {
-                    myForm.setData('Маршрут ' + feature.getProperties().customOptions.brigadeNum + ' бригады');
-                    myForm.show();
-                    myForm.setPosition(e.pointerEvent.clientX + 10, e.pointerEvent.clientY + 10);
-
                 }
             }
             else {
@@ -364,16 +336,12 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
             }
         });
         me.callMarkers.forEach(function (call) {
-            if (call.getProperties().customOptions.status !== "COMPLETED") {
-                call.setStyle(me.iconStyle(call));
-                me.commonArrayMarkers.push(call);
-            }
+            call.setStyle(me.iconStyle(call));
+            me.commonArrayMarkers.push(call);
         });
 
         me.vectorSource = new ol.source.Vector();
-        me.commonArrayMarkers.forEach(function (feature) {
-            me.vectorSource.addFeature(feature);
-        });
+        me.vectorSource.addFeatures(me.commonArrayMarkers);
         me.clusterOptions();
         me.map.addLayer(me.vectorLayer);
 
@@ -448,21 +416,13 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
 
     setStation: function (station) {
         this.Monitoring.readStation(station);
+        station.forEach(function (st) {
+            this.station.push(Ext.String.trim(st));
+        });
     },
 
-    storeCall: function (urlCall) {
+    storeCall: function (records) {
         var me = this;
-        Ext.create('Ext.data.Store', {
-            model: 'Isidamaps.model.Call',
-            proxy: {
-                type: 'ajax',
-                url: urlCall,
-                reader: {
-                    type: 'json'
-                }
-            },
-            autoLoad: false
-        }).load(function (records) {
             records.forEach(function (call) {
                 if (call.get('latitude') !== undefined && call.get('longitude') !== undefined) {
                     var iconFeature = new ol.Feature({
@@ -483,45 +443,37 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
                 }
             });
             me.addMarkers();
-        })
     },
 
-    storeBrigade: function (urlBrigade, urlCall) {
+    storeBrigade: function (records) {
         var me = this;
-        Ext.create('Ext.data.Store', {
-            model: 'Isidamaps.model.Brigade',
-            proxy: {
-                type: 'ajax',
-                url: urlBrigade,
-                reader: {
-                    type: 'json'
-                }
-            },
-            autoLoad: false
-        }).load(function (records) {
-            records.forEach(function (brigade) {
-                if (brigade.get('latitude') !== undefined && brigade.get('longitude') !== undefined) {
-                    var iconFeature = new ol.Feature({
-                        geometry: new ol.geom.Point(ol.proj.fromLonLat([brigade.get('longitude'), brigade.get('latitude')])),
-                        id: brigade.get('deviceId'),
-                        customOptions: {
-                            objectType: brigade.get('objectType'),
-                            profile: brigade.get('profile'),
-                            status: brigade.get('status'),
-                            station: '' + brigade.get('station'),
-                            brigadeNum: brigade.get('brigadeNum')
-                        },
-                        options: {
-                            iconImageHref: 'resources/icon/' + brigade.get('iconName')
-                        }
-                    });
+        console.dir('wew');
+        Ext.Array.clean(me.brigadesMarkers);
+        Ext.Array.clean(me.callMarkers);
+        records.forEach(function (brigade) {
+            if (brigade.get('latitude') !== undefined && brigade.get('longitude') !== undefined) {
+                var iconFeature = new ol.Feature({
+                    geometry: new ol.geom.Point(ol.proj.fromLonLat([brigade.get('longitude'), brigade.get('latitude')])),
+                    id: brigade.get('deviceId'),
+                    customOptions: {
+                        objectType: brigade.get('objectType'),
+                        profile: brigade.get('profile'),
+                        status: brigade.get('status'),
+                        station: '' + brigade.get('station'),
+                        brigadeNum: brigade.get('brigadeNum')
+                    },
+                    options: {
+                        iconImageHref: 'resources/icon/' + brigade.get('iconName')
+                    }
+                });
 
-                    me.brigadesMarkers.push(iconFeature);
-                }
-            });
-            me.addStationFilter();
-            me.storeCall(urlCall);
-        })
+                me.brigadesMarkers.push(iconFeature);
+            }
+        });
+        me.addStationFilter();
+        me.listenerWebSockedStore();
+        //me.storeCall(urlCall);
+
     },
 
     readStation: function (station) {
@@ -538,13 +490,22 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
             }),
             urlBrigade = Ext.String.format(me.urlGeodata + '/data?{0}&statuses=', t),
             urlCall = Ext.String.format(me.urlGeodata + '/call?{0}&{1}', t, s);
-        Ext.Array.clean(me.brigadesMarkers);
-        Ext.Array.clean(me.callMarkers);
-        me.storeBrigade(urlBrigade, urlCall);
-        me.listenerStore();
+
+
     },
 
     listenerStore: function () {
+        var me = this;
+        Ext.getStore('Isidamaps.store.BrigadesFirstLoad').on('load', function (store, records, options) {
+            this.storeBrigade(records)
+        }, this);
+        Ext.getStore('Isidamaps.store.CallsFirstLoad').on('load', function (store, records, options) {
+            this.storeCall(records)
+        }, this);
+
+    },
+
+    listenerWebSockedStore: function () {
         var me = this;
         me.viewModel.getStore('Brigades').on('add', function (store, records, index) {
             this.createBrigadeOfSocked(records)

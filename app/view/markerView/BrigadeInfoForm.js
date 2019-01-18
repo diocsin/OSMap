@@ -1,4 +1,4 @@
-Ext.define('Isidamaps.services.monitoringView.BrigadeInfoForm', {
+Ext.define('Isidamaps.view.markerView.BrigadeInfoForm', {
     extend: 'Ext.form.Panel',
     alias: 'widget.brigadeInfoForm',
     autoScroll: true,

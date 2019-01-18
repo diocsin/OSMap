@@ -7,7 +7,9 @@ Ext.define('Isidamaps.services.monitoringView.Monitoring', {
         'Isidamaps.services.monitoringView.MonitoringController',
         'Isidamaps.services.monitoringView.MapService',
         'Isidamaps.services.monitoringView.MonitoringModel',
-        'Isidamaps.view.clusterView.ClusterInfo'
+        'Isidamaps.view.clusterView.ClusterInfo',
+        'Isidamaps.view.markerView.CallInfoWindow',
+        'Isidamaps.view.markerView.BrigadeInfoWindow'
     ],
 
     controller: 'monitoring',

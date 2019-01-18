@@ -1,4 +1,4 @@
-Ext.define('Isidamaps.services.monitoringView.CallInfoForm', {
+Ext.define('Isidamaps.view.markerView.CallInfoForm', {
     extend: 'Ext.form.Panel',
     alias: 'widget.callInfoForm',
     viewModel: true,

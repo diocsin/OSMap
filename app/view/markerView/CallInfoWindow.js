@@ -1,8 +1,9 @@
-Ext.define('Isidamaps.services.monitoringView.BrigadeInfoWindow', {
+Ext.define('Isidamaps.view.markerView.CallInfoWindow', {
     extend: 'Ext.window.Window',
-    alias: 'widget.brigadeInfoWindow',
+    alias: 'widget.callInfo',
+    controller: 'MarkerController',
     viewModel: true,
-    title: 'Бригада',
+    title: 'Вызов',
     layout: 'form',
     border: 'fit',
     autoScroll: true,
@@ -10,6 +11,6 @@ Ext.define('Isidamaps.services.monitoringView.BrigadeInfoWindow', {
     width: 500,
     constrain: true,
     items: [{
-        xtype: 'brigadeInfoForm'
+        xtype: 'callInfoForm'
     }]
 });

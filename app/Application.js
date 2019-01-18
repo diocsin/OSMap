@@ -15,7 +15,10 @@ Ext.define('Isidamaps.Application', {
   name: 'Isidamaps',
 
   stores: [
-      'Isidamaps.global.GlobalStore'
+      'Isidamaps.store.SettingsStore',
+      'Isidamaps.store.BrigadesFirstLoad',
+      'Isidamaps.store.CallsFirstLoad',
+      'Isidamaps.store.BrigadeInWebSocked'
     // TODO: add global / shared stores here
   ],
 

@@ -5,8 +5,6 @@ Ext.define('Isidamaps.view.clusterView.ClusterInfoController', {
     clustersClick: function (cluster) {
         const me = this,
             win = Ext.WindowManager.getActive();
-
-
         if (win) {
             win.close();
         }
