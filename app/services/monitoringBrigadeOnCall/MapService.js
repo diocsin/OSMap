@@ -1,7 +1,6 @@
-Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MapService', {
-    extend: 'Isidamaps.services.callHistory.MapService',
+Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MapService', {
+    extend: 'Isidamaps.services.monitoring.MapService',
     map: null,
-    callsModel: null,
     brigadeId: null,
     callId: null,
     brigadesMarkers: [],
@@ -15,117 +14,7 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MapService', {
     vectorSource: null,
     arrayRoute: [],
     arrRouteForTable: [],
-    commonArrayMarkers: [],
-    // ====
-    markerClick: Ext.emptyFn,
-    getStoreMarkerInfo: Ext.emptyFn,
-    // ====
-    callInfoForm: [{
-        xtype: 'form',
-        height: '100%',
-        width: '100%',
-        margin: 0,
-        items: [{
-            xtype: 'displayfield',
-            name: 'callCardNum',
-            fieldLabel: 'Номер вызова',
-            labelWidth: '100%',
-            margin: 0
-        },
-            {
-                xtype: 'displayfield',
-                name: 'createTime',
-                fieldLabel: 'Время создания вызова',
-                labelWidth: '100%',
-                renderer: Ext.util.Format.dateRenderer('Y-m-d, H:i:s'),
-                margin: 0
-            },
-            {
-                xtype: 'displayfield',
-                name: 'regBeginTime',
-                fieldLabel: 'Время приема вызова',
-                labelWidth: '100%',
-                renderer: Ext.util.Format.dateRenderer('Y-m-d, H:i:s'),
-                margin: 0
-            },
-            {
-                xtype: 'textareafield',
-                name: 'reason',
-                labelWidth: 100,
-                width: 500,
-                readOnly: true,
-                fieldLabel: 'Повод к вызову',
-                margin: '0px 0px 5px 0px'
-            },
-            {
-                xtype: 'textareafield',
-                name: 'reasonComment',
-                labelWidth: 100,
-                width: 500,
-                readOnly: true,
-                fieldLabel: 'Комментарий',
-                margin: '5px 0px 0px 0px'
-            },
-            {
-                xtype: 'displayfield',
-                name: 'address',
-                labelWidth: '100%',
-                fieldLabel: 'Адрес места вызова',
-                margin: 0
-            },
-            {
-                xtype: 'displayfield',
-                name: 'enter',
-                labelWidth: '100%',
-                fieldLabel: 'Особенности входа',
-                margin: 0
-            },
-            {
-                xtype: 'displayfield',
-                name: 'phone',
-                labelWidth: '100%',
-                fieldLabel: 'Телефон',
-                margin: 0
-            },
-            {
-                xtype: 'displayfield',
-                name: 'fullName',
-                labelWidth: '100%',
-                fieldLabel: 'ФИО',
-                margin: 0
-            },
-            {
-                xtype: 'displayfield',
-                name: 'brigadeNum',
-                labelWidth: '100%',
-                fieldLabel: 'Номер бригады',
-                margin: 0
-            },
-            {
-                xtype: 'displayfield',
-                name: 'brigadeAssignTime',
-                labelWidth: '100%',
-                fieldLabel: 'Время назначения бригады на вызов',
-                renderer: Ext.util.Format.dateRenderer('Y-m-d, H:i:s'),
-                margin: 0
-            },
-            {
-                xtype: 'displayfield',
-                name: 'brigadeArrivalTime',
-                labelWidth: '100%',
-                fieldLabel: 'Время прибытия бригады к месту вызова',
-                renderer: Ext.util.Format.dateRenderer('Y-m-d, H:i:s'),
-                margin: 0
-            },
-            {
-                xtype: 'displayfield',
-                name: 'hospital',
-                labelWidth: '100%',
-                fieldLabel: 'Стационар',
-                margin: 0
-            }
-        ]
-    }],
+
 
     getNearest: function (coord) {
         var me = this;
@@ -282,13 +171,10 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MapService', {
 
     constructor: function (options) {
         var me = this;
-        me.markerClick = options.markerClick;
         me.filterBrigadeArray = options.filterBrigadeArray;
         me.filterCallArray = options.filterCallArray;
-        me.urlGeodata = options.urlGeodata;
         me.urlOpenStreetServerTiles = options.urlOpenStreetServerTiles;
         me.urlOpenStreetServerRoute = options.urlOpenStreetServerRoute;
-        me.getStoreMarkerInfo = options.getStoreMarkerInfo;
         me.map = new ol.Map({
             target: 'mapId',
             layers: [
@@ -369,32 +255,56 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MapService', {
         });
 
     },
+    createBouns: function () {
+        var me = this,
+            arrayLatitude = [],
+            arrayLongitude = [],
+            call = me.callMarkers[0];
+        var coord = call.getGeometry().getCoordinates();
+        var lon = coord[0];
+        var lat = coord[1];
+        arrayLatitude.push(lon);
+        arrayLongitude.push(lat);
+
+        me.brigadesMarkers.forEach(function (brigade) {
+            var coord = brigade.getGeometry().getCoordinates();
+            var lon = coord[0];
+            var lat = coord[1];
+            arrayLatitude.push(lon);
+            arrayLongitude.push(lat);
+        });
+        arrayLatitude.sort(function (a, b) {
+            return a - b
+        });
+        arrayLongitude.sort(function (a, b) {
+            return a - b
+        });
+        me.map.getView().fit([arrayLatitude[0] - 50, arrayLongitude[0], arrayLatitude[arrayLatitude.length - 1], arrayLongitude[arrayLongitude.length - 1]], me.map.getSize(), false);
+    },
 
     addMarkers: function () {
-        var me = this;
-        me.createBouns();
-        me.brigadesMarkers.forEach(function (brigade) {
-            if (brigade.getProperties().customOptions.status !== 'WITHOUT_SHIFT') {
-                brigade.setStyle(me.iconStyle(brigade));
-                me.commonArrayMarkers.push(brigade);
-            }
-        });
+        var me = this,
+            commonArrayMarkers = Ext.Array.filter(me.brigadesMarkers, function (item, index, array) {
+                if (item.getProperties().customOptions.status !== 'WITHOUT_SHIFT') {
+                    item.setStyle(me.iconStyle(item));
+                    return item;
+                }
+            });
         me.callMarkers.forEach(function (call) {
-            if (call.getProperties().customOptions.status !== "COMPLETED") {
-                call.setStyle(me.iconStyle(call));
-                me.commonArrayMarkers.push(call);
-            }
+            call.setStyle(me.iconStyle(call));
+            commonArrayMarkers.push(call);
         });
+
         me.vectorSource = new ol.source.Vector();
-        me.commonArrayMarkers.forEach(function (feature) {
-            me.vectorSource.addFeature(feature);
-        });
+        me.vectorSource.addFeatures(commonArrayMarkers);
         me.vectorLayer = new ol.layer.Vector({
             source: me.vectorSource
         });
         me.createRoute();
         me.map.addLayer(me.vectorLayer);
+        me.createBouns();
     },
+
 
     addMarkersSocket: function (iconFeature) {
         var me = this,
@@ -435,92 +345,11 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MapService', {
         }
     },
 
+
     setMarkers: function (call, brigades) {
-        this.MonitoringBrigade.readMarkers(call, brigades);
+        Isidamaps.app.getController('GlobalController').readMarkers(call, brigades);
     },
 
-    readMarkers: function (call, brigades) {
-        var me = this;
-        me.brigadesMarkers = [];
-        me.callMarkers = [];
-        me.callId = call;
-        me.brigadeId = brigades[0];
-        var t = Ext.Object.toQueryString({
-                brigades: brigades
-            }),
-            urlRoute = Ext.String.format(me.urlGeodata + '/brigade?callcardid={0}&{1}', me.callId, t);
-        me.callStore = Ext.create('Ext.data.Store', {
-            model: 'Isidamaps.model.Call',
-            proxy: {
-                type: 'ajax',
-                url: urlRoute,
-                reader: {
-                    type: 'json',
-                    rootProperty: 'call',
-                    messageProperty: 'msjError'
-                }
-            },
-            autoLoad: false
-        });
-        me.brigadeStore = Ext.create('Ext.data.Store', {
-            model: 'Isidamaps.model.Brigade',
-            proxy: {
-                type: 'ajax',
-                url: urlRoute,
-                reader: {
-                    type: 'json',
-                    rootProperty: 'brigades',
-                    messageProperty: 'msjError'
-                }
-            },
-            autoLoad: false
-        });
-        me.callStore.load(function (records) {
-            records.forEach(function (call) {
-                if (call.get('latitude') !== undefined && call.get('longitude') !== undefined) {
-                    var iconFeature = new ol.Feature({
-                        geometry: new ol.geom.Point(ol.proj.fromLonLat([call.get('longitude'), call.get('latitude')])),
-                        id: call.get('callCardId'),
-                        customOptions: {
-                            objectType: call.get('objectType'),
-                            status: call.get('status'),
-                            callCardNum: call.get('callCardNum'),
-                            station: '' + call.get('station')
-                        },
-                        options: {
-                            iconImageHref: 'resources/icon/' + call.get('iconName')
-                        }
-
-                    });
-                    me.callMarkers.push(iconFeature);
-                }
-            });
-            me.brigadeStore.load(function (records) {
-                records.forEach(function (brigade) {
-                    if (brigade.get('latitude') !== undefined && brigade.get('longitude') !== undefined) {
-                        var iconFeature = new ol.Feature({
-                            geometry: new ol.geom.Point(ol.proj.fromLonLat([brigade.get('longitude'), brigade.get('latitude')])),
-                            id: brigade.get('deviceId'),
-                            customOptions: {
-                                objectType: brigade.get('objectType'),
-                                profile: brigade.get('profile'),
-                                status: brigade.get('status'),
-                                station: brigade.get('station'),
-                                brigadeNum: brigade.get('brigadeNum')
-                            },
-                            options: {
-                                iconImageHref: 'resources/icon/' + brigade.get('iconName')
-                            }
-                        });
-
-                        me.brigadesMarkers.push(iconFeature);
-                    }
-                });
-                me.addMarkers();
-                me.listenerStore();
-            });
-        });
-    },
 
     createCallOfSocked: function (calls) {
         var me = this,
@@ -548,7 +377,7 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MapService', {
             Ext.Array.remove(me.callMarkers, callHas);
             Ext.Array.push(me.callMarkers, iconFeature);
             me.addMarkersSocket(iconFeature);
-            //me.viewModel.getStore('Calls').clearData();
+            Ext.getStore('Isidamaps.store.CallFromWebSockedStore').clearData();
         }
     },
     createBrigadeOfSocked: function (brigades) {
@@ -578,7 +407,7 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MapService', {
             Ext.Array.remove(me.brigadesMarkers, brigadeHas);
             Ext.Array.push(me.brigadesMarkers, iconFeature);
             me.addMarkersSocket(iconFeature);
-            //me.viewModel.getStore('Brigades').clearData();
+            Ext.getStore('Isidamaps.store.BrigadeFromWebSockedStore').clearData();
         }
     },
 
@@ -590,7 +419,8 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MapService', {
     },
     createTableRoute: function () {
         var me = this;
-           // store = me.viewModel.getStore('Route');
+        store = Ext.getStore('Isidamaps.store.RouteForTableStore');
+        console.dir(store);
         me.arrRouteForTable.forEach(function (object) {
             var x = Ext.create('Isidamaps.model.Route');
             x.set('brigadeId', object.brigade.getProperties().id);

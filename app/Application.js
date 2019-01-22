@@ -5,8 +5,8 @@
  */
 Ext.define('Isidamaps.Application', {
     extend: 'Ext.app.Application',
-    requires: ['Isidamaps.services.monitoringView.Monitoring',
-        'Isidamaps.services.monitoringBrigadeOnCallView.MonitoringBrigade',
+    requires: ['Isidamaps.services.monitoring.Monitoring',
+        'Isidamaps.services.monitoringBrigadeOnCall.MonitoringBrigade',
         'Isidamaps.services.brigadeForAssign.BrigadeForAssign',
         'Isidamaps.services.callHistory.CallHistory'
     ],
@@ -21,7 +21,8 @@ Ext.define('Isidamaps.Application', {
         'Isidamaps.store.BrigadeFromWebSockedStore',
         'Isidamaps.store.CallFromWebSockedStore',
         'Isidamaps.store.CallInfoStore',
-        'Isidamaps.store.BrigadeInfoStore'
+        'Isidamaps.store.BrigadeInfoStore',
+        'Isidamaps.store.RouteForTableStore'
     ],
 
     routes: {

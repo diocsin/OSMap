@@ -4,6 +4,8 @@ Ext.define('Isidamaps.global.GlobalController', {
     urlGeodata: null,
     urlWebSocket: null,
     stationArray: [],
+    callId: null,
+    brigadeId: null,
     urlOpenStreetServerTiles: null,
     urlOpenStreetServerRoute: null,
     brigadeStatusesMap: (function () {
@@ -56,15 +58,15 @@ Ext.define('Isidamaps.global.GlobalController', {
         var me = this;
         message.deviceId = '' + message.deviceId;
         if (message.objectType === 'BRIGADE') {
-            if (me.MonitoringBrigade.brigadeId === message.deviceId) {
-                var storeBrigades = me.getViewModel().getStore('Brigades');
+            if (me.brigadeId === message.deviceId) {
+                var storeBrigades = me.getStore('Isidamaps.store.BrigadeFromWebSockedStore');
                 storeBrigades.add(message);
             }
         }
 
         if (message.objectType === 'CALL') {
-            if (me.MonitoringBrigade.callId === message.deviceId) {
-                var storeCalls = me.getViewModel().getStore('Calls');
+            if (me.callId === message.deviceId) {
+                var storeCalls = me.getStore('Isidamaps.store.CallFromWebSockedStore');
                 storeCalls.add(message);
             }
         }
@@ -112,5 +114,33 @@ Ext.define('Isidamaps.global.GlobalController', {
             params: paramsCalls,
         });
         me.connectWebSocked('monitoring');
+    },
+    readMarkers: function (call, brigades) {
+        const me = this,
+            brigadeStore = me.getStore('Isidamaps.store.BrigadesFirstLoadStore'),
+            callStore = me.getStore('Isidamaps.store.CallsFirstLoadStore');
+        me.callId = call;
+        me.brigadeId = brigades[0];
+        const params = {
+            callcardid: me.callId,
+            brigades: me.brigadeId
+        };
+        brigadeStore.getProxy().getReader().setRootProperty('brigades');
+        callStore.getProxy().getReader().setRootProperty('call');
+        brigadeStore.load({
+            url: Ext.String.format(me.urlGeodata + '/brigade?'),
+            params: params
+
+        });
+        callStore.load({
+            url: Ext.String.format(me.urlGeodata + '/brigade?'),
+            params: params,
+
+        });
+        me.connectWebSocked();
+    },
+
+    windowClose: function () {
+        window.close();
     }
 });

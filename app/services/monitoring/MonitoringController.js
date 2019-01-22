@@ -1,4 +1,4 @@
-Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
+Ext.define('Isidamaps.services.monitoring.MonitoringController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.monitoring',
     Monitoring: null,
@@ -260,7 +260,7 @@ Ext.define('Isidamaps.services.monitoringView.MonitoringController', {
     createMap: function () {
         const me = this;
         me.urlOpenStreetServerTiles = Isidamaps.app.getController('GlobalController').urlOpenStreetServerTiles;
-        me.Monitoring = Ext.create('Isidamaps.services.monitoringView.MapService', {
+        me.Monitoring = Ext.create('Isidamaps.services.monitoring.MapService', {
             filterBrigadeArray: me.filterBrigadeArray,
             filterCallArray: me.filterCallArray,
             urlGeodata: me.urlGeodata,

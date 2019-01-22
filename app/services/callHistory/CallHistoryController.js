@@ -1,18 +1,10 @@
 Ext.define('Isidamaps.services.callHistory.CallHistoryController', {
-    extend: 'Isidamaps.services.monitoringView.MonitoringController',
+    extend: 'Isidamaps.services.monitoring.MonitoringController',
     alias: 'controller.callhistory',
     CallHistory: null,
-    urlGeodata: null,
     urlOpenStreetServerTiles: null,
-    listen: {
-        global: {
-            windowClose: 'windowClose'
-        }
-    },
 
-    windowClose: function () {
-        window.close();
-    },
+
 
     createMap: function () {
         var me = this;

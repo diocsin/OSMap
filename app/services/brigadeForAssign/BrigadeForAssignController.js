@@ -1,5 +1,5 @@
 Ext.define('Isidamaps.services.brigadeForAssign.BrigadeForAssignController', {
-    extend: 'Isidamaps.services.monitoringView.MonitoringController',
+    extend: 'Isidamaps.services.monitoring.MonitoringController',
     alias: 'controller.brigadeforassign',
     BrigadeForAssign: null,
     urlGeodata: null,

@@ -1,4 +1,4 @@
-Ext.define('Isidamaps.services.monitoringView.MapService', {
+Ext.define('Isidamaps.services.monitoring.MapService', {
     map: null,
     brigadesMarkers: [],
     callMarkers: [],
@@ -8,10 +8,6 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
     urlOpenStreetServerTiles: null,
     vectorLayer: null,
     vectorSource: null,
-    // ====
-    markerClick: Ext.emptyFn,
-    clustersClick: Ext.emptyFn,
-    // ====
 
     iconStyle: function (feature) {
         const icon = feature.getProperties().options.iconImageHref;
@@ -301,6 +297,7 @@ Ext.define('Isidamaps.services.monitoringView.MapService', {
     storeCall: function (records) {
         const me = this;
         records.forEach(function (call) {
+            console.dir(call);
             if (call.get('latitude') !== undefined && call.get('longitude') !== undefined) {
                 const iconFeature = new ol.Feature({
                     geometry: new ol.geom.Point(ol.proj.fromLonLat([call.get('longitude'), call.get('latitude')])),

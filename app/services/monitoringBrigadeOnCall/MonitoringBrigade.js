@@ -1,10 +1,10 @@
-Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MonitoringBrigade', {
+Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MonitoringBrigade', {
     extend: 'Ext.panel.Panel',
     xtype: 'monitoringBrigade',
 
-    requires: ['Isidamaps.view.routeBrigadeView.RouteBrigadeView',
-        'Isidamaps.services.monitoringBrigadeOnCallView.MonitoringBrigadeController',
-        'Isidamaps.services.monitoringBrigadeOnCallView.MapService',
+        requires: ['Isidamaps.view.routeBrigadeView.RouteBrigadeView',
+        'Isidamaps.services.monitoringBrigadeOnCall.MonitoringBrigadeController',
+        'Isidamaps.services.monitoringBrigadeOnCall.MapService',
         'Isidamaps.view.clusterView.ClusterInfo',
         'Isidamaps.view.markerView.CallInfoWindow',
         'Isidamaps.view.markerView.BrigadeInfoWindow'

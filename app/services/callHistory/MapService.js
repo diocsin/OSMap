@@ -1,5 +1,5 @@
 Ext.define('Isidamaps.services.callHistory.MapService', {
-    extend: 'Isidamaps.services.monitoringView.MapService',
+    extend: 'Isidamaps.services.monitoring.MapService',
     map: null,
     callMarker: null,
     callMarkers: [],

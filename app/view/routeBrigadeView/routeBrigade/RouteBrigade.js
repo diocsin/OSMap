@@ -2,7 +2,7 @@ Ext.define('Isidamaps.view.routeBrigadeView.routeBrigade.RouteBrigade', {
     extend: 'Ext.grid.Panel',
     alias: 'widget.routeBrigadeView-routeBrigade',
     border: false,
-    bind: '{Route}',
+    store: 'Isidamaps.store.RouteForTableStore',
 
     viewConfig: {
         markDirty: false
@@ -52,7 +52,7 @@ Ext.define('Isidamaps.view.routeBrigadeView.routeBrigade.RouteBrigade', {
                 text: 'Закрыть карту',
                 listeners: {
                     click: function () {
-                        Ext.fireEvent('windowClose');
+                        Isidamaps.app.getController('GlobalController').windowClose();
                     }
                 }
             }
