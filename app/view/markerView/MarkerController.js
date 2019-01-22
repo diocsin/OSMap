@@ -8,7 +8,7 @@ Ext.define('Isidamaps.view.markerView.MarkerController', {
         if (win) {
             win.close();
         }
-        const storeMarker = Isidamaps.getApplication().getController('GlobalController').getStoreMarkerInfo(object),
+        const storeMarker = Isidamaps.app.getController('GlobalController').getStoreMarkerInfo(object),
          params = {
             objecttype: object.getProperties().customOptions.objectType,
             objectid: object.getProperties().id
@@ -38,10 +38,10 @@ Ext.define('Isidamaps.view.markerView.MarkerController', {
                     return;
                 }
                 // FIXME define formula in VM
-                const status = Isidamaps.getApplication().getController('GlobalController').brigadeStatusesMap.get(records[0].get('status')) || 'Неизвестно',
+                const status = Isidamaps.app.getController('GlobalController').brigadeStatusesMap.get(records[0].get('status')) || 'Неизвестно',
                     record = records[0];
                 record.set('status', status);
-                const brigadeInfoWidget = Ext.widget('brigadeInfoWindow'),
+                const brigadeInfoWidget = Ext.widget('brigadeInfo'),
                     brigadeInfoViewModel = brigadeInfoWidget.getViewModel();
                 brigadeInfoViewModel.set('record', record);
                 brigadeInfoWidget.show()/*At(coord)*/;

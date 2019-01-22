@@ -34,15 +34,15 @@ Ext.define('Isidamaps.global.GlobalController', {
         });
     },
 
-    connect: function () {
+    connectWebSocked: function (service) {
         const me = this,
             socket = new SockJS(me.urlWebSocket + '/geo');
         me.stompClient = Stomp.over(socket);
         me.stompClient.connect({}, function (frame) {
                 console.log('Connected: ' + frame);
                 me.stompClient.subscribe('/geo-queue/geodata-updates', function (msg) {
-                    console.dir(msg);
-                    me.loadSocketData(JSON.parse(msg.body));
+                    service === 'monitoring' ? me.loadSocketData(JSON.parse(msg.body)) : me.loadSocketDataForMonitoringBrigade(JSON.parse(msg.body));
+
                 });
             }.bind(me),
             function (e) {
@@ -52,54 +52,46 @@ Ext.define('Isidamaps.global.GlobalController', {
         );
     },
 
+    loadSocketDataForMonitoringBrigade: function (message) {
+        var me = this;
+        message.deviceId = '' + message.deviceId;
+        if (message.objectType === 'BRIGADE') {
+            if (me.MonitoringBrigade.brigadeId === message.deviceId) {
+                var storeBrigades = me.getViewModel().getStore('Brigades');
+                storeBrigades.add(message);
+            }
+        }
+
+        if (message.objectType === 'CALL') {
+            if (me.MonitoringBrigade.callId === message.deviceId) {
+                var storeCalls = me.getViewModel().getStore('Calls');
+                storeCalls.add(message);
+            }
+        }
+    },
+
     loadSocketData: function (message) {
         const me = this;
-        console.dir(message);
         message.station = '' + message.station;
         if (me.stationArray.indexOf(message.station) === -1) {
             return;
         }
-        const store = me.getViewModel().getStore(message.objectType === 'BRIGADE' ? 'Brigades' : 'Calls');
+        const store = me.getStore(message.objectType === 'BRIGADE' ? 'Isidamaps.store.BrigadeFromWebSockedStore' : 'Isidamaps.store.CallFromWebSockedStore');
         store.add(message);
     },
 
     getStoreMarkerInfo: function (object) {
         const me = this,
             urlInfoMarker = me.urlGeodata + '/info';
-        if (object.getProperties().customOptions.objectType === 'BRIGADE') {
-            return Ext.create('Ext.data.Store', {
-                model: 'Isidamaps.model.InfoBrigade',
-                proxy: {
-                    type: 'ajax',
-                    url: urlInfoMarker,
-                    reader: {
-                        type: 'json',
-                        rootProperty: 'additionalInfo.brigade'
-                    }
-                },
-                autoLoad: false
-            });
-        }
-
-        if (object.getProperties().customOptions.objectType === 'CALL') {
-            return Ext.create('Ext.data.Store', {
-                model: 'Isidamaps.model.InfoCall',
-                proxy: {
-                    type: 'ajax',
-                    url: urlInfoMarker,
-                    reader: {
-                        type: 'json',
-                        rootProperty: 'additionalInfo.call'
-                    }
-                },
-                autoLoad: false
-            });
-        }
+        const store = me.getStore(object.getProperties().customOptions.objectType === 'BRIGADE' ? 'Isidamaps.store.BrigadeInfoStore' : 'Isidamaps.store.CallInfoStore');
+        store.getProxy().setUrl(urlInfoMarker);
+        return store;
     },
+
     readStation: function (station) {
         const me = this,
-            brigadeStore = me.getStore('Isidamaps.store.BrigadesFirstLoad'),
-            callStore = me.getStore('Isidamaps.store.CallsFirstLoad');
+            brigadeStore = me.getStore('Isidamaps.store.BrigadesFirstLoadStore'),
+            callStore = me.getStore('Isidamaps.store.CallsFirstLoadStore');
         station.forEach(function (st) {
             me.stationArray.push(Ext.String.trim(st));
         });
@@ -119,6 +111,6 @@ Ext.define('Isidamaps.global.GlobalController', {
             url: Ext.String.format(me.urlGeodata + '/call'),
             params: paramsCalls,
         });
-        me.connect();
+        me.connectWebSocked('monitoring');
     }
 });

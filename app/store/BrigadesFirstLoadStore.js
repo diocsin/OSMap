@@ -1,4 +1,4 @@
-Ext.define('Isidamaps.store.BrigadesFirstLoad', {
+Ext.define('Isidamaps.store.BrigadesFirstLoadStore', {
     extend: 'Ext.data.Store',
     model: 'Isidamaps.model.Brigade',
     proxy: {

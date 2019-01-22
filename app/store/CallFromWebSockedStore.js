@@ -1,7 +1,7 @@
-Ext.define('Isidamaps.store.BrigadeInWebSocked', {
+Ext.define('Isidamaps.store.CallFromWebSockedStore', {
     extend: 'Ext.data.Store',
-    id: 'brigadesId',
-    model: 'Isidamaps.model.Brigade',
+    alias: 'CallFromWebSocked',
+    model: 'Isidamaps.model.Call',
     proxy: {
         type: 'memory',
         reader: {

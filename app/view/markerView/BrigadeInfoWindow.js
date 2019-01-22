@@ -1,6 +1,6 @@
 Ext.define('Isidamaps.view.markerView.BrigadeInfoWindow', {
     extend: 'Ext.window.Window',
-    alias: 'widget.brigadeInfoWindow',
+    alias: 'widget.brigadeInfo',
     controller: 'MarkerController',
     viewModel: true,
     title: 'Бригада',

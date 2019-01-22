@@ -2,7 +2,6 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MapService', {
     extend: 'Isidamaps.services.callHistory.MapService',
     map: null,
     callsModel: null,
-    viewModel: null,
     brigadeId: null,
     callId: null,
     brigadesMarkers: [],
@@ -284,7 +283,6 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MapService', {
     constructor: function (options) {
         var me = this;
         me.markerClick = options.markerClick;
-        me.viewModel = options.viewModel;
         me.filterBrigadeArray = options.filterBrigadeArray;
         me.filterCallArray = options.filterCallArray;
         me.urlGeodata = options.urlGeodata;
@@ -523,15 +521,6 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MapService', {
             });
         });
     },
-    listenerStore: function () {
-        var me = this;
-        me.viewModel.getStore('Brigades').on('add', function (store, records, index) {
-            this.createBrigadeOfSocked(records)
-        }, this);
-        me.viewModel.getStore('Calls').on('add', function (store, records, index) {
-            this.createCallOfSocked(records)
-        }, this);
-    },
 
     createCallOfSocked: function (calls) {
         var me = this,
@@ -559,7 +548,7 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MapService', {
             Ext.Array.remove(me.callMarkers, callHas);
             Ext.Array.push(me.callMarkers, iconFeature);
             me.addMarkersSocket(iconFeature);
-            me.viewModel.getStore('Calls').clearData();
+            //me.viewModel.getStore('Calls').clearData();
         }
     },
     createBrigadeOfSocked: function (brigades) {
@@ -589,7 +578,7 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MapService', {
             Ext.Array.remove(me.brigadesMarkers, brigadeHas);
             Ext.Array.push(me.brigadesMarkers, iconFeature);
             me.addMarkersSocket(iconFeature);
-            me.viewModel.getStore('Brigades').clearData();
+            //me.viewModel.getStore('Brigades').clearData();
         }
     },
 
@@ -600,8 +589,8 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCallView.MapService', {
 
     },
     createTableRoute: function () {
-        var me = this,
-            store = me.viewModel.getStore('Route');
+        var me = this;
+           // store = me.viewModel.getStore('Route');
         me.arrRouteForTable.forEach(function (object) {
             var x = Ext.create('Isidamaps.model.Route');
             x.set('brigadeId', object.brigade.getProperties().id);
