@@ -5,7 +5,6 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MonitoringBrigadeControll
     filterBrigadeArray: [],
     filterCallArray: [],
     urlOpenStreetServerRoute: null,
-    urlOpenStreetServerTiles: null,
 
     mainBoxReady: function () {
         const me = this;

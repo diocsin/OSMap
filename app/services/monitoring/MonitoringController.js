@@ -4,9 +4,6 @@ Ext.define('Isidamaps.services.monitoring.MonitoringController', {
     Monitoring: null,
     filterBrigadeArray: [],
     filterCallArray: [],
-    stompClient: null,
-    urlGeodata: null,
-    urlOpenStreetServerRoute: null,
     urlOpenStreetServerTiles: null,
     listen: {
         global: {
@@ -263,7 +260,6 @@ Ext.define('Isidamaps.services.monitoring.MonitoringController', {
         me.Monitoring = Ext.create('Isidamaps.services.monitoring.MapService', {
             filterBrigadeArray: me.filterBrigadeArray,
             filterCallArray: me.filterCallArray,
-            urlGeodata: me.urlGeodata,
             urlOpenStreetServerTiles: me.urlOpenStreetServerTiles
         });
         me.Monitoring.listenerStore();
