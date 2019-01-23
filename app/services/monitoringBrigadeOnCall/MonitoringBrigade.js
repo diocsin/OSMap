@@ -2,7 +2,7 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MonitoringBrigade', {
     extend: 'Ext.panel.Panel',
     xtype: 'monitoringBrigade',
 
-        requires: ['Isidamaps.view.routeBrigadeView.RouteBrigadeView',
+        requires: ['Isidamaps.view.routeHistoryView.RouteHistoryView',
         'Isidamaps.services.monitoringBrigadeOnCall.MonitoringBrigadeController',
         'Isidamaps.services.monitoringBrigadeOnCall.MapService',
         'Isidamaps.view.clusterView.ClusterInfo',
@@ -27,7 +27,8 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MonitoringBrigade', {
         expandToolText: 'Открыть панель',
 
         items: [{
-            xtype: 'routeBrigadeView-routeBrigade',
+            title: 'Параметры доезда',
+            xtype: 'routeHistoryView-routeHistory',
         }]
     },  {
         xtype: 'container',

@@ -16,7 +16,7 @@ Ext.define('Isidamaps.services.callHistory.CallHistory', {
         region: 'west',
         reference: 'navigationPanel',
         publishes: 'size',
-        width: 400,
+        width: 350,
         floatable: true,
         collapsible: true,
         titleAlign: 'center',
