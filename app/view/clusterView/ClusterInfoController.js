@@ -39,7 +39,7 @@ Ext.define('Isidamaps.view.clusterView.ClusterInfoController', {
                     margin: 5,
                     listeners: {
                         click: function () {
-                            const storeMarker = Isidamaps.app.getController('GlobalController').getStoreMarkerInfo(marker);
+                            const storeMarker = Isidamaps.app.getController('AppController').getStoreMarkerInfo(marker);
                             infoHolder.removeAll();
                             storeMarker.load({
                                 params: params,
@@ -66,7 +66,7 @@ Ext.define('Isidamaps.view.clusterView.ClusterInfoController', {
                     margin: 5,
                     listeners: {
                         click: function () {
-                            const storeMarker = Isidamaps.app.getController('GlobalController').getStoreMarkerInfo(marker);
+                            const storeMarker = Isidamaps.app.getController('AppController').getStoreMarkerInfo(marker);
                             infoHolder.removeAll();
                             storeMarker.load({
                                 params: params,
@@ -77,7 +77,7 @@ Ext.define('Isidamaps.view.clusterView.ClusterInfoController', {
                                     }
                                     // FIXME formula?
                                     const record = records[0];
-                                    record.set('status', Isidamaps.app.getController('GlobalController').brigadeStatusesMap.get(records[0].get('status') || 'Неизвестно'));
+                                    record.set('status', Isidamaps.app.getController('AppController').brigadeStatusesMap.get(records[0].get('status') || 'Неизвестно'));
                                     const brigadeInfoForm = Ext.widget('brigadeInfoForm'),
                                         brigadeInfoViewModel = brigadeInfoForm.getViewModel();
                                     brigadeInfoViewModel.set('record', record);

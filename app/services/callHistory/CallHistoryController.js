@@ -2,22 +2,16 @@ Ext.define('Isidamaps.services.callHistory.CallHistoryController', {
     extend: 'Isidamaps.services.monitoring.MonitoringController',
     alias: 'controller.callhistory',
     CallHistory: null,
-    urlOpenStreetServerTiles: null,
-
-
 
     createMap: function () {
         var me = this;
-
+        me.urlOpenStreetServerTiles = Isidamaps.app.getController('AppController').urlOpenStreetServerTiles;
         me.CallHistory = Ext.create('Isidamaps.services.callHistory.MapService', {
-            viewModel: me.getViewModel(),
-            markerClick: me.markerClick,
-            clustersClick: me.clustersClick,
-            urlGeodata: me.urlGeodata,
-            getStoreMarkerInfo: me.getStoreMarkerInfo,
             urlOpenStreetServerTiles: me.urlOpenStreetServerTiles
         });
+        me.CallHistory.listenerStore();
         me.CallHistory.optionsObjectManager();
+        Isidamaps.app.getController('AppController').readMarkersForCallHistory('104055877');
         ASOV.setMapManager({
             setMarkers: me.CallHistory.setMarkers.bind(this)
         }, Ext.History.currentToken);

@@ -1,6 +1,6 @@
-Ext.define('Isidamaps.global.GlobalController', {
+Ext.define('Isidamaps.controller.AppController', {
     extend: 'Ext.app.Controller',
-    id: 'GlobalController',
+    alias: 'controller.AppController',
     urlGeodata: null,
     urlWebSocket: null,
     stationArray: [],
@@ -127,6 +127,7 @@ Ext.define('Isidamaps.global.GlobalController', {
         };
         brigadeStore.getProxy().getReader().setRootProperty('brigades');
         callStore.getProxy().getReader().setRootProperty('call');
+
         brigadeStore.load({
             url: Ext.String.format(me.urlGeodata + '/brigade?'),
             params: params
@@ -138,6 +139,34 @@ Ext.define('Isidamaps.global.GlobalController', {
 
         });
         me.connectWebSocked();
+    },
+
+    readMarkersForCallHistory: function (call) {
+        const me = this,
+            callStore = me.getStore('Isidamaps.store.CallsFirstLoadStore'),
+            brigadeStore = me.getStore('Isidamaps.store.BrigadesFirstLoadStore'),
+            routeHistoryStore = me.getStore('Isidamaps.store.RouteHistoryStore'),
+            factRouteHistoryStore = me.getStore('Isidamaps.store.FactRouteHistoryStore'),
+            params = {
+                callcardid: call
+            };
+        callStore.getProxy().getReader().setRootProperty('call');
+        loadStore(callStore, '/route?', params);
+        loadStore(callStore, '/route/fact?', params);
+        brigadeStore.getProxy().getReader().setRootProperty('startPoint');
+        loadStore(brigadeStore, '/route/fact?', params);
+        brigadeStore.getProxy().getReader().setRootProperty('endPoint');
+        loadStore(brigadeStore, '/route/fact?', params);
+        loadStore(routeHistoryStore, '/route?', params);
+        loadStore(factRouteHistoryStore, '/route/fact?', params);
+
+        function loadStore(store, url, params) {
+            store.load({
+                url: Ext.String.format(me.urlGeodata + url),
+                params: params,
+
+            });
+        }
     },
 
     windowClose: function () {

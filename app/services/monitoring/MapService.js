@@ -4,8 +4,8 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
     callMarkers: [],
     filterBrigadeArray: [],
     filterCallArray: [],
-    station: [],
     urlOpenStreetServerTiles: null,
+    urlOpenStreetServerRoute: null,
     vectorLayer: null,
     vectorSource: null,
 
@@ -46,10 +46,60 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
             return new ol.style.Style({
                 image: new ol.style.Icon(/** @type {module:ol/style/Icon~Options} */ ({
                     src: icon,
-                    scale: 0.5,
+                    scale: 0.4,
                 })),
             });
         }
+
+    },
+
+    createBouns: function () {
+        var me = this,
+            arrayLatitude = [],
+            arrayLongitude = [],
+            call = me.callMarkers[0];
+
+        var coord = call.getGeometry().getCoordinates();
+        var lon = coord[0];
+        var lat = coord[1];
+        arrayLatitude.push(lon);
+        arrayLongitude.push(lat);
+
+        me.brigadesMarkers.forEach(function (brigade) {
+            var coord = brigade.getGeometry().getCoordinates();
+            var lon = coord[0];
+            var lat = coord[1];
+            arrayLatitude.push(lon);
+            arrayLongitude.push(lat);
+        });
+        arrayLatitude.sort(function (a, b) {
+            return a - b
+        });
+        arrayLongitude.sort(function (a, b) {
+            return a - b
+        });
+        me.map.getView().fit([arrayLatitude[0] - 50, arrayLongitude[0], arrayLatitude[arrayLatitude.length - 1], arrayLongitude[arrayLongitude.length - 1]], me.map.getSize(), false);
+    },
+
+
+    createMap: function(){
+        const me = this;
+       return new ol.Map({
+           target: 'mapId',
+           layers: [
+               new ol.layer.Tile({
+                   source: new ol.source.OSM({
+                       url: me.urlOpenStreetServerTiles + '/{z}/{x}/{y}.png',
+                       maxZoom: 19,
+                       crossOrigin: null
+                   })
+               })
+           ],
+           view: new ol.View({
+               center: ol.proj.fromLonLat([27.5458, 53.8939]),
+               zoom: 12
+           })
+       });
 
     },
 
@@ -58,22 +108,7 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
         me.filterBrigadeArray = options.filterBrigadeArray;
         me.filterCallArray = options.filterCallArray;
         me.urlOpenStreetServerTiles = options.urlOpenStreetServerTiles;
-        me.map = new ol.Map({
-            target: 'mapId',
-            layers: [
-                new ol.layer.Tile({
-                    source: new ol.source.OSM({
-                        url: me.urlOpenStreetServerTiles + '/{z}/{x}/{y}.png',
-                        maxZoom: 19,
-                        crossOrigin: null
-                    })
-                })
-            ],
-            view: new ol.View({
-                center: ol.proj.fromLonLat([27.5458, 53.8939]),
-                zoom: 12
-            })
-        });
+        me.map = me.createMap();
     },
 
     clusterOptions: function () {
@@ -291,7 +326,7 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
 
     setStation: function (s) {
         const me = this;
-        Isidamaps.app.getController('GlobalController').readStation(s);
+        Isidamaps.app.getController('AppController').readStation(s);
     },
 
     storeCall: function (records) {
@@ -436,5 +471,25 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
     resizeMap: function (Monitoring) {
         const div = Ext.get('mapId');
         Monitoring.map.setSize([div.getWidth(), div.getHeight()]);
+    },
+
+    to4326: function (coord) {
+        return ol.proj.transform([
+            parseFloat(coord[0]), parseFloat(coord[1])
+        ], 'EPSG:3857', 'EPSG:4326');
+    },
+    createTableRoute: function () {
+        var me = this,
+        store = Ext.getStore('Isidamaps.store.RouteForTableStore');
+        me.arrRouteForTable.forEach(function (object) {
+            var x = Ext.create('Isidamaps.model.Route');
+            x.set('brigadeId', object.brigade.getProperties().id);
+            x.set('brigadeNum', object.brigade.getProperties().customOptions.brigadeNum);
+            x.set('profile', object.brigade.getProperties().customOptions.profile);
+            x.set('distance', (object.route.routes[0].distance / 1000).toFixed(1));
+            x.set('time', (object.route.routes[0].duration / 60).toFixed(0));
+            store.add(x);
+        });
     }
+
 });

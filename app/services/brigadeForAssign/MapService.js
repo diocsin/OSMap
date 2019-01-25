@@ -1,46 +1,15 @@
 Ext.define('Isidamaps.services.brigadeForAssign.MapService', {
-    extend: 'Isidamaps.services.callHistory.MapService',
-    map: null,
+    extend: 'Isidamaps.services.monitoring.MapService',
     points: [],
-    objectManager: null,
-    callMarkers: [],
-    brigadesMarkers: [],
     vectorSource: null,
     vectorLayer: null,
-    viewModel: null,
     arrRoute: [],
     arrpoints: [],
     brigades: [],
-    urlGeodata: null,
     arrRouteForTable: [],
     errorBrigades: [],
     arrayRoute: [],
-    urlOpenStreetServerRoute: null,
-    urlOpenStreetServerTiles: null,
     callCoord: null,
-
-
-    // ====.
-    markerClick: Ext.emptyFn,
-    clustersClick: Ext.emptyFn,
-    // ====
-
-    getNearest: function (coord) {
-        var me = this;
-        var coord4326 = this.to4326(coord);
-        var t = [(parseInt(coord4326[0] * 10000)) / 10000, (parseInt(coord4326[1] * 10000)) / 10000];
-        return new Promise(function (resolve, reject) {
-            //make sure the coord is on street
-
-            fetch(me.urlOpenStreetServerRoute + '/nearest/v1/driving/' + t.join()).then(function (response) {
-                // Convert to JSON
-                return response.json();
-            }).then(function (json) {
-                if (json.code === 'Ok') resolve(json.waypoints[0].location);
-                else reject();
-            });
-        });
-    },
 
     createRoute: function () {
         var me = this;
@@ -115,8 +84,6 @@ Ext.define('Isidamaps.services.brigadeForAssign.MapService', {
                                     me.createTableRoute();
                                     me.callback();
                                     me.arrpoints = [];
-
-
                                 }
 
                                 else {
@@ -140,38 +107,14 @@ Ext.define('Isidamaps.services.brigadeForAssign.MapService', {
 
 
     },
-    to4326: function (coord) {
-        return ol.proj.transform([
-            parseFloat(coord[0]), parseFloat(coord[1])
-        ], 'EPSG:3857', 'EPSG:4326');
-    },
+
 
     constructor: function (options) {
         var me = this;
         me.vectorSource = new ol.source.Vector({});
-        me.markerClick = options.markerClick;
-        me.clustersClick = options.clustersClick;
-        me.viewModel = options.viewModel;
-        me.getStoreMarkerInfo = options.getStoreMarkerInfo;
-        me.urlGeodata = options.urlGeodata;
         me.urlOpenStreetServerRoute = options.urlOpenStreetServerRoute;
         me.urlOpenStreetServerTiles = options.urlOpenStreetServerTiles;
-        me.map = new ol.Map({
-            target: 'mapId',
-            layers: [
-                new ol.layer.Tile({
-                    source: new ol.source.OSM({
-                        url: me.urlOpenStreetServerTiles + '/{z}/{x}/{y}.png',
-                        maxZoom: 19,
-                        crossOrigin: null
-                    })
-                })
-            ],
-            view: new ol.View({
-                center: ol.proj.fromLonLat([27.5458, 53.8939]),
-                zoom: 12
-            })
-        });
+        me.map = me.createMap();
 
     },
 
@@ -421,23 +364,6 @@ Ext.define('Isidamaps.services.brigadeForAssign.MapService', {
                 me.createMarkers();
             });
         });
-    },
-
-    createTableRoute: function () {
-        var me = this;
-        if (me.arrRouteForTable.length === me.brigadesMarkers.length) {
-            var store = me.viewModel.getStore('Routes');
-            me.arrRouteForTable.forEach(function (object) {
-                var x = Ext.create('Isidamaps.model.Route');
-                x.set('checkBox', false);
-                x.set('brigadeId', object.brigade.getProperties().id);
-                x.set('brigadeNum', object.brigade.getProperties().customOptions.brigadeNum);
-                x.set('profile', object.brigade.getProperties().customOptions.profile);
-                x.set('distance', (object.route.routes[0].distance / 1000).toFixed(1));
-                x.set('time', (object.route.routes[0].duration / 60).toFixed(0));
-                store.add(x);
-            });
-        }
     }
 
 });

@@ -10,7 +10,7 @@ Ext.define('Isidamaps.Application', {
         'Isidamaps.services.brigadeForAssign.BrigadeForAssign',
         'Isidamaps.services.callHistory.CallHistory'
     ],
-    controllers: 'Isidamaps.global.GlobalController',
+    controllers: 'Isidamaps.controller.AppController',
 
     name: 'Isidamaps',
 
@@ -22,7 +22,9 @@ Ext.define('Isidamaps.Application', {
         'Isidamaps.store.CallFromWebSockedStore',
         'Isidamaps.store.CallInfoStore',
         'Isidamaps.store.BrigadeInfoStore',
-        'Isidamaps.store.RouteForTableStore'
+        'Isidamaps.store.RouteForTableStore',
+        'Isidamaps.store.RouteHistoryStore',
+        'Isidamaps.store.FactRouteHistoryStore'
     ],
 
     routes: {

@@ -5,6 +5,7 @@ Ext.define('Isidamaps.services.monitoring.MonitoringController', {
     filterBrigadeArray: [],
     filterCallArray: [],
     urlOpenStreetServerTiles: null,
+    urlOpenStreetServerRoute: null,
     listen: {
         global: {
             checkedProfileBrigade: 'checkedProfileBrigade',
@@ -256,7 +257,7 @@ Ext.define('Isidamaps.services.monitoring.MonitoringController', {
 
     createMap: function () {
         const me = this;
-        me.urlOpenStreetServerTiles = Isidamaps.app.getController('GlobalController').urlOpenStreetServerTiles;
+        me.urlOpenStreetServerTiles = Isidamaps.app.getController('AppController').urlOpenStreetServerTiles;
         me.Monitoring = Ext.create('Isidamaps.services.monitoring.MapService', {
             filterBrigadeArray: me.filterBrigadeArray,
             filterCallArray: me.filterCallArray,
@@ -267,8 +268,7 @@ Ext.define('Isidamaps.services.monitoring.MonitoringController', {
         ASOV.setMapManager({
             setStation: me.Monitoring.setStation.bind(me)
         }, Ext.History.currentToken);
-       // me.Monitoring.setStation(['9']);
-        Isidamaps.app.getController('GlobalController').readStation(['9']);
+        Isidamaps.app.getController('AppController').readStation(['9']);
         const ymapWrapper = me.lookupReference('ymapWrapper');
         ymapWrapper.on('resize', function () {
             me.Monitoring.resizeMap(me.Monitoring);
@@ -282,7 +282,7 @@ Ext.define('Isidamaps.services.monitoring.MonitoringController', {
     addStationFilter: function () {
         const me = this,
             checkboxStation = me.lookupReference('stationFilter'),
-            records = Isidamaps.app.getController('GlobalController').stationArray;
+            records = Isidamaps.app.getController('AppController').stationArray;
         records.forEach(function (rec) {
             checkboxStation.add(Ext.create('Ext.form.field.Checkbox', {
                 boxLabel: rec,
@@ -332,7 +332,7 @@ Ext.define('Isidamaps.services.monitoring.MonitoringController', {
                             const idE = e.getProperties().id,
                                 idF = features.getProperties().id;
                             if (idF === idE) {   //для того что me.markerClick() нужен features
-                                const infoMarker = Isidamaps.app.getController('GlobalController').getStoreMarkerInfo(features);
+                                const infoMarker = Isidamaps.app.getController('AppController').getStoreMarkerInfo(features);
                                 Ext.widget('brigadeInfo').getController().markerClick(features, [r.getXY()[0] + 110, r.getXY()[1] + 30], infoMarker);
                                 me.Monitoring.map.getView().setCenter(features.getProperties().geometry.flatCoordinates);
                                 me.Monitoring.map.getView().setZoom(18);

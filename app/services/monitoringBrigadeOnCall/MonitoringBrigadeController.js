@@ -1,21 +1,12 @@
 Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MonitoringBrigadeController', {
-    extend: 'Ext.app.ViewController',
+    extend:'Isidamaps.services.monitoring.MonitoringController',
     alias: 'controller.monitoringBrigade',
     MonitoringBrigade: null,
-    filterBrigadeArray: [],
-    filterCallArray: [],
-    urlOpenStreetServerRoute: null,
-
-    mainBoxReady: function () {
-        const me = this;
-        Ext.defer(me.createMap, 100, me);
-    },
-
 
     createMap: function () {
         var me = this;
-        me.urlOpenStreetServerTiles = Isidamaps.app.getController('GlobalController').urlOpenStreetServerTiles;
-        me.urlOpenStreetServerRoute = Isidamaps.app.getController('GlobalController').urlOpenStreetServerRoute;
+        me.urlOpenStreetServerTiles = Isidamaps.app.getController('AppController').urlOpenStreetServerTiles;
+        me.urlOpenStreetServerRoute = Isidamaps.app.getController('AppController').urlOpenStreetServerRoute;
         me.MonitoringBrigade = Ext.create('Isidamaps.services.monitoringBrigadeOnCall.MapService', {
             filterBrigadeArray: me.filterBrigadeArray,
             filterCallArray: me.filterCallArray,
@@ -27,7 +18,7 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MonitoringBrigadeControll
         ASOV.setMapManager({
             setMarkers: me.MonitoringBrigade.setMarkers.bind(this)
         }, Ext.History.currentToken);
-        Isidamaps.app.getController('GlobalController').readMarkers('105711138', ['910']);
+        Isidamaps.app.getController('AppController').readMarkers('105711138', ['910']);
         var ymapWrapper = me.lookupReference('ymapWrapper');
         ymapWrapper.on('resize', function () {
             me.MonitoringBrigade.resizeMap(me.MonitoringBrigade);
@@ -37,14 +28,5 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MonitoringBrigadeControll
 
     layoutReady: function () {
         this.fireTabEvent(this.lookupReference('RouteBrigadePanel'));
-    },
-
-    tabChange: function (panel, newTab, oldTab) {
-        oldTab.fireEvent('tabExit');
-        this.fireTabEvent(newTab);
-    },
-
-    fireTabEvent: function (tab) {
-        tab.fireEvent('tabEnter');
     }
 });

@@ -4,12 +4,10 @@ Ext.define('Isidamaps.services.callHistory.CallHistory', {
 
     requires: ['Isidamaps.view.routeHistoryView.RouteHistoryView',
         'Isidamaps.services.callHistory.CallHistoryController',
-        'Isidamaps.services.callHistory.MapService',
-        'Isidamaps.services.callHistory.CallHistoryModel'
+        'Isidamaps.services.callHistory.MapService'
     ],
 
     controller: 'callhistory',
-    viewModel: 'callhistory',
     layout: 'border',
     items: [{
         xtype: 'panel',

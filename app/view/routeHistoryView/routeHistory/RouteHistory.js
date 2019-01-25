@@ -52,7 +52,7 @@ Ext.define('Isidamaps.view.routeHistoryView.routeHistory.RouteHistory', {
                 text: 'Закрыть карту',
                 listeners: {
                     click: function () {
-                       Isidamaps.app.getController('GlobalController').windowClose();
+                       Isidamaps.app.getController('AppController').windowClose();
                     }
                 }
             }

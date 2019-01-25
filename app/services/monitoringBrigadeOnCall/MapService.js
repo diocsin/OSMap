@@ -1,17 +1,7 @@
 Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MapService', {
     extend: 'Isidamaps.services.monitoring.MapService',
-    map: null,
     brigadeId: null,
     callId: null,
-    brigadesMarkers: [],
-    callMarkers: [],
-    filterBrigadeArray: [],
-    filterCallArray: [],
-    station: [],
-    urlGeodata: null,
-    urlOpenStreetServerTiles: null,
-    vectorLayer: null,
-    vectorSource: null,
     arrayRoute: [],
     arrRouteForTable: [],
 
@@ -119,55 +109,6 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MapService', {
 
 
     },
-    to4326: function (coord) {
-        return ol.proj.transform([
-            parseFloat(coord[0]), parseFloat(coord[1])
-        ], 'EPSG:3857', 'EPSG:4326');
-    },
-
-    iconStyle: function (feature) {
-        var icon = feature.getProperties().options.iconImageHref;
-        var textFill = new ol.style.Fill({
-            color: '#00000'
-        });
-        var textFill3 = new ol.style.Stroke({
-            color: '#000000',
-            lineCap: 'round',
-            lineJoin: 'round'
-        });
-        var textFill2 = new ol.style.Fill({
-            color: '#ffffff'
-        });
-        if (feature.getProperties().customOptions.objectType === "BRIGADE") {
-            return new ol.style.Style({
-                image: new ol.style.Icon(/** @type {module:ol/style/Icon~Options} */ ({
-                    src: icon,
-                    scale: 0.5,
-                })),
-
-                text: new ol.style.Text({
-                    text: feature.getProperties().customOptions.brigadeNum + "(" + feature.getProperties().customOptions.profile + ")",
-                    offsetX: 35,
-                    offsetY: -20,
-                    font: '14px sans-serif',
-                    fill: textFill,
-                    padding: [1, 1, 1, 1],
-                    backgroundFill: textFill2,
-                    backgroundStroke: textFill3,
-
-                })
-            });
-        }
-        if (feature.getProperties().customOptions.objectType === "CALL") {
-            return new ol.style.Style({
-                image: new ol.style.Icon(/** @type {module:ol/style/Icon~Options} */ ({
-                    src: icon,
-                    scale: 0.5,
-                })),
-            });
-        }
-
-    },
 
     constructor: function (options) {
         var me = this;
@@ -175,22 +116,7 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MapService', {
         me.filterCallArray = options.filterCallArray;
         me.urlOpenStreetServerTiles = options.urlOpenStreetServerTiles;
         me.urlOpenStreetServerRoute = options.urlOpenStreetServerRoute;
-        me.map = new ol.Map({
-            target: 'mapId',
-            layers: [
-                new ol.layer.Tile({
-                    source: new ol.source.OSM({
-                        url: me.urlOpenStreetServerTiles + '/{z}/{x}/{y}.png',
-                        maxZoom: 19,
-                        crossOrigin: null
-                    })
-                })
-            ],
-            view: new ol.View({
-                center: ol.proj.fromLonLat([27.5458, 53.8939]),
-                zoom: 12
-            })
-        });
+        me.map = me.createMap();
     },
 
 
@@ -347,7 +273,7 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MapService', {
 
 
     setMarkers: function (call, brigades) {
-        Isidamaps.app.getController('GlobalController').readMarkers(call, brigades);
+        Isidamaps.app.getController('AppController').readMarkers(call, brigades);
     },
 
 
@@ -416,19 +342,6 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MapService', {
         var div = Ext.get('mapId');
         Monitoring.map.setSize([div.getWidth(), div.getHeight()]);
 
-    },
-    createTableRoute: function () {
-        var me = this;
-        store = Ext.getStore('Isidamaps.store.RouteForTableStore');
-        console.dir(store);
-        me.arrRouteForTable.forEach(function (object) {
-            var x = Ext.create('Isidamaps.model.Route');
-            x.set('brigadeId', object.brigade.getProperties().id);
-            x.set('brigadeNum', object.brigade.getProperties().customOptions.brigadeNum);
-            x.set('profile', object.brigade.getProperties().customOptions.profile);
-            x.set('distance', (object.route.routes[0].distance / 1000).toFixed(1));
-            x.set('time', (object.route.routes[0].duration / 60).toFixed(0));
-            store.add(x);
-        });
     }
+
 });
