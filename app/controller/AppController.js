@@ -150,23 +150,39 @@ Ext.define('Isidamaps.controller.AppController', {
             params = {
                 callcardid: call
             };
-        callStore.getProxy().getReader().setRootProperty('call');
-        loadStore(callStore, '/route?', params);
-        loadStore(callStore, '/route/fact?', params);
-        brigadeStore.getProxy().getReader().setRootProperty('startPoint');
-        loadStore(brigadeStore, '/route/fact?', params);
-        brigadeStore.getProxy().getReader().setRootProperty('endPoint');
-        loadStore(brigadeStore, '/route/fact?', params);
-        loadStore(routeHistoryStore, '/route?', params);
-        loadStore(factRouteHistoryStore, '/route/fact?', params);
 
-        function loadStore(store, url, params) {
-            store.load({
-                url: Ext.String.format(me.urlGeodata + url),
-                params: params,
+        Ext.Ajax.request({
+            url: me.urlGeodata + '/route?',
+            params: params,
+            method: 'GET',
 
-            });
-        }
+            success: function(response, opts) {
+                var obj = Ext.decode(response.responseText);
+                callStore.add(obj.call);
+                routeHistoryStore.add(obj.brigadeRoute);
+            },
+
+            failure: function(response, opts) {
+                console.log('server-side failure with status code ' + response.status);
+            }
+        });
+        Ext.Ajax.request({
+            url: me.urlGeodata + '/route/fact?',
+            params: params,
+            method: 'GET',
+
+            success: function(response, opts) {
+                var obj = Ext.decode(response.responseText);
+               brigadeStore.add([obj.endPoint, obj.startPoint]);
+                factRouteHistoryStore.add(obj.points);
+                callStore.add(obj.call);
+            },
+
+            failure: function(response, opts) {
+                console.log('server-side failure with status code ' + response.status);
+            }
+        });
+
     },
 
     windowClose: function () {

@@ -2,10 +2,9 @@ Ext.define('Isidamaps.store.FactRouteHistoryStore', {
     extend: 'Ext.data.Store',
     model: 'Isidamaps.model.FactRoute',
     proxy: {
-        type: 'ajax',
+        type: 'memory',
         reader: {
             type: 'json',
-            rootProperty: 'points'
         }
     }
 });

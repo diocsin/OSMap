@@ -2,7 +2,6 @@ Ext.define('Isidamaps.services.callHistory.CallHistoryController', {
     extend: 'Isidamaps.services.monitoring.MonitoringController',
     alias: 'controller.callhistory',
     CallHistory: null,
-
     createMap: function () {
         var me = this;
         me.urlOpenStreetServerTiles = Isidamaps.app.getController('AppController').urlOpenStreetServerTiles;
@@ -21,6 +20,7 @@ Ext.define('Isidamaps.services.callHistory.CallHistoryController', {
             me.CallHistory.resizeMap(me.CallHistory);
         });
     },
+
     layoutReady: function () {
         this.fireTabEvent(this.lookupReference('navigationPanel'));
     }

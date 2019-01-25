@@ -1,14 +1,7 @@
 Ext.define('Isidamaps.services.callHistory.MapService', {
     extend: 'Isidamaps.services.monitoring.MapService',
-    callMarker: null,
-    brigadeRoute: null,
-    factRoute: null,
-    brigadesStartPoint: null,
-    brigadesEndPoint: null,
     arrRouteForTable: [],
     vectorSourceRoute: null,
-    callMarkersFactRoute: [],
-    arrayRoute: [],
 
     constructor: function (options) {
         var me = this;
@@ -22,27 +15,6 @@ Ext.define('Isidamaps.services.callHistory.MapService', {
         });
         me.map.addLayer(vectorLayerRoute);
         me.map.addLayer(me.vectorLayer);
-    },
-
-    checkCreateBouns: function () {
-        var me = this;
-        if (me.brigadesMarkers.length !== 0 && me.callMarkers.length !== 0) {
-            me.createBouns();
-        }
-
-        /* if (me.callMarkers.length < 1) {
-             Ext.create('Ext.window.MessageBox').show({
-                 title: 'Ошибка',
-                 message: 'Нет сохраненных маршрутов',
-                 icon: Ext.Msg.ERROR,
-                 buttons: Ext.Msg.OK
-             });
-         }*/
-
-        // me.vectorSource.addFeatures(me.brigadesMarkers);
-        me.vectorSource.addFeature(feature);
-
-
     },
 
     createPolylineRoute: function (routeList) {
@@ -69,8 +41,6 @@ Ext.define('Isidamaps.services.callHistory.MapService', {
             array = [];
             i = 0;
             var polyline = new ol.geom.LineString(arrayR);
-
-            // polyline.transform('EPSG:4326','EPSG:3857');
             var feature = new ol.Feature({
                 geometry: polyline,
                 customOptions: {
@@ -87,7 +57,6 @@ Ext.define('Isidamaps.services.callHistory.MapService', {
             };
 
             feature.setStyle(styles.route);
-            me.arrayRoute.push(feature);
             arrayR = [];
             me.vectorSourceRoute.addFeature(feature);
 
@@ -98,15 +67,10 @@ Ext.define('Isidamaps.services.callHistory.MapService', {
 
     storeFactRouteHistory: function (records) {
         var me = this;
-        var array = [];
         var arrayR = [];
-        var i = 0;
         records.forEach(function (l) {
-
-            arrayR.push([l.data.longitude, l.data.latitude]);
-
+            arrayR.push([l.get('longitude'), l.get('latitude')]);
         });
-        i = 0;
         var polyline = new ol.geom.LineString(arrayR);
         polyline.transform('EPSG:4326', 'EPSG:3857');
         var feature = new ol.Feature({
@@ -123,18 +87,16 @@ Ext.define('Isidamaps.services.callHistory.MapService', {
                 })
             })
         };
-
         feature.setStyle(styles.route);
-        me.arrayRoute.push(feature);
         me.vectorSourceRoute.addFeature(feature);
 
     },
 
-    storeFactHistoryBrigade: function (records) {
+    storeFactHistoryBrigade: function (rec) {
         var me = this;
-        records.forEach(function (brigade) {
+        rec.forEach(function (brigade) {
             if (brigade.get('latitude') !== undefined && brigade.get('longitude') !== undefined) {
-                var iconFeature = new ol.Feature({
+                var feature = new ol.Feature({
                     geometry: new ol.geom.Point(ol.proj.fromLonLat([brigade.get('longitude'), brigade.get('latitude')])),
                     id: brigade.get('deviceId'),
                     customOptions: {
@@ -147,23 +109,23 @@ Ext.define('Isidamaps.services.callHistory.MapService', {
                         iconImageHref: 'resources/icon/' + brigade.get('iconName')
                     }
                 });
-
-                iconFeature.setStyle(me.iconStyle(iconFeature));
-                me.brigadesMarkers.push(iconFeature);
-                me.vectorSource.addFeature(feature);
+                me.brigadesMarkers.push(feature);
+                me.setStyleAndAddFeature(feature);
             }
         });
+
     },
 
 
-    storeBrigadeHistory: function (records) {
+    storeRouteHistory: function (records) {
         var me = this;
         var routeList = null;
         records.forEach(function (b) {
             routeList = Ext.decode(b.get('routeList'));
+            me.createPolylineRoute(routeList);
             routeList.forEach(function (brigade) {
                 if (brigade.latitude !== undefined && brigade.longitude !== undefined) {
-                    var iconFeature = new ol.Feature({
+                    var feature = new ol.Feature({
                         geometry: new ol.geom.Point(ol.proj.fromLonLat(me.to4326([brigade.longitude, brigade.latitude]))),
                         id: brigade.brigadeId,
                         customOptions: {
@@ -176,20 +138,26 @@ Ext.define('Isidamaps.services.callHistory.MapService', {
                             iconImageHref: 'resources/icon/free.png'
                         }
                     });
-                    iconFeature.setStyle(me.iconStyle(iconFeature));
-                    me.brigadesMarkers.push(iconFeature);
-                    me.vectorSource.addFeature(iconFeature);
+                    me.brigadesMarkers.push(feature);
+                    me.setStyleAndAddFeature(feature);
                 }
             })
         });
-        me.createPolylineRoute(routeList);
     },
 
-    storeFactHistoryCall: function (records) {
+    setStyleAndAddFeature: function (feature) {
         var me = this;
-        records.forEach(function (call) {
+        feature.setStyle(me.iconStyle(feature));
+        me.vectorSource.addFeature(feature);
+
+    },
+
+    storeFactHistoryCall: function (rec) {
+        var me = this;
+        rec.forEach(function (call) {
+            console.dir(call);
             if (call.get('latitude') !== undefined && call.get('longitude') !== undefined) {
-                var iconFeature = new ol.Feature({
+                var feature = new ol.Feature({
                     geometry: new ol.geom.Point(ol.proj.fromLonLat([call.get('longitude'), call.get('latitude')])),
                     id: call.get('callCardId'),
                     customOptions: {
@@ -200,12 +168,9 @@ Ext.define('Isidamaps.services.callHistory.MapService', {
                     options: {
                         iconImageHref: 'resources/icon/' + call.get('iconName')
                     }
-
                 });
-
-                iconFeature.setStyle(me.iconStyle(iconFeature));
-                me.callMarkers.push(iconFeature);
-                me.vectorSource.addFeature(iconFeature);
+                me.callMarkers.push(feature);
+                me.callMarkers.length === 1 ? me.setStyleAndAddFeature(feature) : me.createBouns();
             }
         });
     },
@@ -216,16 +181,16 @@ Ext.define('Isidamaps.services.callHistory.MapService', {
     },
 
     listenerStore: function () {
-        Ext.getStore('Isidamaps.store.CallsFirstLoadStore').on('load', function (store, records, options) {
+        Ext.getStore('Isidamaps.store.CallsFirstLoadStore').on('add', function (store, records, options) {
             this.storeFactHistoryCall(records)
         }, this);
-        Ext.getStore('Isidamaps.store.BrigadesFirstLoadStore').on('load', function (store, records, options) {
+        Ext.getStore('Isidamaps.store.BrigadesFirstLoadStore').on('add', function (store, records, options) {
             this.storeFactHistoryBrigade(records)
         }, this);
-        Ext.getStore('Isidamaps.store.RouteHistoryStore').on('load', function (store, records, options) {
-            this.storeBrigadeHistory(records)
+        Ext.getStore('Isidamaps.store.RouteHistoryStore').on('add', function (store, records, options) {
+            this.storeRouteHistory(records)
         }, this);
-        Ext.getStore('Isidamaps.store.FactRouteHistoryStore').on('load', function (store, records, options) {
+        Ext.getStore('Isidamaps.store.FactRouteHistoryStore').on('add', function (store, records, options) {
             this.storeFactRouteHistory(records)
         }, this);
     }

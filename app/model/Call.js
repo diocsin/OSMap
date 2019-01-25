@@ -4,6 +4,5 @@ Ext.define('Isidamaps.model.Call', {
     requires: ['Isidamaps.model.Brigade'],
     fields: ['longitude', 'latitude', 'statusAsov', 'station', 'status', {name: 'callCardId', type: 'int'},
         'callCardNum', 'createTime', 'lastUpdateTime', 'objectType', 'iconName'
-    ],
-    idProperty: 'callCardId'
+    ]
 });
