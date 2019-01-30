@@ -4,12 +4,10 @@ Ext.define('Isidamaps.services.brigadeForAssign.BrigadeForAssign', {
 
     requires: ['Isidamaps.view.routeView.RouteView',
         'Isidamaps.services.brigadeForAssign.BrigadeForAssignController',
-        'Isidamaps.services.brigadeForAssign.MapService',
-        'Isidamaps.services.brigadeForAssign.BrigadeForAssignModel'
+        'Isidamaps.services.brigadeForAssign.MapService'
     ],
 
     controller: 'brigadeforassign',
-    viewModel: 'brigadeforassign',
     layout: 'border',
     items: [{
         xtype: 'panel',

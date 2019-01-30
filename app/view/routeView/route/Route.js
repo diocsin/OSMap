@@ -3,7 +3,7 @@ Ext.define('Isidamaps.view.routeView.route.Route', {
     alias: 'widget.routeView-route',
     border: false,
     title: 'Table Layout',
-    bind: '{Routes}',
+    store: 'Isidamaps.store.RouteForTableStore',
 
     viewConfig: {
         markDirty: false

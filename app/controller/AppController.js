@@ -55,18 +55,18 @@ Ext.define('Isidamaps.controller.AppController', {
     },
 
     loadSocketDataForMonitoringBrigade: function (message) {
-        var me = this;
+        const me = this;
         message.deviceId = '' + message.deviceId;
         if (message.objectType === 'BRIGADE') {
             if (me.brigadeId === message.deviceId) {
-                var storeBrigades = me.getStore('Isidamaps.store.BrigadeFromWebSockedStore');
+                let storeBrigades = me.getStore('Isidamaps.store.BrigadeFromWebSockedStore');
                 storeBrigades.add(message);
             }
         }
 
         if (message.objectType === 'CALL') {
             if (me.callId === message.deviceId) {
-                var storeCalls = me.getStore('Isidamaps.store.CallFromWebSockedStore');
+                let storeCalls = me.getStore('Isidamaps.store.CallFromWebSockedStore');
                 storeCalls.add(message);
             }
         }
@@ -125,18 +125,20 @@ Ext.define('Isidamaps.controller.AppController', {
             callcardid: me.callId,
             brigades: me.brigadeId
         };
-        brigadeStore.getProxy().getReader().setRootProperty('brigades');
-        callStore.getProxy().getReader().setRootProperty('call');
-
-        brigadeStore.load({
-            url: Ext.String.format(me.urlGeodata + '/brigade?'),
-            params: params
-
-        });
-        callStore.load({
-            url: Ext.String.format(me.urlGeodata + '/brigade?'),
+        Ext.Ajax.request({
+            url: me.urlGeodata + '/brigade?',
             params: params,
+            method: 'GET',
 
+            success: function(response, opts) {
+                let obj = Ext.decode(response.responseText);
+                callStore.add(obj.call);
+                brigadeStore.add(obj.brigades);
+            },
+
+            failure: function(response, opts) {
+                console.log('server-side failure with status code ' + response.status);
+            }
         });
         me.connectWebSocked();
     },
@@ -157,7 +159,7 @@ Ext.define('Isidamaps.controller.AppController', {
             method: 'GET',
 
             success: function(response, opts) {
-                var obj = Ext.decode(response.responseText);
+                let obj = Ext.decode(response.responseText);
                 callStore.add(obj.call);
                 routeHistoryStore.add(obj.brigadeRoute);
             },
@@ -172,10 +174,38 @@ Ext.define('Isidamaps.controller.AppController', {
             method: 'GET',
 
             success: function(response, opts) {
-                var obj = Ext.decode(response.responseText);
+                let obj = Ext.decode(response.responseText);
                brigadeStore.add([obj.endPoint, obj.startPoint]);
                 factRouteHistoryStore.add(obj.points);
                 callStore.add(obj.call);
+            },
+
+            failure: function(response, opts) {
+                console.log('server-side failure with status code ' + response.status);
+            }
+        });
+
+    },
+
+    readMarkersBrigadeForAssign: function (call, brigades) {
+        const me = this,
+            callStore = me.getStore('Isidamaps.store.CallsFirstLoadStore'),
+            brigadeStore = me.getStore('Isidamaps.store.BrigadesFirstLoadStore'),
+
+            params = {
+                callcardid: call,
+                brigades: brigades
+            };
+
+        Ext.Ajax.request({
+            url: me.urlGeodata + '/brigade?',
+            params: params,
+            method: 'GET',
+
+            success: function(response, opts) {
+                let obj = Ext.decode(response.responseText);
+                callStore.add(obj.call);
+                brigadeStore.add(obj.brigades);
             },
 
             failure: function(response, opts) {

@@ -7,4 +7,5 @@ Ext.define('Isidamaps.view.filterBrigadeView.filterBrigade.FilterBrigade', {
         type: 'table',
         columns: 2
     }
-})
+
+});

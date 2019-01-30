@@ -29,4 +29,5 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MonitoringBrigadeControll
     layoutReady: function () {
         this.fireTabEvent(this.lookupReference('RouteBrigadePanel'));
     }
+
 });

@@ -2,9 +2,6 @@ Ext.define('Isidamaps.services.brigadeForAssign.BrigadeForAssignController', {
     extend: 'Isidamaps.services.monitoring.MonitoringController',
     alias: 'controller.brigadeforassign',
     BrigadeForAssign: null,
-    urlGeodata: null,
-    urlOpenStreetServerRoute: null,
-    urlOpenStreetServerTiles: null,
     listen: {
         global: {
             jsonAnswerReady: 'buttonCheked',
@@ -13,8 +10,7 @@ Ext.define('Isidamaps.services.brigadeForAssign.BrigadeForAssignController', {
     },
 
     checkedBrigadeForAssign: function () {
-        var me = this,
-            store = me.getViewModel().getStore('Routes');
+        const store =Ext.getStore('Isidamaps.store.RouteForTableStore');
         store.each(function (rec) {
             rec.set('checkBox', false);
         })
@@ -22,39 +18,28 @@ Ext.define('Isidamaps.services.brigadeForAssign.BrigadeForAssignController', {
 
     createMap: function () {
         const me = this,
-            viewModel = me.getViewModel(),
-            settingsStore = viewModel.getStore('Settings');
-        settingsStore.load({
-            callback: function (records) {
-                const settings = records[0];
-                me.urlGeodata = settings.get('urlGeodata');
-                me.urlWebSocket = settings.get('urlWebSocket');
-                me.urlOpenStreetServerRoute = settings.get('urlOpenStreetServerRoute');
-                me.urlOpenStreetServerTiles = settings.get('urlOpenStreetServerTiles');
-                me.connect();
-                me.BrigadeForAssign = Ext.create('Isidamaps.services.brigadeForAssign.MapService', {
-                    viewModel: me.getViewModel(),
-                    markerClick: me.markerClick,
-                    clustersClick: me.clustersClick,
-                    urlGeodata: me.urlGeodata,
-                    getStoreMarkerInfo: me.getStoreMarkerInfo,
-                    urlOpenStreetServerRoute: me.urlOpenStreetServerRoute,
-                    urlOpenStreetServerTiles: me.urlOpenStreetServerTiles,
-                });
-                ASOV.setMapManager({
-                    setMarkers: me.BrigadeForAssign.setMarkers.bind(this)
-                }, Ext.History.currentToken);
-                var ymapWrapper = me.lookupReference('ymapWrapper');
-                ymapWrapper.on('resize', function () {
-                    me.BrigadeForAssign.resizeMap(me.BrigadeForAssign);
-                })
-            }
-            })
+        ymapWrapper = me.lookupReference('ymapWrapper');
+        me.urlOpenStreetServerTiles = Isidamaps.app.getController('AppController').urlOpenStreetServerTiles;
+        me.urlOpenStreetServerRoute = Isidamaps.app.getController('AppController').urlOpenStreetServerRoute;
+        me.BrigadeForAssign = Ext.create('Isidamaps.services.brigadeForAssign.MapService', {
+            urlOpenStreetServerRoute: me.urlOpenStreetServerRoute,
+            urlOpenStreetServerTiles: me.urlOpenStreetServerTiles,
+        });
+        me.BrigadeForAssign.listenerStore();
+        me.BrigadeForAssign.optionsObjectManager();
+        Isidamaps.app.getController('AppController').readMarkersBrigadeForAssign('106198579', ['910','951','920']);
+        ASOV.setMapManager({
+            setMarkers: me.BrigadeForAssign.setMarkers.bind(this)
+        }, Ext.History.currentToken);
+        ymapWrapper.on('resize', function () {
+            me.BrigadeForAssign.resizeMap(me.BrigadeForAssign);
+        })
     },
 
     buttonCheked: function () {
         this.BrigadeForAssign.createAnswer();
     },
+
     layoutReady: function () {
         this.fireTabEvent(this.lookupReference('navigationPanel'));
     }

@@ -34,9 +34,9 @@ Ext.define('Isidamaps.services.monitoring.MonitoringController', {
                     me.Monitoring.map.getView().setCenter(features.getProperties().geometry.flatCoordinates);
                     me.Monitoring.map.getView().setZoom(18);
                     searchTrue = feature;
-                    me.flash(features);
+                    me.animationFeaturesWhenFind(features);
                     const t = setInterval(function run() {
-                        me.flash(features);
+                        me.animationFeaturesWhenFind(features);
                     }, 2000);
 
                     setTimeout(function () {
@@ -299,7 +299,6 @@ Ext.define('Isidamaps.services.monitoring.MonitoringController', {
         })
     },
 
-
     addButtonsBrigadeOnPanel: function () {
         const me = this,
             buttonBrigade = me.lookupReference('BrigadePanel'),
@@ -336,9 +335,9 @@ Ext.define('Isidamaps.services.monitoring.MonitoringController', {
                                 Ext.widget('brigadeInfo').getController().markerClick(features, [r.getXY()[0] + 110, r.getXY()[1] + 30], infoMarker);
                                 me.Monitoring.map.getView().setCenter(features.getProperties().geometry.flatCoordinates);
                                 me.Monitoring.map.getView().setZoom(18);
-                                me.flash(features);
+                                me.animationFeaturesWhenFind(features);
                                 const t = setInterval(function run() {
-                                    me.flash(features);
+                                    me.animationFeaturesWhenFind(features);
                                 }, 2000);
 
                                 setTimeout(function () {
@@ -352,14 +351,12 @@ Ext.define('Isidamaps.services.monitoring.MonitoringController', {
         })
     },
 
-    flash: function (features) {
+    animationFeaturesWhenFind: function (features) {
         const me = this,
             listenerKey = me.Monitoring.map.on('postcompose', animate),
             start = new Date().getTime(),
             duration = 3000;
-
         me.Monitoring.map.render();
-
         function animate(evt) {
             const vectorContext = evt.vectorContext,
                 frameState = evt.frameState,
@@ -388,26 +385,21 @@ Ext.define('Isidamaps.services.monitoring.MonitoringController', {
             // tell OpenLayers to continue postcompose animation
             me.Monitoring.map.render();
         }
-    }
-    ,
+    },
 
     layoutReady: function () {
         const me = this;
         me.fireTabEvent(me.lookup('navigationPanel'));
         me.fireTabEvent(me.lookup('BrigadePanel'));
-    }
-    ,
+    },
 
     tabChange: function (panel, newTab, oldTab) {
         oldTab.fireEvent('tabExit');
         this.fireTabEvent(newTab);
-    }
-    ,
+    },
 
     fireTabEvent: function (tab) {
         tab.fireEvent('tabEnter');
     }
-    ,
 
-})
-;
+});
