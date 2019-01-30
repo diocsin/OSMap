@@ -1,6 +1,8 @@
 Ext.define('Isidamaps.view.markerView.CallInfoForm', {
     extend: 'Ext.form.Panel',
     alias: 'widget.callInfoForm',
+    bodyStyle: 'padding: 0 5px 0',
+    border: false,
     viewModel: true,
     items: [{
         xtype: 'displayfield',

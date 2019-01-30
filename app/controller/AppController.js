@@ -212,7 +212,6 @@ Ext.define('Isidamaps.controller.AppController', {
                 console.log('server-side failure with status code ' + response.status);
             }
         });
-
     },
 
     windowClose: function () {

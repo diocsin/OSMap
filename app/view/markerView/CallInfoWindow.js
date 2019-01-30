@@ -5,10 +5,9 @@ Ext.define('Isidamaps.view.markerView.CallInfoWindow', {
     viewModel: true,
     title: 'Вызов',
     layout: 'form',
-    border: 'fit',
     autoScroll: true,
     resizable: false,
-    width: 500,
+    width: 540,
     constrain: true,
     items: [{
         xtype: 'callInfoForm'

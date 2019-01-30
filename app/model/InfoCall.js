@@ -1,6 +1,5 @@
 Ext.define('Isidamaps.model.InfoCall', {
     extend: 'Ext.data.Model',
-
     fields: [{
         name: 'brigadeNum',
         mapping: 'call.brigadeNum'

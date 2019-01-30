@@ -1,5 +1,5 @@
 Ext.define('Isidamaps.view.markerView.MarkerController', {
-    extend:'Ext.app.ViewController',
+    extend: 'Ext.app.ViewController',
     alias: 'controller.MarkerController',
 
     markerClick: function (object) {
@@ -9,10 +9,10 @@ Ext.define('Isidamaps.view.markerView.MarkerController', {
             win.close();
         }
         const storeMarker = Isidamaps.app.getController('AppController').getStoreMarkerInfo(object),
-         params = {
-            objecttype: object.getProperties().customOptions.objectType,
-            objectid: object.getProperties().id
-        };
+            params = {
+                objecttype: object.getProperties().customOptions.objectType,
+                objectid: object.getProperties().id
+            };
 
 
         const options = {
@@ -20,7 +20,7 @@ Ext.define('Isidamaps.view.markerView.MarkerController', {
             store: storeMarker
         };
         if (object.getProperties().customOptions.objectType === 'BRIGADE') {
-            me.brigadeMarkerClick(options);
+            me.brigadeMarkerClick(options, object);
             return;
         }
 
@@ -28,7 +28,7 @@ Ext.define('Isidamaps.view.markerView.MarkerController', {
     }
     ,
 
-    brigadeMarkerClick: function (options) {
+    brigadeMarkerClick: function (options, object) {
         const me = this;
         options.store.load({
             params: options.params,
@@ -40,7 +40,13 @@ Ext.define('Isidamaps.view.markerView.MarkerController', {
                 // FIXME define formula in VM
                 const status = Isidamaps.app.getController('AppController').brigadeStatusesMap.get(records[0].get('status')) || 'Неизвестно',
                     record = records[0];
-                record.set('status', status);
+                console.dir(record);
+                record.set({
+                    'status': status,
+                    'profile': object.getProperties().customOptions.profile
+                });
+
+
                 const brigadeInfoWidget = Ext.widget('brigadeInfo'),
                     brigadeInfoViewModel = brigadeInfoWidget.getViewModel();
                 brigadeInfoViewModel.set('record', record);

@@ -1,6 +1,13 @@
 Ext.define('Isidamaps.view.clusterView.ClusterInfoController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.clusterInfoController',
+    callStatusesMap: (function () {
+        const map = Ext.create('Ext.util.HashMap');
+        map.add('NEW', 'Новый');
+        map.add('COMPLETED', 'Завершен');
+        map.add('ASSIGNED', 'Исполнение');
+        return map;
+    })(),
 
     clustersClick: function (cluster) {
         const me = this,
@@ -19,21 +26,8 @@ Ext.define('Isidamaps.view.clusterView.ClusterInfoController', {
                 objectid: marker.getProperties().id
             };
             if (marker.getProperties().customOptions.objectType === 'CALL') {
-                function f() {
-                    if (marker.getProperties().customOptions.status === 'NEW') {
-                        return 'Новый';
-                    }
-                    if (marker.getProperties().customOptions.status === 'COMPLETED') {
-                        return 'Завершен';
-                    }
-                    if (marker.getProperties().customOptions.status === 'ASSIGNED') {
-                        return 'Исполнение';
-                    }
-                    return "";
-                }
-
                 buttonsHolder.add(Ext.create('Ext.Button', {
-                    text: 'Выз.№ ' + marker.getProperties().customOptions.callCardNum + " " + f(),
+                    text: 'Выз.№ ' + marker.getProperties().customOptions.callCardNum + " " + me.callStatusesMap.get(marker.getProperties().customOptions.status || 'Неизвестно'),
                     maxWidth: 170,
                     minWidth: 170,
                     margin: 5,
@@ -77,7 +71,10 @@ Ext.define('Isidamaps.view.clusterView.ClusterInfoController', {
                                     }
                                     // FIXME formula?
                                     const record = records[0];
-                                    record.set('status', Isidamaps.app.getController('AppController').brigadeStatusesMap.get(records[0].get('status') || 'Неизвестно'));
+                                    record.set({
+                                        'status': Isidamaps.app.getController('AppController').brigadeStatusesMap.get(records[0].get('status') || 'Неизвестно'),
+                                        'profile': marker.getProperties().customOptions.profile
+                                    });
                                     const brigadeInfoForm = Ext.widget('brigadeInfoForm'),
                                         brigadeInfoViewModel = brigadeInfoForm.getViewModel();
                                     brigadeInfoViewModel.set('record', record);
@@ -90,6 +87,7 @@ Ext.define('Isidamaps.view.clusterView.ClusterInfoController', {
             }
         })
     },
+
     errorMessage: function (msg) {
         Ext.Msg.show({
             title: 'Ошибка',

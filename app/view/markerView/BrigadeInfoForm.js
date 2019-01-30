@@ -2,9 +2,9 @@ Ext.define('Isidamaps.view.markerView.BrigadeInfoForm', {
     extend: 'Ext.form.Panel',
     alias: 'widget.brigadeInfoForm',
     autoScroll: true,
-    height: '100%',
-    width: '100%',
     viewModel: true,
+    bodyStyle: 'padding: 0 5px 0',
+    border: false,
     defaults: {
         margin: 0,
         labelWidth: '100%'

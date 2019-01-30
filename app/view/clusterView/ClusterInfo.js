@@ -15,6 +15,7 @@ Ext.define('Isidamaps.view.clusterView.ClusterInfo', {
     items: [{
         xtype: 'panel',
         reference: 'buttonsHolder',
+        scrollable: 'vertical',
         autoScroll: true,
         layout: 'vbox',
         height: '100%',
@@ -22,7 +23,6 @@ Ext.define('Isidamaps.view.clusterView.ClusterInfo', {
     }, {
         xtype: 'panel',
         reference: 'infoHolder',
-        autoScroll: true,
         height: '100%',
         width: '75%'
     }]
