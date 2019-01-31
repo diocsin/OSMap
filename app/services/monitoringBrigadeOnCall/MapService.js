@@ -34,9 +34,9 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MapService', {
     storeCall: function (records) {
         const me = this;
         records.forEach(function (call) {
-            if (call.get('latitude') !== undefined && call.get('longitude') !== undefined) {
-                const iconFeature = me.createCallFeature(call);
-                me.callMarkers.push(iconFeature);
+            if (call.get('latitude')&& call.get('longitude')) {
+                const feature = me.createCallFeature(call);
+                me.callMarkers.push(feature);
             }
         });
         me.addCallOnMap();
@@ -47,7 +47,7 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MapService', {
         Ext.Array.clean(me.brigadesMarkers);
         Ext.Array.clean(me.callMarkers);
         records.forEach(function (brigade) {
-            if (brigade.get('latitude') !== undefined && brigade.get('longitude') !== undefined) {
+            if (brigade.get('latitude') && brigade.get('longitude')) {
                 const feature = me.createBrigadeFeature(brigade);
                 me.brigadesMarkers.push(feature);
             }
@@ -87,8 +87,8 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MapService', {
             let coordCall = me.callMarkers[0].getGeometry().getCoordinates();
             me.getNearest(coordCall).then(function (coord_street) {
                 me.callCoord = coord_street;
-                me.brigadesMarkers.forEach(function (brigadeMarker) {
-                    let coordBrigade = brigadeMarker.getGeometry().getCoordinates();
+                me.brigadesMarkers.forEach(function (feature) {
+                    let coordBrigade = feature.getGeometry().getCoordinates();
                     me.getNearest(coordBrigade).then(function (coord_street) {
                         let point1 = me.callCoord.join(),
                             point2 = coord_street.join(),
@@ -109,7 +109,7 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MapService', {
                                             geometry: route,
                                             customOptions: {
                                                 objectType: 'route',
-                                                brigadeNum: brigadeMarker.getProperties().customOptions.brigadeNum
+                                                brigadeNum: me.getCustomOptions(feature).brigadeNum
                                             }
                                         });
                                         let styles = {
@@ -120,7 +120,7 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MapService', {
                                                 })
                                             },
                                             routeList = {
-                                                brigade: brigadeMarker,
+                                                brigade: feature,
                                                 route: json
                                             };
                                         route.setStyle(styles.route);
@@ -156,16 +156,16 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MapService', {
     createCallOfSocked: function (calls) {
         const me = this,
             call = calls[0];
-        if (call.get('latitude') !== undefined && call.get('longitude') !== undefined) {
-            let iconFeature = me.createCallFeature(call),
+        if (call.get('latitude') && call.get('longitude')) {
+            let feature = me.createCallFeature(call),
                 callHas = Ext.Array.findBy(me.callMarkers, function (callInArray, index) {
                     if (callInArray.getProperties().id === call.get('deviceId')) {
                         return callInArray;
                     }
                 });
             Ext.Array.remove(me.callMarkers, callHas);
-            Ext.Array.push(me.callMarkers, iconFeature);
-            me.addMarkersSocket(iconFeature);
+            Ext.Array.push(me.callMarkers, feature);
+            me.addMarkersSocket(feature);
             Ext.getStore('Isidamaps.store.CallFromWebSockedStore').clearData();
         }
     },
@@ -173,32 +173,32 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MapService', {
     createBrigadeOfSocked: function (brigades) {
         const me = this;
         let brigade = brigades[0];
-        if (brigade.get('latitude') !== undefined && brigade.get('longitude') !== undefined) {
-            let iconFeature = me.createBrigadeFeature(brigade),
+        if (brigade.get('latitude') && brigade.get('longitude')) {
+            let feature = me.createBrigadeFeature(brigade),
                 brigadeHas = Ext.Array.findBy(me.brigadesMarkers, function (brigadeInArray, index) {
                     if (brigadeInArray.getProperties().id === brigade.get('deviceId')) {
                         return brigadeInArray;
                     }
                 });
             Ext.Array.remove(me.brigadesMarkers, brigadeHas);
-            Ext.Array.push(me.brigadesMarkers, iconFeature);
-            me.addMarkersSocket(iconFeature);
+            Ext.Array.push(me.brigadesMarkers, feature);
+            me.addMarkersSocket(feature);
             Ext.getStore('Isidamaps.store.BrigadeFromWebSockedStore').clearData();
         }
     },
 
-    addMarkersSocket: function (iconFeature) {
+    addMarkersSocket: function (feature) {
         const me = this,
             sourceVectorLayer = me.vectorLayer.getSource().getSource(),
-            id = iconFeature.getProperties().id;
-        if (iconFeature.getProperties().customOptions.objectType === 'BRIGADE') {
+            id = feature.getProperties().id;
+        if (me.getCustomOptions(feature).objectType === 'BRIGADE') {
 
             const brigadeHas = Ext.Array.findBy(sourceVectorLayer.getFeatures(), function (brigadeInArray, index) {
                 if (brigadeInArray.getProperties().id === id) {
                     return brigadeInArray;
                 }
             });
-            if (brigadeHas !== null) {
+            if (brigadeHas) {
                 sourceVectorLayer.removeFeature(brigadeHas);
                 me.map.getLayers().getArray().forEach(function (layer) {
                     if (layer.renderMode_ === 'route') {
@@ -206,22 +206,22 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MapService', {
                     }
                 })
             }
-            iconFeature.setStyle(me.iconStyle(iconFeature));
-            sourceVectorLayer.addFeature(iconFeature);
+            feature.setStyle(me.iconStyle(feature));
+            sourceVectorLayer.addFeature(feature);
             me.createRoute();
             return;
         }
-        if (iconFeature.getProperties().customOptions.objectType === 'CALL') {
+        if (me.getCustomOptions(feature).objectType === 'CALL') {
             const callHas = Ext.Array.findBy(sourceVectorLayer.getFeatures(), function (callInArray, index) {
                 if (callInArray.getProperties().id === id) {
                     return callInArray;
                 }
             });
-            if (callHas !== null) {
+            if (callHas) {
                 sourceVectorLayer.removeFeature(callHas);
             }
-            iconFeature.setStyle(me.iconStyle(iconFeature));
-            sourceVectorLayer.addFeature(iconFeature);
+            feature.setStyle(me.iconStyle(feature));
+            sourceVectorLayer.addFeature(feature);
         }
     }
 

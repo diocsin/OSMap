@@ -37,8 +37,8 @@ Ext.define('Isidamaps.services.brigadeForAssign.MapService', {
             let coordCall = me.callMarkers[0].getGeometry().getCoordinates();
             me.getNearest(coordCall).then(function (coord_street) {
                 let callCoord = coord_street;
-                me.brigadesMarkers.forEach(function (brigadeMarker) {
-                    const coordBrigade = brigadeMarker.getGeometry().getCoordinates();
+                me.brigadesMarkers.forEach(function (feature) {
+                    const coordBrigade = feature.getGeometry().getCoordinates();
                     me.getNearest(coordBrigade).then(function (coord_street) {
                         const point1 = callCoord.join(),
                             point2 = coord_street.join(),
@@ -59,7 +59,7 @@ Ext.define('Isidamaps.services.brigadeForAssign.MapService', {
                                             geometry: route,
                                             customOptions: {
                                                 objectType: 'route',
-                                                brigadeNum: brigadeMarker.getProperties().customOptions.brigadeNum
+                                                brigadeNum: me.getCustomOptions(feature).brigadeNum
                                             }
                                         });
                                         const styles = {
@@ -70,7 +70,7 @@ Ext.define('Isidamaps.services.brigadeForAssign.MapService', {
                                             })
                                         };
                                         const routeList = {
-                                            brigade: brigadeMarker,
+                                            brigade: feature,
                                             route: json
                                         };
                                         route.setStyle(styles.route);
@@ -85,13 +85,13 @@ Ext.define('Isidamaps.services.brigadeForAssign.MapService', {
                                         me.arrRouteForTable.push(routeList);
                                         arrpoints = route.getProperties().geometry.flatCoordinates;
                                         me.arrRoute.push({
-                                            brigadeId: brigadeMarker.getProperties().id,
-                                            objectType: brigadeMarker.getProperties().customOptions.objectType,
-                                            profile: brigadeMarker.getProperties().customOptions.profile,
-                                            brigadeNum: brigadeMarker.getProperties().customOptions.brigadeNum,
-                                            station: brigadeMarker.getProperties().customOptions.station,
-                                            longitude: brigadeMarker.getProperties().geometry.flatCoordinates[1],
-                                            latitude: brigadeMarker.getProperties().geometry.flatCoordinates[0],
+                                            brigadeId: feature.getProperties().id,
+                                            objectType: me.getCustomOptions(feature).objectType,
+                                            profile: me.getCustomOptions(feature).profile,
+                                            brigadeNum: me.getCustomOptions(feature).brigadeNum,
+                                            station: me.getCustomOptions(feature).station,
+                                            longitude: feature.getProperties().geometry.flatCoordinates[1],
+                                            latitude: feature.getProperties().geometry.flatCoordinates[0],
                                             distance: (json.routes[0].distance / 1000).toFixed(1),
                                             time: (json.routes[0].duration / 60).toFixed(0),
                                             route: arrpoints
@@ -142,9 +142,9 @@ Ext.define('Isidamaps.services.brigadeForAssign.MapService', {
     storeCall: function (records) {
         const me = this;
         records.forEach(function (call) {
-            if (call.get('latitude') !== undefined && call.get('longitude') !== undefined) {
-                const iconFeature = me.createCallFeature(call);
-                me.callMarkers.push(iconFeature);
+            if (call.get('latitude') && call.get('longitude')) {
+                const feature = me.createCallFeature(call);
+                me.callMarkers.push(feature);
             }
         });
         me.addCallOnMap();
@@ -155,7 +155,7 @@ Ext.define('Isidamaps.services.brigadeForAssign.MapService', {
         Ext.Array.clean(me.brigadesMarkers);
         Ext.Array.clean(me.callMarkers);
         records.forEach(function (brigade) {
-            if (brigade.get('latitude') !== undefined && brigade.get('longitude') !== undefined) {
+            if (brigade.get('latitude') && brigade.get('longitude')) {
                 const feature = me.createBrigadeFeature(brigade);
                 me.brigadesMarkers.push(feature);
             }

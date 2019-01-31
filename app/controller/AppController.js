@@ -57,25 +57,21 @@ Ext.define('Isidamaps.controller.AppController', {
     loadSocketDataForMonitoringBrigade: function (message) {
         const me = this;
         message.deviceId = '' + message.deviceId;
-        if (message.objectType === 'BRIGADE') {
-            if (me.brigadeId === message.deviceId) {
-                let storeBrigades = me.getStore('Isidamaps.store.BrigadeFromWebSockedStore');
-                storeBrigades.add(message);
-            }
+        if (message.objectType === 'BRIGADE' && me.brigadeId === message.deviceId) {
+            let storeBrigades = me.getStore('Isidamaps.store.BrigadeFromWebSockedStore');
+            storeBrigades.add(message);
         }
 
-        if (message.objectType === 'CALL') {
-            if (me.callId === message.deviceId) {
-                let storeCalls = me.getStore('Isidamaps.store.CallFromWebSockedStore');
-                storeCalls.add(message);
-            }
+        if (message.objectType === 'CALL' && me.callId === message.deviceId) {
+            let storeCalls = me.getStore('Isidamaps.store.CallFromWebSockedStore');
+            storeCalls.add(message);
         }
     },
 
     loadSocketData: function (message) {
         const me = this;
         message.station = '' + message.station;
-        if (me.stationArray.indexOf(message.station) === -1) {
+        if (!Ext.Array.contains(me.stationArray, message.station)) {
             return;
         }
         const store = me.getStore(message.objectType === 'BRIGADE' ? 'Isidamaps.store.BrigadeFromWebSockedStore' : 'Isidamaps.store.CallFromWebSockedStore');
@@ -99,7 +95,7 @@ Ext.define('Isidamaps.controller.AppController', {
         });
         const paramsBrigades = {
             stations: me.stationArray,
-            statuses: ''
+            statuses: ['CRASH_CAR', 'RELAXON', 'HIJACKING', 'ON_EVENT', 'GO_HOSPITAL', 'AT_CALL', 'PASSED_BRIGADE', 'FREE']
         };
         const paramsCalls = {
             stations: me.stationArray,
@@ -130,13 +126,13 @@ Ext.define('Isidamaps.controller.AppController', {
             params: params,
             method: 'GET',
 
-            success: function(response, opts) {
+            success: function (response, opts) {
                 let obj = Ext.decode(response.responseText);
                 callStore.add(obj.call);
                 brigadeStore.add(obj.brigades);
             },
 
-            failure: function(response, opts) {
+            failure: function (response, opts) {
                 console.log('server-side failure with status code ' + response.status);
             }
         });
@@ -158,13 +154,13 @@ Ext.define('Isidamaps.controller.AppController', {
             params: params,
             method: 'GET',
 
-            success: function(response, opts) {
+            success: function (response, opts) {
                 let obj = Ext.decode(response.responseText);
                 callStore.add(obj.call);
                 routeHistoryStore.add(obj.brigadeRoute);
             },
 
-            failure: function(response, opts) {
+            failure: function (response, opts) {
                 console.log('server-side failure with status code ' + response.status);
             }
         });
@@ -173,14 +169,14 @@ Ext.define('Isidamaps.controller.AppController', {
             params: params,
             method: 'GET',
 
-            success: function(response, opts) {
+            success: function (response, opts) {
                 let obj = Ext.decode(response.responseText);
-               brigadeStore.add([obj.endPoint, obj.startPoint]);
+                brigadeStore.add([obj.endPoint, obj.startPoint]);
                 factRouteHistoryStore.add(obj.points);
                 callStore.add(obj.call);
             },
 
-            failure: function(response, opts) {
+            failure: function (response, opts) {
                 console.log('server-side failure with status code ' + response.status);
             }
         });
@@ -202,13 +198,13 @@ Ext.define('Isidamaps.controller.AppController', {
             params: params,
             method: 'GET',
 
-            success: function(response, opts) {
+            success: function (response, opts) {
                 let obj = Ext.decode(response.responseText);
                 callStore.add(obj.call);
                 brigadeStore.add(obj.brigades);
             },
 
-            failure: function(response, opts) {
+            failure: function (response, opts) {
                 console.log('server-side failure with status code ' + response.status);
             }
         });

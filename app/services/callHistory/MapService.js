@@ -93,7 +93,7 @@ Ext.define('Isidamaps.services.callHistory.MapService', {
     storeFactHistoryBrigade: function (rec) {
         const me = this;
         rec.forEach(function (brigade) {
-            if (brigade.get('latitude') !== undefined && brigade.get('longitude') !== undefined) {
+            if (brigade.get('latitude') && brigade.get('longitude')) {
                 const feature = me.createBrigadeFeature(brigade);
                 me.brigadesMarkers.push(feature);
                 me.setStyleAndAddFeature(feature);
@@ -108,7 +108,7 @@ Ext.define('Isidamaps.services.callHistory.MapService', {
             routeList = Ext.decode(b.get('routeList'));
             me.createPolylineRoute(routeList);
             routeList.forEach(function (brigade) {
-                if (brigade.latitude !== undefined && brigade.longitude !== undefined) {
+                if (brigade.latitude && brigade.longitude) {
                     const feature = new ol.Feature({
                         geometry: new ol.geom.Point(ol.proj.fromLonLat(me.to4326([brigade.longitude, brigade.latitude]))),
                         id: brigade.brigadeId,
@@ -138,8 +138,7 @@ Ext.define('Isidamaps.services.callHistory.MapService', {
     storeFactHistoryCall: function (rec) {
         const me = this;
         rec.forEach(function (call) {
-            console.dir(call);
-            if (call.get('latitude') !== undefined && call.get('longitude') !== undefined) {
+            if (call.get('latitude')&& call.get('longitude')) {
                 const feature = me.createCallFeature(call);
                 me.callMarkers.push(feature);
                 me.callMarkers.length === 1 ? me.setStyleAndAddFeature(feature) : me.createBouns();
