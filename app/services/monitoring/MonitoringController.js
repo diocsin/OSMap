@@ -363,18 +363,17 @@ Ext.define('Isidamaps.services.monitoring.MonitoringController', {
                 elapsed = frameState.time - start,
                 elapsedRatio = elapsed / duration;
             // radius will be 5 at start and 30 at end.
-            const radius = ol.easing.easeOut(elapsedRatio) * 25 + 5;
-            const opacity = ol.easing.easeOut(1 - elapsedRatio);
-
-            const style = new ol.style.Style({
-                image: new ol.style.Circle({
-                    radius: radius,
-                    stroke: new ol.style.Stroke({
-                        color: 'rgba(255, 0, 0, ' + opacity + ')',
-                        width: 0.25 + opacity
+            let radius = ol.easing.easeOut(elapsedRatio) * 25 + 5,
+                opacity = ol.easing.easeOut(1 - elapsedRatio),
+                style = new ol.style.Style({
+                    image: new ol.style.Circle({
+                        radius: radius,
+                        stroke: new ol.style.Stroke({
+                            color: 'rgba(255, 0, 0, ' + opacity + ')',
+                            width: 0.25 + opacity
+                        })
                     })
-                })
-            });
+                });
             vectorContext.setStyle(style);
             vectorContext.drawGeometry(flashGeom);
             if (elapsed > duration) {

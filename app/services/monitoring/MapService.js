@@ -69,9 +69,9 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
                         return feature;
                     });
                 if (me.getCustomOptions(feature) && me.getCustomOptions(feature).objectType === 'route') {
-                        myForm.setData('Маршрут ' + me.getCustomOptions(feature).brigadeNum + ' бригады');
-                        myForm.show();
-                        myForm.setPosition(e.pointerEvent.clientX + 10, e.pointerEvent.clientY + 10);
+                    myForm.setData('Маршрут ' + me.getCustomOptions(feature).brigadeNum + ' бригады');
+                    myForm.show();
+                    myForm.setPosition(e.pointerEvent.clientX + 10, e.pointerEvent.clientY + 10);
                 }
             }
             else {
@@ -310,7 +310,6 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
 
                 setTimeout(func, 20);
             }
-            return;
         }
         if (feature.getProperties().customOptions.objectType === 'CALL') {
             let callHas = Ext.Array.findBy(sourceVectorLayer.getFeatures(), function (callInArray, index) {
@@ -325,8 +324,12 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
             if (!Ext.Array.contains(me.filterBrigadeArray, me.getCustomOptions(feature).status) &&
                 !Ext.Array.contains(me.filterBrigadeArray, me.getCustomOptions(feature).station) &&
                 me.getCustomOptions(feature).status !== "COMPLETED") {
-                feature.setStyle(me.iconStyle(feature));
-                sourceVectorLayer.addFeature(feature);
+                function func() {
+                    feature.setStyle(me.iconStyle(feature));
+                    sourceVectorLayer.addFeature(feature);
+                }
+
+                setTimeout(func, 20);
             }
         }
     },
@@ -402,6 +405,7 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
 
     storeCall: function (records) {
         const me = this;
+        Ext.Array.clean(me.callMarkers);
         records.forEach(function (call) {
             if (call.get('latitude') && call.get('longitude')) {
                 const feature = me.createCallFeature(call);
@@ -414,7 +418,6 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
     storeBrigade: function (records) {
         const me = this;
         Ext.Array.clean(me.brigadesMarkers);
-        Ext.Array.clean(me.callMarkers);
         records.forEach(function (brigade) {
             if (brigade.get('latitude') && brigade.get('longitude')) {
                 const feature = me.createBrigadeFeature(brigade);

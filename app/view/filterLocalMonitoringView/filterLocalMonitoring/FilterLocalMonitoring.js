@@ -17,23 +17,25 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
             inputValue: 'ALL',
             margin: '5px 10px 0px 10px',
             listeners: {
+
                 change: function (checkbox, checked) {
-                    if (checked === true) {
+                    if (checked) {
                         Ext.getCmp('stationGroupId').items.each(function (item) {
                             item.setValue(true);
-                        })
+                        });
                     }
-                    if (checked === false) {
+                    if (!checked) {
                         var i = true;
                         Ext.getCmp('stationGroupId').items.each(function (item) {
                             if (item.checked === false) {
                                 i = false;
                             }
                         });
-                        if (i === true) {
+                        if (i) {
                             Ext.fireEvent('deletingAllMarkers');
                             Ext.getCmp('stationGroupId').items.each(function (item) {
                                 item.setValue(false);
+
                             })
                         }
                     }
@@ -59,19 +61,19 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
             margin: '5px 10px 0px 10px',
             listeners: {
                 change: function (checkbox, checked) {
-                    if (checked === true) {
+                    if (checked) {
                         Ext.getCmp('statusGroupId').items.each(function (item) {
                             item.setValue(true);
                         })
                     }
-                    if (checked === false) {
+                    if (!checked) {
                         var i = true;
                         Ext.getCmp('statusGroupId').items.each(function (item) {
                             if (item.checked === false) {
                                 i = false;
                             }
                         });
-                        if (i === true) {
+                        if (i) {
                             Ext.getCmp('statusGroupId').items.each(function (item) {
                                 item.setValue(false);
                             })
@@ -210,19 +212,19 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                 margin: '5px 10px 0px 10px',
                 listeners: {
                     change: function (checkbox, checked) {
-                        if (checked === true) {
+                        if (checked) {
                             Ext.getCmp('profileGroupId').items.each(function (item) {
                                 item.setValue(true);
                             })
                         }
-                        if (checked === false) {
+                        if (!checked) {
                             var i = true;
                             Ext.getCmp('profileGroupId').items.each(function (item) {
                                 if (item.checked === false) {
                                     i = false;
                                 }
                             });
-                            if (i === true) {
+                            if (i) {
                                 Ext.getCmp('profileGroupId').items.each(function (item) {
                                     item.setValue(false);
                                 })
@@ -326,19 +328,19 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                 margin: '5px 10px 0px 10px',
                 listeners: {
                     change: function (checkbox, checked) {
-                        if (checked === true) {
+                        if (checked) {
                             Ext.getCmp('callGroupId').items.each(function (item) {
                                 item.setValue(true);
                             })
                         }
-                        if (checked === false) {
+                        if (!checked) {
                             var i = true;
                             Ext.getCmp('callGroupId').items.each(function (item) {
                                 if (item.checked === false) {
                                     i = false;
                                 }
                             });
-                            if (i === true) {
+                            if (i) {
                                 Ext.getCmp('callGroupId').items.each(function (item) {
                                     item.setValue(false);
                                 })
