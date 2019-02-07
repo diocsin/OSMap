@@ -33,6 +33,12 @@ Ext.define('Isidamaps.Application', {
 
     launch: function () {
         // TODO - Launch the application
+        if (Ext.supports.LocalStorage) {
+            Ext.state.Manager.setProvider(new Ext.state.LocalStorageProvider());
+        }
+        else {
+            Ext.state.Manager.setProvider(new Ext.state.CookieProvider());
+        }
     },
 
     onAppUpdate: function () {

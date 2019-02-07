@@ -13,39 +13,44 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
             xtype: 'checkbox',
             boxLabel: 'Все',
             reference: 'allStation',
-            checked: true,
+            checked: false,
             inputValue: 'ALL',
             margin: '5px 10px 0px 10px',
             listeners: {
-
                 change: function (checkbox, checked) {
-                    if (checked) {
-                        Ext.getCmp('stationGroupId').items.each(function (item) {
-                            item.setValue(true);
+                    const stationGroup = Ext.getCmp('stationGroupId');
+                    if (checked === true) {
+                        stationGroup.items.each(function (item) {
+                            item.setRawValue(true);
                         });
+                        stationGroup.fireEvent('customerchange');
+                        Ext.fireEvent('selectAll', checkbox);
+                        return;
                     }
-                    if (!checked) {
-                        var i = true;
-                        Ext.getCmp('stationGroupId').items.each(function (item) {
-                            if (item.checked === false) {
-                                i = false;
-                            }
-                        });
-                        if (i) {
-                            Ext.fireEvent('deletingAllMarkers');
-                            Ext.getCmp('stationGroupId').items.each(function (item) {
-                                item.setValue(false);
+                    Ext.getCmp('stationGroupId').items.each(function (item) {
+                        item.setRawValue(false);
+                    });
+                    stationGroup.fireEvent('customerchange');
+                    Ext.fireEvent('deselectAll', checkbox);
 
-                            })
-                        }
-                    }
                 }
             }
         }, {
             xtype: 'checkboxgroup',
             id: 'stationGroupId',
             reference: 'stationFilter',
-            columns: 3,
+            columns: 4,
+            getState: function () {
+                return {"checked": this.getValue()};
+            },
+            applyState: function (state) {
+                Ext.fireEvent('setStateStation', state);
+            },
+            stateEvents: [
+                'customerchange'
+            ],
+            stateId: 'checkBoxStation',
+            stateful: true,
             vertical: true,
             margin: '0px 5px 5px 5px'
         }]
@@ -56,29 +61,25 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
             xtype: 'checkbox',
             boxLabel: 'Все',
             reference: 'allStatus',
-            checked: true,
+            checked: false,
             inputValue: 'ALL',
             margin: '5px 10px 0px 10px',
             listeners: {
                 change: function (checkbox, checked) {
-                    if (checked) {
-                        Ext.getCmp('statusGroupId').items.each(function (item) {
-                            item.setValue(true);
-                        })
-                    }
-                    if (!checked) {
-                        var i = true;
-                        Ext.getCmp('statusGroupId').items.each(function (item) {
-                            if (item.checked === false) {
-                                i = false;
-                            }
+                    const statusGroup = Ext.getCmp('statusGroupId');
+                    if (checked === true) {
+                        statusGroup.items.each(function (item) {
+                            item.setRawValue(true);
                         });
-                        if (i) {
-                            Ext.getCmp('statusGroupId').items.each(function (item) {
-                                item.setValue(false);
-                            })
-                        }
+                        statusGroup.fireEvent('customerchange');
+                        Ext.fireEvent('selectAll', checkbox);
+                        return;
                     }
+                    statusGroup.items.each(function (item) {
+                        item.setRawValue(false);
+                    });
+                    statusGroup.fireEvent('customerchange');
+                    Ext.fireEvent('deselectAll', checkbox);
                 }
             }
         }, {
@@ -86,12 +87,24 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
             id: 'statusGroupId',
             reference: 'statusBrigadeFilter',
             columns: 1,
+            getState: function () {
+                console.dir(this.getValue());
+                return {"checked": this.getValue()};
+            },
+            applyState: function (state) {
+                Ext.fireEvent('setStateStatusBrigades', state);
+            },
+            stateEvents: [
+                'customerchange'
+            ],
+            stateId: 'checkBoxStatusBrigades',
+            stateful: true,
             vertical: true,
             margin: '0px 5px 5px 5px',
 
             items: [{
                 boxLabel: 'Свободна',
-                checked: true,
+                checked: false,
                 inputValue: 'FREE',
                 listeners: {
                     change: {
@@ -103,7 +116,7 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
             },
                 {
                     boxLabel: 'Принял вызов',
-                    checked: true,
+                    checked: false,
                     inputValue: 'PASSED_BRIGADE',
                     listeners: {
                         change: {
@@ -115,7 +128,7 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                 },
                 {
                     boxLabel: 'На вызове',
-                    checked: true,
+                    checked: false,
                     inputValue: 'AT_CALL',
                     listeners: {
                         change: {
@@ -127,7 +140,7 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                 },
                 {
                     boxLabel: 'Транспортировка в стационар',
-                    checked: true,
+                    checked: false,
                     inputValue: 'GO_HOSPITAL',
                     listeners: {
                         change: {
@@ -139,7 +152,7 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                 },
                 {
                     boxLabel: 'Дежурство на мероприятии',
-                    checked: true,
+                    checked: false,
                     inputValue: 'ON_EVENT',
                     listeners: {
                         change: {
@@ -151,7 +164,7 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                 },
                 {
                     boxLabel: 'Вне графика',
-                    checked: true,
+                    checked: false,
                     inputValue: 'WITHOUT_SHIFT',
                     listeners: {
                         change: {
@@ -163,7 +176,7 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                 },
                 {
                     boxLabel: 'Ремонт',
-                    checked: true,
+                    checked: false,
                     inputValue: 'CRASH_CAR',
                     listeners: {
                         change: {
@@ -175,7 +188,7 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                 },
                 {
                     boxLabel: 'Обед',
-                    checked: true,
+                    checked: false,
                     inputValue: 'RELAXON',
                     listeners: {
                         change: {
@@ -187,7 +200,7 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                 },
                 {
                     boxLabel: 'Проблемы',
-                    checked: true,
+                    checked: false,
                     inputValue: 'HIJACKING',
                     listeners: {
                         change: {
@@ -207,29 +220,25 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                 xtype: 'checkbox',
                 boxLabel: 'Все',
                 reference: 'allProfile',
-                checked: true,
+                checked: false,
                 inputValue: 'ALL',
                 margin: '5px 10px 0px 10px',
                 listeners: {
                     change: function (checkbox, checked) {
-                        if (checked) {
-                            Ext.getCmp('profileGroupId').items.each(function (item) {
-                                item.setValue(true);
-                            })
-                        }
-                        if (!checked) {
-                            var i = true;
-                            Ext.getCmp('profileGroupId').items.each(function (item) {
-                                if (item.checked === false) {
-                                    i = false;
-                                }
+                        const profileGroup = Ext.getCmp('profileGroupId');
+                        if (checked === true) {
+                            profileGroup.items.each(function (item) {
+                                item.setRawValue(true);
                             });
-                            if (i) {
-                                Ext.getCmp('profileGroupId').items.each(function (item) {
-                                    item.setValue(false);
-                                })
-                            }
+                            profileGroup.fireEvent('customerchange');
+                            Ext.fireEvent('selectAll', checkbox);
+                            return;
                         }
+                        profileGroup.items.each(function (item) {
+                            item.setRawValue(false);
+                        });
+                        profileGroup.fireEvent('customerchange');
+                        Ext.fireEvent('deselectAll', checkbox);
                     }
                 }
             }, {
@@ -237,11 +246,22 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                 id: 'profileGroupId',
                 reference: 'profileBrigadeFilter',
                 columns: 3,
+                getState: function () {
+                    return {"checked": this.getValue()};
+                },
+                applyState: function (state) {
+                    Ext.fireEvent('setStateProfileBrigades', state);
+                },
+                stateEvents: [
+                    'customerchange'
+                ],
+                stateId: 'checkBoxProfileBrigades',
+                stateful: true,
                 vertical: true,
                 margin: '0px 5px 5px 5px',
                 items: [{
                     boxLabel: 'БИТ',
-                    checked: true,
+                    checked: false,
                     inputValue: 'БИТ',
                     listeners: {
                         change: {
@@ -253,7 +273,7 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                 },
                     {
                         boxLabel: 'Неот',
-                        checked: true,
+                        checked: false,
                         inputValue: 'Неот',
                         width: 100,
                         listeners: {
@@ -266,7 +286,7 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                     },
                     {
                         boxLabel: 'Пед',
-                        checked: true,
+                        checked: false,
                         inputValue: 'Пед',
                         width: 100,
                         listeners: {
@@ -279,7 +299,7 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                     },
                     {
                         boxLabel: 'Псих',
-                        checked: true,
+                        checked: false,
                         inputValue: 'Псих',
                         listeners: {
                             change: {
@@ -291,7 +311,7 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                     },
                     {
                         boxLabel: 'Реан',
-                        checked: true,
+                        checked: false,
                         inputValue: 'Реан',
                         listeners: {
                             change: {
@@ -303,7 +323,7 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                     },
                     {
                         boxLabel: 'Фелд',
-                        checked: true,
+                        checked: false,
                         inputValue: 'Фелд',
                         listeners: {
                             change: {
@@ -323,42 +343,50 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                 xtype: 'checkbox',
                 boxLabel: 'Все',
                 reference: 'allCalls',
-                checked: true,
+                checked: false,
                 inputValue: 'ALL',
                 margin: '5px 10px 0px 10px',
                 listeners: {
                     change: function (checkbox, checked) {
-                        if (checked) {
-                            Ext.getCmp('callGroupId').items.each(function (item) {
-                                item.setValue(true);
-                            })
-                        }
-                        if (!checked) {
-                            var i = true;
-                            Ext.getCmp('callGroupId').items.each(function (item) {
-                                if (item.checked === false) {
-                                    i = false;
-                                }
+                        const callGroup = Ext.getCmp('callGroupId');
+                        if (checked === true) {
+                            callGroup.items.each(function (item) {
+                                item.setRawValue(true);
                             });
-                            if (i) {
-                                Ext.getCmp('callGroupId').items.each(function (item) {
-                                    item.setValue(false);
-                                })
-                            }
+                            callGroup.fireEvent('customerchange');
+                            Ext.fireEvent('selectAll', checkbox);
+                            return;
                         }
+                        callGroup.items.each(function (item) {
+                            item.setRawValue(false);
+                        });
+                        callGroup.fireEvent('customerchange');
+                        Ext.fireEvent('deselectAll', checkbox);
                     }
                 }
             }, {
                 xtype: 'checkboxgroup',
                 id: 'callGroupId',
                 reference: 'callStatusFilter',
-                columns: 1,
+                columns: 2,
+                getState: function () {
+                    return {"checked": this.getValue()};
+                },
+                applyState: function (state) {
+                    Ext.fireEvent('setStateStatusCalls', state);
+                },
+                stateEvents: [
+                    'customerchange'
+                ],
+                stateId: 'checkBoxStatusCalls',
+                stateful: true,
                 vertical: true,
                 margin: '0px 5px 5px 5px',
                 items: [{
                     boxLabel: 'Новые',
-                    checked: true,
+                    checked: false,
                     inputValue: 'NEW',
+                    width: 100,
                     listeners: {
                         change: {
                             fn: function (checkbox, checked) {
@@ -369,7 +397,7 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
                 },
                     {
                         boxLabel: 'Исполнение',
-                        checked: true,
+                        checked: false,
                         inputValue: 'ASSIGNED',
                         listeners: {
                             change: {

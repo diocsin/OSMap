@@ -2,20 +2,34 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
     map: null,
     brigadesMarkers: [],
     callMarkers: [],
-    filterBrigadeArray: [],
+    getFilterBrigadeArray: Ext.emptyFn,
     filterCallArray: [],
     urlOpenStreetServerTiles: null,
     urlOpenStreetServerRoute: null,
     vectorLayer: null,
     vectorSource: null,
+    getStoreMarkerInfo: Ext.emptyFn,
+    setCheckbox: Ext.emptyFn,
+    addNewButtonOnPanel: Ext.emptyFn,
+    destroyButtonOnPanel: Ext.emptyFn,
+    addButtonsBrigadeOnPanel: Ext.emptyFn,
+    addStationFilter: Ext.emptyFn,
+
 
     constructor: function (options) {
         const me = this;
         me.vectorSource = new ol.source.Vector({});
-        me.filterBrigadeArray = options.filterBrigadeArray;
+        me.getFilterBrigadeArray = options.getFilterBrigadeArray;
         me.filterCallArray = options.filterCallArray;
         me.urlOpenStreetServerTiles = options.urlOpenStreetServerTiles;
+        me.addButtonsBrigadeOnPanel = options.addButtonsBrigadeOnPanel;
+        me.addStationFilter = options.addStationFilter;
+        me.getButtonBrigadeForChangeButton = options.getButtonBrigadeForChangeButton;
+        me.setCheckbox = options.setCheckbox;
+        me.addNewButtonOnPanel = options.addNewButtonOnPanel;
+        me.destroyButtonOnPanel = options.destroyButtonOnPanel;
         me.map = me.createMap();
+        console.dir(me.map);
         me.clusterOptions();
         me.map.addLayer(me.vectorLayer);
 
@@ -258,27 +272,21 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
         });
     },
 
-    addCallOnMap: function () {
+    addMarkers: function () {
         const me = this;
         me.callMarkers.forEach(function (call) {
             call.setStyle(me.iconStyle(call));
         });
-        me.vectorSource.addFeatures(me.callMarkers);
-    },
-
-    addBrigadesOnMap: function () {
-        const me = this;
+        //me.vectorSource.addFeatures(me.callMarkers);
         me.brigadesMarkers.forEach(function (item) {
             item.setStyle(me.iconStyle(item));
         });
-        me.vectorSource.addFeatures(me.brigadesMarkers);
+        //me.vectorSource.addFeatures(me.brigadesMarkers);
+        me.addButtonsBrigadeOnPanel();
+        me.setCheckbox();
 
-        function func() {
-            me.addButtonsBrigadeOnPanel();
-        }
-
-        setTimeout(func, 20);
     },
+
 
     addMarkersSocket: function (feature) {
         const me = this,
@@ -295,20 +303,16 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
                 sourceVectorLayer.removeFeature(brigadeHas);
             }
 
-            if (!brigadeHas || feature.getProperties().customOptions.status === 'WITHOUT_SHIFT') {
-                me.addButtonsBrigadeOnPanel();
-            }
-
-            if (!Ext.Array.contains(me.filterBrigadeArray, me.getCustomOptions(feature).station) &&
-                !Ext.Array.contains(me.filterBrigadeArray, me.getCustomOptions(feature).status) &&
-                !Ext.Array.contains(me.filterBrigadeArray, me.getCustomOptions(feature).profile) &&
+            if (!Ext.Array.contains(me.getFilterBrigadeArray(), me.getCustomOptions(feature).station) &&
+                !Ext.Array.contains(me.getFilterBrigadeArray(), me.getCustomOptions(feature).status) &&
+                !Ext.Array.contains(me.getFilterBrigadeArray(), me.getCustomOptions(feature).profile) &&
                 me.getCustomOptions(feature).status !== "WITHOUT_SHIFT") {
                 function func() {
                     feature.setStyle(me.iconStyle(feature));
                     sourceVectorLayer.addFeature(feature);
                 }
 
-                setTimeout(func, 20);
+                setTimeout(func, 1);
             }
         }
         if (feature.getProperties().customOptions.objectType === 'CALL') {
@@ -321,8 +325,8 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
                 sourceVectorLayer.removeFeature(callHas);
             }
 
-            if (!Ext.Array.contains(me.filterBrigadeArray, me.getCustomOptions(feature).status) &&
-                !Ext.Array.contains(me.filterBrigadeArray, me.getCustomOptions(feature).station) &&
+            if (!Ext.Array.contains(me.getFilterBrigadeArray(), me.getCustomOptions(feature).status) &&
+                !Ext.Array.contains(me.getFilterBrigadeArray(), me.getCustomOptions(feature).station) &&
                 me.getCustomOptions(feature).status !== "COMPLETED") {
                 function func() {
                     feature.setStyle(me.iconStyle(feature));
@@ -334,13 +338,6 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
         }
     },
 
-    addButtonsBrigadeOnPanel: function () {
-        Ext.fireEvent('addButtonsBrigadeOnPanel');
-    },
-
-    addStationFilter: function () {
-        Ext.fireEvent('addStationFilter');
-    },
 
     setStation: function (stations) {
         Isidamaps.app.getController('AppController').readStation(stations);
@@ -367,6 +364,7 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
             });
             Ext.Array.remove(me.callMarkers, callHas);
             if (me.getCustomOptions(feature).status !== "COMPLETED") {
+                feature.setStyle(me.iconStyle(feature));
                 Ext.Array.push(me.callMarkers, feature);
             }
             me.addMarkersSocket(feature);
@@ -386,7 +384,17 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
             });
             Ext.Array.remove(me.brigadesMarkers, brigadeHas);
             if (me.getCustomOptions(feature).status !== 'WITHOUT_SHIFT') {
+                feature.setStyle(me.iconStyle(feature));
                 Ext.Array.push(me.brigadesMarkers, feature);
+                if (brigadeHas && me.getCustomOptions(brigadeHas).status !== me.getCustomOptions(feature).status) {
+                    Ext.fireEvent('getButtonBrigadeForChangeButton', feature, me.getCustomOptions(brigadeHas).status);
+                }
+                else if (!brigadeHas) {
+                    me.addNewButtonOnPanel(feature);
+                }
+            }
+            else {
+                me.destroyButtonOnPanel(feature);
             }
             me.addMarkersSocket(feature);
             Ext.getStore('Isidamaps.store.BrigadeFromWebSockedStore').clearData();
@@ -412,7 +420,7 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
                 me.callMarkers.push(feature);
             }
         });
-        me.addCallOnMap();
+        me.checkArrayFeatureComplete(me.brigadesMarkers);
     },
 
     storeBrigade: function (records) {
@@ -424,9 +432,18 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
                 me.brigadesMarkers.push(feature);
             }
         });
-        me.addStationFilter();
-        me.addBrigadesOnMap();
-        me.listenerWebSockedStore();
+        me.checkArrayFeatureComplete(me.callMarkers);
+
+    },
+
+    checkArrayFeatureComplete: function (array) {
+        const me = this;
+        if (array.length !== 0) {
+            me.addStationFilter();
+            me.addMarkers();
+            me.listenerWebSockedStore();
+        }
+
     },
 
     createCallFeature: function (call) {

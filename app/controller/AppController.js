@@ -111,6 +111,7 @@ Ext.define('Isidamaps.controller.AppController', {
         });
         me.connectWebSocked('monitoring');
     },
+
     readMarkers: function (call, brigades) {
         const me = this,
             brigadeStore = me.getStore('Isidamaps.store.BrigadesFirstLoadStore'),

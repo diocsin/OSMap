@@ -3,26 +3,154 @@ Ext.define('Isidamaps.services.monitoring.MonitoringController', {
     alias: 'controller.monitoring',
     Monitoring: null,
     filterBrigadeArray: [],
-    filterCallArray: [],
+    allStatusBrigade: [],
+    allProfileBrigade: [],
+    allStatusCall: [],
+    allStation: [],
+    stateStatusBrigades: null,
+    stateStation: null,
+    stateProfileBrigades: null,
+    stateStatusCalls: null,
+    myMask: null,
     urlOpenStreetServerTiles: null,
     urlOpenStreetServerRoute: null,
     listen: {
         global: {
             checkedProfileBrigade: 'checkedProfileBrigade',
             checkedStatusBrigade: 'checkedStatusBrigade',
-            checkedStationBrigade: 'checkedStationBrigade',
             checkedCallStatus: 'checkedCallStatus',
-            addButtonsBrigadeOnPanel: 'addButtonsBrigadeOnPanel',
-            addStationFilter: 'addStationFilter',
+            checkedStationBrigade: 'checkedStationBrigade',
+            setStateStatusBrigades: 'setStateStatusBrigades',
+            setStateStation: 'setStateStation',
+            setStateProfileBrigades: 'setStateProfileBrigades',
+            setStateStatusCalls: 'setStateStatusCalls',
+            getButtonBrigadeForChangeButton: 'getButtonBrigadeForChangeButton',
             buttonSearch: 'buttonSearch',
-            deletingAllMarkers: 'deletingAllMarkers'
+            selectAll: 'selectAll',
+            deselectAll: 'deselectAll'
         }
     },
 
-    deletingAllMarkers: function () {
+    selectAll: function (checkbox) {
         const me = this;
-        me.Monitoring.vectorSource.clear();
+        switch (checkbox.reference) {
+            case 'allStation':
+                me.filterBrigadeArray = Ext.Array.difference(me.filterBrigadeArray, Isidamaps.app.getController('AppController').stationArray);
+                break;
+            case 'allStatus':
+                me.filterBrigadeArray = Ext.Array.difference(me.filterBrigadeArray, me.allStatusBrigade);
+                break;
+            case  'allProfile':
+                me.filterBrigadeArray = Ext.Array.difference(me.filterBrigadeArray, me.allProfileBrigade);
+                break;
+            case 'allCalls':
+                me.filterBrigadeArray = Ext.Array.difference(me.filterBrigadeArray, me.allStatusCall);
+                break;
+        }
+        me.setFilterObjectManager();
     },
+
+    deselectAll: function (checkbox) {
+        const me = this;
+        switch (checkbox.reference) {
+            case 'allStation':
+                me.filterBrigadeArray = Ext.Array.merge(me.filterBrigadeArray, Isidamaps.app.getController('AppController').stationArray);
+                break;
+            case 'allStatus':
+                me.filterBrigadeArray = Ext.Array.merge(me.filterBrigadeArray, me.allStatusBrigade);
+                break;
+            case  'allProfile':
+                me.filterBrigadeArray = Ext.Array.merge(me.filterBrigadeArray, me.allProfileBrigade);
+                break;
+            case 'allCalls':
+                me.filterBrigadeArray = Ext.Array.merge(me.filterBrigadeArray, me.allStatusCall);
+                break;
+        }
+        me.setFilterObjectManager();
+    },
+
+    setStateStatusBrigades: function (state) {
+        const me = this;
+        me.stateStatusBrigades = state;
+    },
+
+    setStateStation: function (state) {
+        const me = this;
+        me.stateStation = state;
+    },
+
+    setStateProfileBrigades: function (state) {
+        const me = this;
+        me.stateProfileBrigades = state;
+    },
+
+    setStateStatusCalls: function (state) {
+        const me = this;
+        me.stateStatusCalls = state;
+    },
+
+    getFilterBrigadeArray: function () {
+        return this.filterBrigadeArray;
+    },
+
+    setFilterObjectManager: function () {
+        const me = this,
+            arrayForShowButton = [],
+            arrayForHideButton = [];
+        let commonArray
+        commonArray = Ext.Array.merge(me.Monitoring.brigadesMarkers, me.Monitoring.callMarkers);
+        Ext.Array.each(commonArray, function (object) {
+            if (me.Monitoring.getCustomOptions(object).objectType === 'BRIGADE' &&
+                !Ext.Array.contains(me.filterBrigadeArray, me.Monitoring.getCustomOptions(object).station) &&
+                !Ext.Array.contains(me.filterBrigadeArray, me.Monitoring.getCustomOptions(object).status) &&
+                !Ext.Array.contains(me.filterBrigadeArray, me.Monitoring.getCustomOptions(object).profile)) {
+
+                try {
+                    me.Monitoring.vectorSource.addFeature(object);
+                    arrayForShowButton.push(object);
+                }
+                catch (e) {
+                }
+
+
+                return;
+            }
+            if (me.Monitoring.getCustomOptions(object).objectType === 'CALL' &&
+                !Ext.Array.contains(me.filterBrigadeArray, me.Monitoring.getCustomOptions(object).station) &&
+                !Ext.Array.contains(me.filterBrigadeArray, me.Monitoring.getCustomOptions(object).status)) {
+                try {
+                    me.Monitoring.vectorSource.addFeature(object);
+                }
+                catch (e) {
+                }
+
+                return;
+            }
+            if (me.Monitoring.getCustomOptions(object).objectType === 'BRIGADE') {
+
+                try {
+                    me.Monitoring.vectorSource.removeFeature(object);
+                    arrayForHideButton.push(object);
+                }
+                catch (e) {
+
+                }
+                return;
+            }
+            if (me.Monitoring.getCustomOptions(object).objectType === 'CALL') {
+                try {
+                    me.Monitoring.vectorSource.removeFeature(object);
+                }
+                catch (e) {
+
+                }
+            }
+
+        });
+        me.showButtonInPanel(arrayForShowButton);
+        me.hideButtonInPanel(arrayForHideButton);
+    },
+
 
     buttonSearch: function () {
         const me = this,
@@ -61,23 +189,20 @@ Ext.define('Isidamaps.services.monitoring.MonitoringController', {
             callStatusFilterComp = me.lookupReference('callStatusFilter');
         if (checkboxChecked) {
             let j = 0;
-            Ext.Array.remove(me.filterCallArray, checkboxValue);
-            Ext.Array.each(me.Monitoring.callMarkers, function (call) {
-                if (checkboxValue === me.Monitoring.getCustomOptions(call).status && !Ext.Array.contains(me.filterCallArray, call.getProperties().customOptions.station)) {
-                    me.Monitoring.vectorSource.addFeature(call);
-                }
-            });
+            Ext.Array.remove(me.filterBrigadeArray, checkboxValue);
+            me.setFilterObjectManager();
             callStatusFilterComp.items.each(function (checkbox) {
                 if (checkbox.checked) {
                     j++
                 }
             });
             if (callStatusFilterComp.items.length === j) {
-                me.lookupReference('allCalls').setValue(true)
+                me.lookupReference('allCalls').setRawValue(true)
             }
+            callStatusFilterComp.fireEvent('customerchange');
             return;
         }
-        me.filterCallArray.push(checkboxValue);
+        me.filterBrigadeArray.push(checkboxValue);
         let i = 0;
         callStatusFilterComp.items.each(function (checkbox) {
             if (checkbox.checked) {
@@ -85,167 +210,123 @@ Ext.define('Isidamaps.services.monitoring.MonitoringController', {
             }
         });
         if (callStatusFilterComp.items.length === i + 1) {
-            me.lookupReference('allCalls').setValue(false)
+            me.lookupReference('allCalls').setRawValue(false)
         }
-        Ext.Array.each(me.Monitoring.callMarkers, function (call) {
-            if (checkboxValue === call.getProperties().customOptions.status && me.Monitoring.vectorSource.hasFeature(call)) {
-                me.Monitoring.vectorSource.removeFeature(call);
-            }
-        });
+        me.setFilterObjectManager();
+        callStatusFilterComp.fireEvent('customerchange');
     },
 
     checkedStationBrigade: function (checkbox) {
-        function func(checkbox, me) {
-            const checkboxValue = checkbox.inputValue,
-                checkboxChecked = checkbox.checked,
-                stationFilterComp = me.lookupReference('stationFilter');
-            if (!checkboxChecked) {
-                me.filterCallArray.push(checkboxValue);
-                me.filterBrigadeArray.push(checkboxValue);
+        const me = this,
+            checkboxValue = checkbox.inputValue,
+            checkboxChecked = checkbox.checked,
+            stationFilterComp = me.lookupReference('stationFilter');
+        if (!checkboxChecked) {
+            me.filterBrigadeArray.push(checkboxValue);
 
-                let i = 0;
-                stationFilterComp.items.each(function (checkbox) {
-                    if (checkbox.checked) {
-                        i++
-                    }
-                });
-                if (stationFilterComp.items.length === i + 1) {
-                    me.lookupReference('allStation').setValue(false)
+            let i = 0;
+            stationFilterComp.items.each(function (checkbox) {
+                if (checkbox.checked) {
+                    i++
                 }
-                Ext.Array.each(me.Monitoring.vectorSource.getFeatures(), function (marker) {
-                    if (checkboxValue === marker.getProperties().customOptions.station &&
-                        me.Monitoring.vectorSource.hasFeature(marker)) {
-                        me.Monitoring.vectorSource.removeFeature(marker);
-                    }
-                });
+            });
+            if (stationFilterComp.items.length === i + 1) {
+                me.lookupReference('allStation').setRawValue(false)
             }
-            if (checkboxChecked) {
-                let j = 0;
-                Ext.Array.remove(me.filterBrigadeArray, checkboxValue);
-                Ext.Array.remove(me.filterCallArray, checkboxValue);
-                Ext.Array.each(me.Monitoring.brigadesMarkers, function (brigade) {
-                    if (checkboxValue === me.Monitoring.getCustomOptions(brigade).station &&
-                        !Ext.Array.contains(me.filterBrigadeArray, me.Monitoring.getCustomOptions(brigade).status) &&
-                        !Ext.Array.contains(me.filterBrigadeArray, me.Monitoring.getCustomOptions(brigade).profile)) {
-                        me.Monitoring.vectorSource.addFeature(brigade);
-                    }
-                });
-                Ext.Array.each(me.Monitoring.callMarkers, function (call) {
-                    if (checkboxValue === me.Monitoring.getCustomOptions(call).station &&
-                        !Ext.Array.contains(me.filterBrigadeArray, me.Monitoring.getCustomOptions(call).status)) {
-                        me.Monitoring.vectorSource.addFeature(call);
-                    }
-
-                });
-                stationFilterComp.items.each(function (checkbox) {
-                    if (checkbox.checked) {
-                        j++
-                    }
-                });
-                if (stationFilterComp.items.length === j) {
-                    me.lookupReference('allStation').setValue(true)
+            me.setFilterObjectManager();
+            stationFilterComp.fireEvent('customerchange');
+        }
+        if (checkboxChecked) {
+            let j = 0;
+            Ext.Array.remove(me.filterBrigadeArray, checkboxValue);
+            me.setFilterObjectManager();
+            stationFilterComp.items.each(function (checkbox) {
+                if (checkbox.checked) {
+                    j++
                 }
+            });
+            if (stationFilterComp.items.length === j) {
+                me.lookupReference('allStation').setRawValue(true)
             }
-            me.addButtonsBrigadeOnPanel();
+            stationFilterComp.fireEvent('customerchange');
         }
 
-        setTimeout(func(checkbox, this), 40);
+
+
     },
 
     checkedProfileBrigade: function (checkbox) {
-        function func(checkbox, me) {
-            const checkboxValue = checkbox.inputValue,
-                checkboxChecked = checkbox.checked,
-                profileBrigadeFilterComp = me.lookupReference('profileBrigadeFilter');
-            if (!checkboxChecked) {
-                me.filterBrigadeArray.push(checkboxValue);
-                let i = 0;
-                profileBrigadeFilterComp.items.each(function (checkbox) {
-                    if (checkbox.checked) {
-                        i++
-                    }
-                });
-                if (profileBrigadeFilterComp.items.length === i + 1) {
-                    me.lookupReference('allProfile').setValue(false)
+        const me = this,
+            checkboxValue = checkbox.inputValue,
+            checkboxChecked = checkbox.checked,
+            profileBrigadeFilterComp = me.lookupReference('profileBrigadeFilter');
+        if (!checkboxChecked) {
+            me.filterBrigadeArray.push(checkboxValue);
+            let i = 0;
+            profileBrigadeFilterComp.items.each(function (checkbox) {
+                if (checkbox.checked) {
+                    i++
                 }
-                Ext.Array.each(me.Monitoring.brigadesMarkers, function (brigade) {
-                    if (checkboxValue === me.Monitoring.getCustomOptions(brigade).profile &&
-                        me.Monitoring.vectorSource.hasFeature(brigade)) {
-                        me.Monitoring.vectorSource.removeFeature(brigade);
-                    }
-                });
+            });
+            if (profileBrigadeFilterComp.items.length === i + 1) {
+                me.lookupReference('allProfile').setRawValue(false)
             }
-            if (checkboxChecked) {
-                let j = 0;
-                Ext.Array.remove(me.filterBrigadeArray, checkboxValue);
-                Ext.Array.each(me.Monitoring.brigadesMarkers, function (brigade) {
-                    if (checkboxValue === brigade.getProperties().customOptions.profile &&
-                        !Ext.Array.contains(me.filterBrigadeArray, me.Monitoring.getCustomOptions(brigade).status) &&
-                        !Ext.Array.contains(me.filterBrigadeArray, me.Monitoring.getCustomOptions(brigade).station)) {
-                        me.Monitoring.vectorSource.addFeature(brigade);
-                    }
-                });
-                profileBrigadeFilterComp.items.each(function (checkbox) {
-                    if (checkbox.checked) {
-                        j++
-                    }
-                });
-                if (profileBrigadeFilterComp.items.length === j) {
-                    me.lookupReference('allProfile').setValue(true)
+            me.setFilterObjectManager();
+            profileBrigadeFilterComp.fireEvent('customerchange');
+        }
+        if (checkboxChecked) {
+            let j = 0;
+            Ext.Array.remove(me.filterBrigadeArray, checkboxValue);
+            me.setFilterObjectManager();
+            profileBrigadeFilterComp.items.each(function (checkbox) {
+                if (checkbox.checked) {
+                    j++
                 }
+            });
+            if (profileBrigadeFilterComp.items.length === j) {
+                me.lookupReference('allProfile').setRawValue(true)
             }
-            me.addButtonsBrigadeOnPanel();
+            profileBrigadeFilterComp.fireEvent('customerchange');
         }
 
-        setTimeout(func(checkbox, this), 40);
+
     },
 
     checkedStatusBrigade: function (checkbox) {
-        function func(checkbox, me) {
-            let checkboxValue = checkbox.inputValue,
-                checkboxChecked = checkbox.checked,
-                statusBrigadeFilterComp = me.lookupReference('statusBrigadeFilter');
-            if (!checkboxChecked) {
-                me.filterBrigadeArray.push(checkboxValue);
-                let i = 0;
-                statusBrigadeFilterComp.items.each(function (checkbox) {
-                    if (checkbox.checked) {
-                        i++
-                    }
-                });
-                if (statusBrigadeFilterComp.items.length === i + 1) {
-                    me.lookupReference('allStatus').setValue(false)
+        const me = this,
+            checkboxValue = checkbox.inputValue,
+            checkboxChecked = checkbox.checked,
+            statusBrigadeFilterComp = me.lookupReference('statusBrigadeFilter');
+        if (!checkboxChecked) {
+            me.filterBrigadeArray.push(checkboxValue);
+            let i = 0;
+            statusBrigadeFilterComp.items.each(function (checkbox) {
+                if (checkbox.checked) {
+                    i++
                 }
-                Ext.Array.each(me.Monitoring.brigadesMarkers, function (brigade) {
-                    if (checkboxValue === brigade.getProperties().customOptions.status &&
-                        me.Monitoring.vectorSource.hasFeature(brigade)) {
-                        me.Monitoring.vectorSource.removeFeature(brigade);
-                    }
-                });
+            });
+            if (statusBrigadeFilterComp.items.length === i + 1) {
+                me.lookupReference('allStatus').setRawValue(false)
             }
-            if (checkboxChecked) {
-                let j = 0;
-                Ext.Array.remove(me.filterBrigadeArray, checkboxValue);
-                Ext.Array.each(me.Monitoring.brigadesMarkers, function (brigade) {
-                    if (checkboxValue === me.Monitoring.getCustomOptions(brigade).status &&
-                        !Ext.Array.contains(me.filterBrigadeArray, me.Monitoring.getCustomOptions(brigade).profile) &&
-                        !Ext.Array.contains(me.filterBrigadeArray, me.Monitoring.getCustomOptions(brigade).station)) {
-                        me.Monitoring.vectorSource.addFeature(brigade);
-                    }
-                });
-                statusBrigadeFilterComp.items.each(function (checkbox) {
-                    if (checkbox.checked) {
-                        j++
-                    }
-                });
-                if (statusBrigadeFilterComp.items.length === j) {
-                    me.lookupReference('allStatus').setValue(true)
+            me.setFilterObjectManager();
+            statusBrigadeFilterComp.fireEvent('customerchange');
+        }
+        if (checkboxChecked) {
+            let j = 0;
+            Ext.Array.remove(me.filterBrigadeArray, checkboxValue);
+            me.setFilterObjectManager();
+            statusBrigadeFilterComp.items.each(function (checkbox) {
+                if (checkbox.checked) {
+                    j++
                 }
+            });
+            if (statusBrigadeFilterComp.items.length === j) {
+                me.lookupReference('allStatus').setRawValue(true)
             }
-            me.addButtonsBrigadeOnPanel();
+            statusBrigadeFilterComp.fireEvent('customerchange');
         }
 
-        setTimeout(func(checkbox, this), 40);
+
     },
 
     mainBoxReady: function () {
@@ -255,37 +336,66 @@ Ext.define('Isidamaps.services.monitoring.MonitoringController', {
 
     createMap: function () {
         const me = this;
+        me.myMask = new Ext.LoadMask({
+            msg: 'Подождите пожалуйста. Загрузка...',
+            target: Ext.getCmp('monitoringPanel')
+        });
+        me.myMask.show();
         me.urlOpenStreetServerTiles = Isidamaps.app.getController('AppController').urlOpenStreetServerTiles;
         me.Monitoring = Ext.create('Isidamaps.services.monitoring.MapService', {
-            filterBrigadeArray: me.filterBrigadeArray,
-            filterCallArray: me.filterCallArray,
-            urlOpenStreetServerTiles: me.urlOpenStreetServerTiles
+            getFilterBrigadeArray: me.getFilterBrigadeArray.bind(me),
+            urlOpenStreetServerTiles: me.urlOpenStreetServerTiles,
+            addButtonsBrigadeOnPanel: me.addButtonsBrigadeOnPanel.bind(me),
+            addStationFilter: me.addStationFilter.bind(me),
+            getButtonBrigadeForChangeButton: me.getButtonBrigadeForChangeButton,
+            setCheckbox: me.setCheckbox.bind(me),
+            addNewButtonOnPanel: me.addNewButtonOnPanel.bind(me),
+            destroyButtonOnPanel: me.destroyButtonOnPanel.bind(me),
         });
         me.Monitoring.listenerStore();
         me.Monitoring.optionsObjectManager();
         ASOV.setMapManager({
             setStation: me.Monitoring.setStation.bind(me)
         }, Ext.History.currentToken);
-        Isidamaps.app.getController('AppController').readStation(['9']);
+        Isidamaps.app.getController('AppController').readStation(['7', '8', '9']);
         const ymapWrapper = me.lookupReference('ymapWrapper');
         ymapWrapper.on('resize', function () {
             me.Monitoring.resizeMap(me.Monitoring);
         });
-        setInterval(function () {
-            window.location.reload();
-        }, 1800000);
-
     },
+
+    setCheckbox: function () {
+        const me = this;
+        try {
+            me.lookupReference('stationFilter').setValue(me.stateStation.checked);
+
+            me.lookupReference('profileBrigadeFilter').setValue(me.stateProfileBrigades.checked);
+
+            me.lookupReference('statusBrigadeFilter').setValue(me.stateStatusBrigades.checked);
+
+            me.lookupReference('callStatusFilter').setValue(me.stateStatusCalls.checked);
+
+
+        }
+        catch (e) {
+            console.dir(e);
+        }
+        me.myMask.hide();
+    }
+    ,
+
 
     addStationFilter: function () {
         const me = this,
             checkboxStation = me.lookupReference('stationFilter'),
+            buttonBrigade = me.lookupReference('BrigadePanel'),
             records = Isidamaps.app.getController('AppController').stationArray;
+
         Ext.Array.each(records, function (rec) {
             checkboxStation.add(Ext.create('Ext.form.field.Checkbox', {
                 boxLabel: rec,
                 inputValue: rec,
-                checked: true,
+                checked: false,
                 listeners: {
                     change: {
                         fn: function (checkbox, checked) {
@@ -294,60 +404,156 @@ Ext.define('Isidamaps.services.monitoring.MonitoringController', {
                     }
                 }
             }));
+            buttonBrigade.add(Ext.create('Ext.panel.Panel', {
+                itemId: 'panel_' + rec,
+                title: rec,
+                width: 260,
+                renderTo: Ext.getBody(),
+                floatable: true,
+                collapsible: true,
+                scrollable: 'vertical',
+                collapseToolText: 'Скрыть панель',
+                expandToolText: 'Открыть панель',
+                header: {
+                    titlePosition: 1
+                }
+            }));
         });
-    },
+        me.setFilterBrigadeAndCall();
 
+    }
+    ,
+    setFilterBrigadeAndCall: function () {
+        const me = this;
+        me.lookupReference('profileBrigadeFilter').eachBox(function (item) {
+            me.allProfileBrigade.push(item.inputValue);
+        });
+        me.lookupReference('statusBrigadeFilter').eachBox(function (item) {
+            me.allStatusBrigade.push(item.inputValue);
+        });
+        me.lookupReference('callStatusFilter').eachBox(function (item) {
+            me.allStatusCall.push(item.inputValue);
+        });
+
+        me.lookupReference('stationFilter').eachBox(function (item) {
+            me.allStation.push(item.inputValue);
+        });
+        me.filterBrigadeArray = Ext.Array.merge(me.allProfileBrigade, me.allStatusBrigade, me.allStatusCall, me.allStation);
+    }
+    ,
+
+    getButtonBrigadeForChangeButton: function (brigade, oldStatus) {
+        const me = this,
+            brigadePanel = me.buttonBrigade.getComponent('panel_' + me.Monitoring.getCustomOptions(brigade).station),
+            brigadeHave = brigadePanel.getComponent('id' + brigade.getProperties().id);
+        brigadeHave.removeCls('button_' + oldStatus);
+        brigadeHave.addCls('button_' + me.Monitoring.getCustomOptions(brigade).status);
+        if (Ext.Array.contains(me.filterBrigadeArray, me.Monitoring.getCustomOptions(brigade).status) && !brigadeHave.isHidden()) {
+            brigadeHave.hide();
+        }
+        brigadePanel.updateLayout();
+    }
+    ,
+
+    hideButtonInPanel: function (brigades) {
+        const me = this;
+        Ext.suspendLayouts();
+        Ext.Array.each(brigades, function (brigade) {
+            let brigadePanel = me.buttonBrigade.getComponent('panel_' + me.Monitoring.getCustomOptions(brigade).station);
+            brigadePanel.getComponent('id' + brigade.getProperties().id).hide();
+        });
+        Ext.resumeLayouts(true);
+    }
+    ,
+
+    showButtonInPanel: function (brigades) {
+        const me = this;
+        Ext.suspendLayouts();
+        Ext.Array.each(brigades, function (brigade) {
+            let brigadePanel = me.buttonBrigade.getComponent('panel_' + me.Monitoring.getCustomOptions(brigade).station);
+            brigadePanel.getComponent('id' + brigade.getProperties().id).show();
+        });
+        Ext.resumeLayouts(true);
+    }
+    ,
+
+    destroyButtonOnPanel: function (brigade) {
+        const me = this;
+        try {
+            const brigadePanel = me.buttonBrigade.getComponent('panel_' + me.Monitoring.getCustomOptions(brigade).station);
+            brigadePanel.getComponent('id' + brigade.getProperties().id).destroy();
+        }
+        catch (e) {
+        }
+    }
+    ,
+
+    addNewButtonOnPanel: function (brigade) {
+        const me = this,
+            brigadePanel = me.buttonBrigade.getComponent('panel_' + me.Monitoring.getCustomOptions(brigade).station),
+            button = me.createButton(brigade);
+        brigadePanel.add(button);
+        me.setFilterObjectManager();
+    }
+    ,
     addButtonsBrigadeOnPanel: function () {
         const me = this,
-            buttonBrigade = me.lookupReference('BrigadePanel'),
             brigadeSort = [];
-        buttonBrigade.removeAll();
-        me.Monitoring.vectorLayer.getSource().getFeatures().forEach(function (features) {
-            features.getProperties().features.forEach(function (feature) {
-                if (feature.getProperties().customOptions.objectType === 'BRIGADE') {
-                    brigadeSort.push(feature);
-                }
-            })
+        console.dir(me.filterBrigadeArray);
+        me.buttonBrigade = me.lookupReference('BrigadePanel');
+        Ext.Array.each(me.Monitoring.brigadesMarkers, function (brigade) {
+            brigadeSort.push(brigade);
         });
-
         brigadeSort.sort(function (a, b) {
             return a.getProperties().customOptions.brigadeNum - b.getProperties().customOptions.brigadeNum
         });
-
-        brigadeSort.forEach(function (e) {
-            if (!e.getProperties().customOptions.brigadeNum) {
-                return;
-            }
-            buttonBrigade.add(Ext.create('Ext.Button', {
-                text: e.getProperties().customOptions.brigadeNum + " " + "(" + e.getProperties().customOptions.profile + ")" + " " + e.getProperties().customOptions.station,
-                maxWidth: 110,
-                minWidth: 110,
-                margin: 5,
-                listeners: {
-                    click: function (r) {
-                        me.Monitoring.vectorSource.forEachFeature(function (features) {
-                            const idE = e.getProperties().id,
-                                idF = features.getProperties().id;
-                            if (idF === idE) {   //для того что me.markerClick() нужен features
-                                const infoMarker = Isidamaps.app.getController('AppController').getStoreMarkerInfo(features);
-                                Ext.widget('brigadeInfo').getController().markerClick(features, [r.getXY()[0] + 110, r.getXY()[1] + 30], infoMarker);
-                                me.Monitoring.map.getView().setCenter(features.getProperties().geometry.flatCoordinates);
-                                me.Monitoring.map.getView().setZoom(18);
-                                me.animationFeaturesWhenFind(features);
-                                const t = setInterval(function run() {
-                                    me.animationFeaturesWhenFind(features);
-                                }, 2000);
-
-                                setTimeout(function () {
-                                    clearInterval(t);
-                                }, 6000);
-                            }
-                        });
-                    }
-                }
-            }))
-        })
+        Ext.Array.each(brigadeSort, function (brigade) {
+            const button = me.createButton(brigade),
+                stationPanelBrigades = me.buttonBrigade.getComponent('panel_' + me.Monitoring.getCustomOptions(brigade).station);
+            stationPanelBrigades.add(button);
+        });
     },
+
+    createButton: function (brigade) {
+        const me = this;
+        return Ext.create('Ext.Button', {
+            itemId: 'id' + brigade.getProperties().id,
+            text: me.Monitoring.getCustomOptions(brigade).brigadeNum + " " + "(" + me.Monitoring.getCustomOptions(brigade).profile + ")",
+            maxWidth: 110,
+            minWidth: 110,
+            margin: 5,
+            hidden: true,
+            hideMode: 'offsets',
+            cls: 'button_' + me.Monitoring.getCustomOptions(brigade).status,
+            listeners: {
+                click: function () {
+                    me.clickButton(brigade);
+                }
+            }
+        });
+    },
+
+    clickButton: function (brigade) {
+        const me = this;
+        me.Monitoring.vectorSource.forEachFeature(function (features) {
+            const idE = brigade.getProperties().id,
+                idF = features.getProperties().id;
+            if (idF === idE) {   //для того что me.markerClick() нужен features
+                Ext.widget('brigadeInfo').getController().markerClick(features);
+                me.Monitoring.map.getView().setCenter(features.getProperties().geometry.flatCoordinates);
+                me.Monitoring.map.getView().setZoom(18);
+                me.animationFeaturesWhenFind(features);
+                const t = setInterval(function run() {
+                    me.animationFeaturesWhenFind(features);
+                }, 2000);
+
+                setTimeout(function () {
+                    clearInterval(t);
+                }, 6000);
+            }
+        });
+    }
+    ,
 
     animationFeaturesWhenFind: function (features) {
         const me = this,
