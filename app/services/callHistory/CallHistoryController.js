@@ -3,22 +3,26 @@ Ext.define('Isidamaps.services.callHistory.CallHistoryController', {
     alias: 'controller.callhistory',
     CallHistory: null,
     createMap: function () {
-        var me = this;
-        me.urlOpenStreetServerTiles = Isidamaps.app.getController('AppController').urlOpenStreetServerTiles;
-        me.CallHistory = Ext.create('Isidamaps.services.callHistory.MapService', {
-            urlOpenStreetServerTiles: me.urlOpenStreetServerTiles
-        });
-        me.CallHistory.listenerStore();
-        me.CallHistory.optionsObjectManager();
-        Isidamaps.app.getController('AppController').readMarkersForCallHistory('104055877');
-        ASOV.setMapManager({
-            setMarkers: me.CallHistory.setMarkers.bind(this)
-        }, Ext.History.currentToken);
+        const me = this;
+        Isidamaps.app.getController('AppController').initial(f);
 
-        var ymapWrapper = me.lookupReference('ymapWrapper');
-        ymapWrapper.on('resize', function () {
-            me.CallHistory.resizeMap(me.CallHistory);
-        });
+        function f() {
+            me.urlOpenStreetServerTiles = Isidamaps.app.getController('AppController').urlOpenStreetServerTiles;
+            me.CallHistory = Ext.create('Isidamaps.services.callHistory.MapService', {
+                urlOpenStreetServerTiles: me.urlOpenStreetServerTiles
+            });
+            me.CallHistory.listenerStore();
+            me.CallHistory.optionsObjectManager();
+            Isidamaps.app.getController('AppController').readMarkersForCallHistory('104055877');
+            ASOV.setMapManager({
+                setMarkers: me.CallHistory.setMarkers.bind(this)
+            }, Ext.History.currentToken);
+
+            const ymapWrapper = me.lookupReference('ymapWrapper');
+            ymapWrapper.on('resize', function () {
+                me.CallHistory.resizeMap(me.CallHistory);
+            });
+        }
     },
 
     layoutReady: function () {

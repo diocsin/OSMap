@@ -88,7 +88,6 @@ Ext.define('Isidamaps.view.filterLocalMonitoringView.filterLocalMonitoring.Filte
             reference: 'statusBrigadeFilter',
             columns: 1,
             getState: function () {
-                console.dir(this.getValue());
                 return {"checked": this.getValue()};
             },
             applyState: function (state) {

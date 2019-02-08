@@ -10,30 +10,34 @@ Ext.define('Isidamaps.services.brigadeForAssign.BrigadeForAssignController', {
     },
 
     checkedBrigadeForAssign: function () {
-        const store =Ext.getStore('Isidamaps.store.RouteForTableStore');
+        const store = Ext.getStore('Isidamaps.store.RouteForTableStore');
         store.each(function (rec) {
             rec.set('checkBox', false);
         })
     },
 
     createMap: function () {
-        const me = this,
-        ymapWrapper = me.lookupReference('ymapWrapper');
-        me.urlOpenStreetServerTiles = Isidamaps.app.getController('AppController').urlOpenStreetServerTiles;
-        me.urlOpenStreetServerRoute = Isidamaps.app.getController('AppController').urlOpenStreetServerRoute;
-        me.BrigadeForAssign = Ext.create('Isidamaps.services.brigadeForAssign.MapService', {
-            urlOpenStreetServerRoute: me.urlOpenStreetServerRoute,
-            urlOpenStreetServerTiles: me.urlOpenStreetServerTiles,
-        });
-        me.BrigadeForAssign.listenerStore();
-        me.BrigadeForAssign.optionsObjectManager();
-        Isidamaps.app.getController('AppController').readMarkersBrigadeForAssign('106198579', ['910','951','920']);
-        ASOV.setMapManager({
-            setMarkers: me.BrigadeForAssign.setMarkers.bind(this)
-        }, Ext.History.currentToken);
-        ymapWrapper.on('resize', function () {
-            me.BrigadeForAssign.resizeMap(me.BrigadeForAssign);
-        })
+        const me = this;
+        Isidamaps.app.getController('AppController').initial(f);
+
+        function f() {
+            me.urlOpenStreetServerTiles = Isidamaps.app.getController('AppController').urlOpenStreetServerTiles;
+            me.urlOpenStreetServerRoute = Isidamaps.app.getController('AppController').urlOpenStreetServerRoute;
+            me.BrigadeForAssign = Ext.create('Isidamaps.services.brigadeForAssign.MapService', {
+                urlOpenStreetServerRoute: me.urlOpenStreetServerRoute,
+                urlOpenStreetServerTiles: me.urlOpenStreetServerTiles,
+            });
+            me.BrigadeForAssign.listenerStore();
+            me.BrigadeForAssign.optionsObjectManager();
+            Isidamaps.app.getController('AppController').readMarkersBrigadeForAssign('106198579', ['910', '951', '920']);
+            ASOV.setMapManager({
+                setMarkers: me.BrigadeForAssign.setMarkers.bind(this)
+            }, Ext.History.currentToken);
+            const ymapWrapper = me.lookupReference('ymapWrapper');
+            ymapWrapper.on('resize', function () {
+                me.BrigadeForAssign.resizeMap(me.BrigadeForAssign);
+            })
+        }
     },
 
     buttonCheked: function () {

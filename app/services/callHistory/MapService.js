@@ -138,7 +138,7 @@ Ext.define('Isidamaps.services.callHistory.MapService', {
     storeFactHistoryCall: function (rec) {
         const me = this;
         rec.forEach(function (call) {
-            if (call.get('latitude')&& call.get('longitude')) {
+            if (call.get('latitude') && call.get('longitude')) {
                 const feature = me.createCallFeature(call);
                 me.callMarkers.push(feature);
                 me.callMarkers.length === 1 ? me.setStyleAndAddFeature(feature) : me.createBouns();
@@ -147,7 +147,7 @@ Ext.define('Isidamaps.services.callHistory.MapService', {
     },
 
     setMarkers: function (call) {
-        Isidamaps.app.getController('AppController').readMarkersForCallHistory(call);
+            Isidamaps.app.getController('AppController').readMarkersForCallHistory(call);
     },
 
     listenerStore: function () {

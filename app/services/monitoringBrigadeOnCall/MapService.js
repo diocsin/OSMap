@@ -18,7 +18,7 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MapService', {
     },
 
     setMarkers: function (call, brigades) {
-        Isidamaps.app.getController('AppController').readMarkers(call, brigades);
+            Isidamaps.app.getController('AppController').readMarkers(call, brigades);
     },
 
     listenerStore: function () {
@@ -34,7 +34,7 @@ Ext.define('Isidamaps.services.monitoringBrigadeOnCall.MapService', {
     storeCall: function (records) {
         const me = this;
         records.forEach(function (call) {
-            if (call.get('latitude')&& call.get('longitude')) {
+            if (call.get('latitude') && call.get('longitude')) {
                 const feature = me.createCallFeature(call);
                 me.callMarkers.push(feature);
             }

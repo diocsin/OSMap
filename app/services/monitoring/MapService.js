@@ -21,15 +21,14 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
         me.vectorSource = new ol.source.Vector({});
         me.getFilterBrigadeArray = options.getFilterBrigadeArray;
         me.filterCallArray = options.filterCallArray;
-        me.urlOpenStreetServerTiles = options.urlOpenStreetServerTiles;
         me.addButtonsBrigadeOnPanel = options.addButtonsBrigadeOnPanel;
         me.addStationFilter = options.addStationFilter;
         me.getButtonBrigadeForChangeButton = options.getButtonBrigadeForChangeButton;
         me.setCheckbox = options.setCheckbox;
+        me.urlOpenStreetServerTiles = options.urlOpenStreetServerTiles;
         me.addNewButtonOnPanel = options.addNewButtonOnPanel;
         me.destroyButtonOnPanel = options.destroyButtonOnPanel;
         me.map = me.createMap();
-        console.dir(me.map);
         me.clusterOptions();
         me.map.addLayer(me.vectorLayer);
 
@@ -298,21 +297,22 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
                     return brigadeInArray;
                 }
             });
-
             if (brigadeHas) {
                 sourceVectorLayer.removeFeature(brigadeHas);
             }
 
-            if (!Ext.Array.contains(me.getFilterBrigadeArray(), me.getCustomOptions(feature).station) &&
-                !Ext.Array.contains(me.getFilterBrigadeArray(), me.getCustomOptions(feature).status) &&
-                !Ext.Array.contains(me.getFilterBrigadeArray(), me.getCustomOptions(feature).profile) &&
-                me.getCustomOptions(feature).status !== "WITHOUT_SHIFT") {
-                function func() {
+            Ext.defer(func, 20, me);
+
+            function func() {
+                if (!Ext.Array.contains(me.getFilterBrigadeArray(), me.getCustomOptions(feature).station) &&
+                    !Ext.Array.contains(me.getFilterBrigadeArray(), me.getCustomOptions(feature).status) &&
+                    !Ext.Array.contains(me.getFilterBrigadeArray(), me.getCustomOptions(feature).profile) &&
+                    me.getCustomOptions(feature).status !== "WITHOUT_SHIFT") {
                     feature.setStyle(me.iconStyle(feature));
                     sourceVectorLayer.addFeature(feature);
+
                 }
 
-                setTimeout(func, 1);
             }
         }
         if (feature.getProperties().customOptions.objectType === 'CALL') {
@@ -324,23 +324,22 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
             if (callHas) {
                 sourceVectorLayer.removeFeature(callHas);
             }
+            Ext.defer(func, 20, me);
 
-            if (!Ext.Array.contains(me.getFilterBrigadeArray(), me.getCustomOptions(feature).status) &&
-                !Ext.Array.contains(me.getFilterBrigadeArray(), me.getCustomOptions(feature).station) &&
-                me.getCustomOptions(feature).status !== "COMPLETED") {
-                function func() {
+            function func() {
+                if (!Ext.Array.contains(me.getFilterBrigadeArray(), me.getCustomOptions(feature).status) &&
+                    !Ext.Array.contains(me.getFilterBrigadeArray(), me.getCustomOptions(feature).station) &&
+                    me.getCustomOptions(feature).status !== "COMPLETED") {
                     feature.setStyle(me.iconStyle(feature));
                     sourceVectorLayer.addFeature(feature);
                 }
-
-                setTimeout(func, 20);
             }
         }
     },
 
 
     setStation: function (stations) {
-        Isidamaps.app.getController('AppController').readStation(stations);
+            Isidamaps.app.getController('AppController').readStation(stations);
     },
 
     listenerWebSockedStore: function () {
@@ -375,7 +374,7 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
     createBrigadeOfSocked: function (brigades) {
         const me = this;
         let brigade = brigades[0];
-        if (brigade.get('latitude') && brigade.get('longitude')) {
+        if (brigade.get('latitude') && brigade.get('longitude') && brigade.get('status')) {
             const feature = me.createBrigadeFeature(brigade);
             const brigadeHas = Ext.Array.findBy(me.brigadesMarkers, function (brigadeInArray, index) {
                 if (brigadeInArray.getProperties().id === brigade.get('deviceId')) {
@@ -389,7 +388,7 @@ Ext.define('Isidamaps.services.monitoring.MapService', {
                 if (brigadeHas && me.getCustomOptions(brigadeHas).status !== me.getCustomOptions(feature).status) {
                     Ext.fireEvent('getButtonBrigadeForChangeButton', feature, me.getCustomOptions(brigadeHas).status);
                 }
-                else if (!brigadeHas) {
+                else if (brigadeHas === null) {
                     me.addNewButtonOnPanel(feature);
                 }
             }

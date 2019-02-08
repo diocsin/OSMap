@@ -22,7 +22,7 @@ Ext.define('Isidamaps.controller.AppController', {
         return map;
     })(),
 
-    init: function () {
+    initial: function (getGeoInform) {
         const me = this,
             settingsStore = me.getStore('Isidamaps.store.SettingsStore');
         settingsStore.load({
@@ -32,6 +32,7 @@ Ext.define('Isidamaps.controller.AppController', {
                 me.urlWebSocket = settings.get('urlWebSocket');
                 me.urlOpenStreetServerRoute = settings.get('urlOpenStreetServerRoute');
                 me.urlOpenStreetServerTiles = settings.get('urlOpenStreetServerTiles');
+                getGeoInform();
             }
         });
     },
@@ -49,7 +50,7 @@ Ext.define('Isidamaps.controller.AppController', {
             }.bind(me),
             function (e) {
                 console.error(e, "Reconnecting WS");
-                Ext.defer(me.connect, 2500, me);
+                Ext.defer(me.connectWebSocked, 2500, me);
             }.bind(me)
         );
     },
